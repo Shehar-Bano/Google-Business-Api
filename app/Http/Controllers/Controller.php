@@ -4,5 +4,4 @@ namespace App\Http\Controllers;
 
 abstract class Controller
 {
-    use \App\Support\ApiResponder;
 }

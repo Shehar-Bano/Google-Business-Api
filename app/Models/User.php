@@ -2,10 +2,7 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
@@ -32,7 +29,6 @@ class User extends Authenticatable
         'owner_manager_name',
         'address',
         'city',
-        'city_id',
         'number_of_courts',
         'working_hours',
         'club_logo',
@@ -69,50 +65,5 @@ class User extends Authenticatable
             'facilities' => 'array',
             'dob' => 'date',
         ];
-    }
-
-    public function courts(): HasMany
-    {
-        return $this->hasMany(Court::class, 'club_id');
-    }
-
-    public function tournaments(): HasMany
-    {
-        return $this->hasMany(Tournament::class, 'club_id');
-    }
-
-    public function bookingsAsClub(): HasMany
-    {
-        return $this->hasMany(Booking::class, 'club_id');
-    }
-
-    public function bookingsAsPlayer(): HasMany
-    {
-        return $this->hasMany(Booking::class, 'player_id');
-    }
-
-    public function tournamentRegistrations(): HasMany
-    {
-        return $this->hasMany(TournamentRegistration::class, 'player_id');
-    }
-
-    public function bookingReviewsAsPlayer(): HasMany
-    {
-        return $this->hasMany(BookingReview::class, 'player_id');
-    }
-
-    public function bookingReviewsAsClub(): HasMany
-    {
-        return $this->hasMany(BookingReview::class, 'club_id');
-    }
-
-    public function appNotifications(): HasMany
-    {
-        return $this->hasMany(AppNotification::class);
-    }
-
-    public function cityRelation(): BelongsTo
-    {
-        return $this->belongsTo(City::class, 'city_id');
     }
 }

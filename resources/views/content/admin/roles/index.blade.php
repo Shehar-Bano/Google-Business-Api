@@ -4,7 +4,7 @@
 
 @section('content')
 @php
-    $protectedRoles = ['super_admin', 'club', 'player'];
+    $protectedRoles = ['super_admin', 'admin'];
 @endphp
 
 @component('admin.components.datatable', [

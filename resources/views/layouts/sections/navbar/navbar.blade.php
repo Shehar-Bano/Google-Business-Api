@@ -20,7 +20,7 @@
             <span class="app-brand-logo demo">
                 @include('_partials.macros', ['height' => 20, 'color' => '#B5F23C'])
             </span>
-            <span class="app-brand-text demo menu-text fw-semibold ms-1">Squash Pro</span>
+            <span class="app-brand-text demo menu-text fw-semibold ms-1">{{ config('variables.templateName') }}</span>
         </a>
         <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
             <i class="mdi menu-toggle-icon d-xl-block align-middle mdi-20px"></i>
@@ -138,8 +138,8 @@
                             <img src="{{ asset('assets/img/avatars/1.png') }}" alt="User" class="rounded-circle">
                         </div>
                         <div>
-                            <h6 class="mb-0">John Doe</h6>
-                            <small class="text-muted">Admin</small>
+                            <h6 class="mb-0">{{ auth()->user()?->name ?? 'User' }}</h6>
+                            <small class="text-muted">Account</small>
                         </div>
                     </div>
                 </li>

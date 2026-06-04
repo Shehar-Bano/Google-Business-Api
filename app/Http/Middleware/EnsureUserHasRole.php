@@ -27,7 +27,6 @@ class EnsureUserHasRole
             ], 401);
         }
 
-        // Check if user has the required role
         if ($user->role !== $role) {
             return response()->json([
                 'success' => false,
@@ -39,7 +38,6 @@ class EnsureUserHasRole
             ], 403);
         }
 
-        // Additional status checks
         if ($user->status === 'suspended') {
             return response()->json([
                 'success' => false,
@@ -52,8 +50,8 @@ class EnsureUserHasRole
         if ($user->role === 'club' && in_array($user->status, ['pending', 'rejected'])) {
             return response()->json([
                 'success' => false,
-                'message' => $user->status === 'pending' 
-                    ? 'Your club profile is pending admin approval.' 
+                'message' => $user->status === 'pending'
+                    ? 'Your club profile is pending admin approval.'
                     : 'Your club profile has been rejected by admin.',
                 'error_code' => $user->status === 'pending' ? 'CLUB_PENDING_APPROVAL' : 'CLUB_REJECTED',
                 'errors' => new \stdClass(),

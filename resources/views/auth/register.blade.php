@@ -1,6 +1,6 @@
 @extends('layouts/blankLayout')
 
-@section('title', 'Register - Squash Pro')
+@section('title', 'Register - ' . config('variables.templateName'))
 
 @section('page-style')
     <link rel="stylesheet" href="{{ asset('assets/vendor/css/pages/page-auth.css') }}">
@@ -17,12 +17,12 @@
                         <span class="app-brand-logo demo">
                             @include('_partials.macros', ['height' => 20, 'color' => '#B5F23C'])
                         </span>
-                        <span class="app-brand-text demo text-heading fw-semibold">Squash Pro</span>
+                        <span class="app-brand-text demo text-heading fw-semibold">{{ config('variables.templateName') }}</span>
                     </a>
                 </div>
 
                 <h4 class="mb-2">Create your account</h4>
-                <p class="mb-4">Start managing your squash operations with a modern admin experience</p>
+                <p class="mb-4">Create your account to get started.</p>
 
                 @if ($errors->any())
                     <div class="alert alert-danger">

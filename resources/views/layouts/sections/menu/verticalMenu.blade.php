@@ -4,7 +4,7 @@
             <span class="app-brand-logo demo me-1">
                 @include('_partials.macros', ['height' => 20, 'color' => '#B5F23C'])
             </span>
-            <span class="app-brand-text demo menu-text fw-semibold ms-2">Squash Pro</span>
+            <span class="app-brand-text demo menu-text fw-semibold ms-2">Laravel Starter</span>
         </a>
 
         <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto">
@@ -20,86 +20,6 @@
                 <i class="menu-icon tf-icons mdi mdi-home-outline"></i>
                 <div>Dashboard</div>
             </a>
-        </li>
-
-        <li class="menu-item {{ request()->routeIs('admin.clubs.*') || request()->routeIs('admin.courts.*') ? 'open' : '' }}">
-            <a href="#" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons mdi mdi-domain"></i>
-                <div>Club Management</div>
-            </a>
-            <ul class="menu-sub">
-                <li class="menu-item {{ request()->routeIs('admin.clubs.*') ? 'active' : '' }}">
-                    <a href="{{ route('admin.clubs.index') }}" class="menu-link"><div>Clubs</div></a>
-                </li>
-                <li class="menu-item {{ request()->routeIs('admin.courts.*') ? 'active' : '' }}">
-                    <a href="{{ route('admin.courts.index') }}" class="menu-link"><div>Courts</div></a>
-                </li>
-            </ul>
-        </li>
-
-        <li class="menu-item {{ request()->routeIs('admin.players.*') ? 'active' : '' }}">
-            <a href="{{ route('admin.players.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons mdi mdi-account-group-outline"></i>
-                <div>Player Management</div>
-            </a>
-        </li>
-
-        <li class="menu-item {{ request()->routeIs('admin.bookings.*') ? 'active' : '' }}">
-            <a href="{{ route('admin.bookings.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons mdi mdi-calendar-check-outline"></i>
-                <div>Booking Management</div>
-            </a>
-        </li>
-
-        <li class="menu-item {{ request()->routeIs('admin.tournaments.*') ? 'active' : '' }}">
-            <a href="{{ route('admin.tournaments.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons mdi mdi-trophy-outline"></i>
-                <div>Tournament Management</div>
-            </a>
-        </li>
-
-        <li class="menu-item {{ request()->routeIs('admin.payments.*') || request()->routeIs('admin.revenue.*') ? 'open' : '' }}">
-            <a href="#" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons mdi mdi-cash-multiple"></i>
-                <div>Finance</div>
-            </a>
-            <ul class="menu-sub">
-                <li class="menu-item {{ request()->routeIs('admin.payments.*') ? 'active' : '' }}">
-                    <a href="{{ route('admin.payments.index') }}" class="menu-link"><div>Payments</div></a>
-                </li>
-                <li class="menu-item {{ request()->routeIs('admin.revenue.*') ? 'active' : '' }}">
-                    <a href="{{ route('admin.revenue.index') }}" class="menu-link"><div>Revenue Reports</div></a>
-                </li>
-            </ul>
-        </li>
-
-        <li class="menu-item {{ request()->routeIs('admin.notifications.*') ? 'active' : '' }}">
-            <a href="{{ route('admin.notifications.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons mdi mdi-bell-outline"></i>
-                <div>Notifications</div>
-            </a>
-        </li>
-
-        <li class="menu-item {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">
-            <a href="{{ route('admin.reports.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons mdi mdi-chart-box-outline"></i>
-                <div>Reports</div>
-            </a>
-        </li>
-
-        <li class="menu-item {{ request()->routeIs('admin.support-options.*') || request()->routeIs('admin.privacy-policy.*') ? 'open' : '' }}">
-            <a href="#" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons mdi mdi-file-document-edit-outline"></i>
-                <div>Content Management</div>
-            </a>
-            <ul class="menu-sub">
-                <li class="menu-item {{ request()->routeIs('admin.support-options.*') ? 'active' : '' }}">
-                    <a href="{{ route('admin.support-options.index') }}" class="menu-link"><div>Help & Support</div></a>
-                </li>
-                <li class="menu-item {{ request()->routeIs('admin.privacy-policy.*') ? 'active' : '' }}">
-                    <a href="{{ route('admin.privacy-policy.edit') }}" class="menu-link"><div>Privacy Policy</div></a>
-                </li>
-            </ul>
         </li>
 
         <li class="menu-item {{ request()->routeIs('admin.roles.*') || request()->routeIs('admin.permissions.*') || request()->routeIs('admin.users.*') ? 'open' : '' }}">
@@ -120,11 +40,38 @@
             </ul>
         </li>
 
-        <li class="menu-item {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">
-            <a href="{{ route('admin.settings.index') }}" class="menu-link">
-                <i class="menu-icon tf-icons mdi mdi-cog-outline"></i>
-                <div>Settings</div>
+        <li class="menu-item {{ request()->routeIs('admin.support-options.*') || request()->routeIs('admin.privacy-policy.*') || request()->routeIs('admin.notifications.*') ? 'open' : '' }}">
+            <a href="#" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons mdi mdi-lifebuoy"></i>
+                <div>Support & Content</div>
             </a>
+            <ul class="menu-sub">
+                <li class="menu-item {{ request()->routeIs('admin.support-options.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.support-options.index') }}" class="menu-link"><div>Help & Support</div></a>
+                </li>
+                <li class="menu-item {{ request()->routeIs('admin.privacy-policy.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.privacy-policy.edit') }}" class="menu-link"><div>Privacy Policy</div></a>
+                </li>
+                <li class="menu-item {{ request()->routeIs('admin.notifications.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.notifications.index') }}" class="menu-link"><div>Notifications</div></a>
+                </li>
+            </ul>
         </li>
+
+        <li class="menu-item {{ request()->routeIs('admin.modules.*') ? 'open' : '' }}">
+            <a href="#" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons mdi mdi-view-grid-outline"></i>
+                <div>Modules</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item {{ request()->routeIs('admin.modules.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.modules.show', 'future-module') }}" class="menu-link">
+                        <div>Future Module</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+        {{-- TODO: Add feature-specific menu groups here in future. --}}
     </ul>
 </aside>
