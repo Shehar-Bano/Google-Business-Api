@@ -1,10 +1,10 @@
 <?php
 
 return [
-    "templateName" => "Squash Pro",
-    "templateDescription" => "Premium Squash Management Dashboard",
-    "templateKeyword" => "squash, sports management, admin dashboard, laravel",
-    "creatorName" => "Squash Pro",
+    "templateName" => "Laravel Starter",
+    "templateDescription" => "Reusable Laravel starter foundation",
+    "templateKeyword" => "laravel, starter, admin dashboard, foundation",
+    "creatorName" => "Starter Template",
     "creatorUrl" => "",
     "productPage" => "",
     "licenseUrl" => "",

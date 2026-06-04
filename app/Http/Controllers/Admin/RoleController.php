@@ -14,7 +14,7 @@ use Spatie\Permission\Models\Role;
 
 class RoleController extends Controller
 {
-    private const PROTECTED_ROLES = ['super_admin', 'club', 'player'];
+    private const PROTECTED_ROLES = ['super_admin', 'admin'];
 
     public function index(Request $request): View
     {

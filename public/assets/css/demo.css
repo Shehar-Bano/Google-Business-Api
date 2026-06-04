@@ -1,14 +1,14 @@
 /*
- * Squash Pro - Premium Admin Dashboard Theme
+ * Starter - Premium Admin Dashboard Theme
  * Global Design System & Reusable Components
  * ─────────────────────────────────────────────────────────────
  */
 
 /* ═══════════════════════════════════════════════════════════════
-   1. SQUASH PRO DESIGN TOKENS
+   1. DESIGN TOKENS
    ═══════════════════════════════════════════════════════════════ */
 :root {
-  /* Squash Pro Brand Colors */
+  /* Starter brand colors */
   --primary: #121212;
   --secondary-green: #B5F23C;
   --danger-red: #E53935;

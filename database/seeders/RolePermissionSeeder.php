@@ -12,50 +12,12 @@ class RolePermissionSeeder extends Seeder
     private const ROLES = [
         'super_admin',
         'admin',
-        'club',
         'player',
+        'club',
     ];
 
     private const PERMISSIONS = [
         'view_dashboard',
-        'view_clubs',
-        'create_club',
-        'edit_club',
-        'delete_club',
-        'approve_club',
-        'verify_club',
-        'suspend_club',
-        'feature_club',
-        'view_players',
-        'edit_player',
-        'suspend_player',
-        'delete_player',
-        'view_bookings',
-        'edit_booking',
-        'cancel_booking',
-        'refund_booking',
-        'view_courts',
-        'create_court',
-        'edit_court',
-        'delete_court',
-        'view_tournaments',
-        'create_tournament',
-        'edit_tournament',
-        'approve_tournament',
-        'suspend_tournament',
-        'delete_tournament',
-        'manage_tournament_results',
-        'view_payments',
-        'view_revenue',
-        'export_revenue',
-        'manage_refunds',
-        'view_notifications',
-        'send_notifications',
-        'schedule_notifications',
-        'view_settings',
-        'manage_settings',
-        'view_reports',
-        'export_reports',
         'view_roles',
         'create_role',
         'edit_role',
@@ -66,29 +28,15 @@ class RolePermissionSeeder extends Seeder
         'edit_permission',
         'delete_permission',
         'view_users',
-        'create_user',
         'edit_user',
-        'delete_user',
         'assign_roles',
-    ];
-
-    private const CLUB_PERMISSIONS = [
-        'view_dashboard',
-        'view_bookings',
-        'edit_booking',
-        'cancel_booking',
-        'view_courts',
-        'create_court',
-        'edit_court',
-        'delete_court',
-        'view_tournaments',
-        'create_tournament',
-        'edit_tournament',
-        'manage_tournament_results',
-        'view_payments',
-        'view_revenue',
+        'view_support_options',
+        'create_support_option',
+        'edit_support_option',
+        'delete_support_option',
+        'view_privacy_policy',
+        'edit_privacy_policy',
         'view_notifications',
-        'view_reports',
     ];
 
     /**
@@ -112,22 +60,21 @@ class RolePermissionSeeder extends Seeder
             ]);
         }
 
-        // Remove obsolete legacy roles if they still exist in old environments.
-        Role::query()
-            ->whereIn('name', ['admin_vet', 'client', 'client_vet'])
-            ->get()
-            ->each
-            ->delete();
-
         $superAdminRole = Role::where('name', 'super_admin')->firstOrFail();
         $adminRole = Role::where('name', 'admin')->firstOrFail();
-        $clubRole = Role::where('name', 'club')->firstOrFail();
-        $playerRole = Role::where('name', 'player')->firstOrFail();
 
         $superAdminRole->syncPermissions(self::PERMISSIONS);
-        $adminRole->syncPermissions(self::PERMISSIONS);
-        $clubRole->syncPermissions(self::CLUB_PERMISSIONS);
-        $playerRole->syncPermissions([]);
+        $adminRole->syncPermissions([
+            'view_dashboard',
+            'view_users',
+            'edit_user',
+            'assign_roles',
+            'view_roles',
+            'view_permissions',
+            'view_support_options',
+            'view_privacy_policy',
+            'view_notifications',
+        ]);
 
         app(PermissionRegistrar::class)->forgetCachedPermissions();
     }

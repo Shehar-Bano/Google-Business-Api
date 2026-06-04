@@ -8,9 +8,9 @@
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
 
-    <title>@yield('title') - Squash Pro</title>
-    <meta name="description" content="Premium Squash Management Dashboard" />
-    <meta name="keywords" content="squash, sports management, admin dashboard, laravel">
+    <title>@yield('title') - {{ config('variables.templateName') }}</title>
+    <meta name="description" content="{{ config('variables.templateDescription') }}" />
+    <meta name="keywords" content="{{ config('variables.templateKeyword') }}">
     <!-- laravel CRUD token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <!-- Canonical SEO -->

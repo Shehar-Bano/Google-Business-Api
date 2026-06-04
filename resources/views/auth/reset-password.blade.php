@@ -1,6 +1,6 @@
 @extends('layouts/blankLayout')
 
-@section('title', 'Reset Password - Squash Pro')
+@section('title', 'Reset Password - ' . config('variables.templateName'))
 
 @section('page-style')
     <link rel="stylesheet" href="{{ asset('assets/vendor/css/pages/page-auth.css') }}">
@@ -11,20 +11,18 @@
         <div class="authentication-wrapper authentication-basic container-p-y">
             <div class="authentication-inner py-4">
                 <div class="card p-2">
-                    <!-- Logo -->
                     <div class="app-brand justify-content-center mt-5">
                         <a href="{{ url('/') }}" class="app-brand-link gap-2">
                             <span class="app-brand-logo demo">
                                 @include('_partials.macros', ['height' => 20, 'color' => '#B5F23C'])
                             </span>
-                            <span class="app-brand-text demo text-heading fw-semibold">Squash Pro</span>
+                            <span class="app-brand-text demo text-heading fw-semibold">{{ config('variables.templateName') }}</span>
                         </a>
                     </div>
-                    <!-- /Logo -->
 
                     <div class="card-body mt-2">
-                        <h4 class="mb-2">Reset Password 🔐</h4>
-                        <p class="mb-4">Enter your new password below</p>
+                        <h4 class="mb-2">Reset Password</h4>
+                        <p class="mb-4">Enter your new password below.</p>
 
                         @if ($errors->any())
                             <div class="alert alert-danger">
@@ -53,8 +51,7 @@
                                             required autocomplete="new-password" />
                                         <label for="password">New Password</label>
                                     </div>
-                                    <span class="input-group-text cursor-pointer"><i
-                                            class="mdi mdi-eye-off-outline"></i></span>
+                                    <span class="input-group-text cursor-pointer"><i class="mdi mdi-eye-off-outline"></i></span>
                                 </div>
                             </div>
 
@@ -67,8 +64,7 @@
                                             required autocomplete="new-password" />
                                         <label for="password_confirmation">Confirm Password</label>
                                     </div>
-                                    <span class="input-group-text cursor-pointer"><i
-                                            class="mdi mdi-eye-off-outline"></i></span>
+                                    <span class="input-group-text cursor-pointer"><i class="mdi mdi-eye-off-outline"></i></span>
                                 </div>
                             </div>
 
@@ -76,8 +72,7 @@
                         </form>
 
                         <div class="text-center">
-                            <a href="{{ route('login') }}"
-                                class="d-flex align-items-center justify-content-center">
+                            <a href="{{ route('login') }}" class="d-flex align-items-center justify-content-center">
                                 <i class="mdi mdi-chevron-left scaleX-n1-rtl mdi-24px"></i>
                                 Back to login
                             </a>
