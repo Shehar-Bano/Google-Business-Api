@@ -1,0 +1,189 @@
+/* Squash Pro Auth - Split Screen */
+.login-wrapper {
+  min-height: 100vh;
+  height: 100vh;
+  display: flex;
+  width: 100%;
+  overflow: hidden;
+}
+
+.login-left {
+  position: relative;
+  flex: 0 0 60%;
+  max-width: 60%;
+  background-image:
+    linear-gradient(135deg, rgba(18, 18, 18, 0.78), rgba(26, 52, 27, 0.62)),
+    url('/assets/img/backgrounds/19.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.login-right {
+  flex: 0 0 40%;
+  max-width: 40%;
+  background: #f5f6f8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 430px;
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 20px 48px rgba(17, 24, 39, 0.14);
+  padding: 40px;
+}
+
+.login-card .app-brand-text {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #121212;
+  letter-spacing: -0.02em;
+}
+
+.login-card .app-brand-logo svg {
+  width: 36px;
+  height: 32px;
+}
+
+.login-card h4 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #121212;
+  margin-bottom: 0.5rem;
+}
+
+.login-card p {
+  color: #757575;
+  font-size: 0.9375rem;
+}
+
+.login-card .form-control,
+.login-card .input-group-text {
+  height: 48px;
+  border-radius: 10px;
+  border: 1.5px solid #d0d0d0;
+  background: #fafafa;
+}
+
+.login-card .form-control:focus {
+  border-color: #b5f23c;
+  box-shadow: 0 0 0 3px rgba(181, 242, 60, 0.15);
+  background: #ffffff;
+}
+
+.login-card .input-group .form-control {
+  border-left: none;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.login-card .btn-primary {
+  height: 48px;
+  border-radius: 10px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  background: #b5f23c;
+  border: none;
+  color: #121212;
+  box-shadow: 0 4px 12px rgba(181, 242, 60, 0.3);
+}
+
+.login-card .btn-primary:hover {
+  background: #a8e635;
+  color: #121212;
+}
+
+.login-card a {
+  color: #8fbf2d;
+  text-decoration: none;
+}
+
+.login-card a:hover {
+  color: #7aa927;
+  text-decoration: underline;
+}
+
+.login-card .alert-danger {
+  background-color: #ffebee;
+  border: 1px solid #ffcdd2;
+  color: #e53935;
+  border-radius: 10px;
+  padding: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.login-card .alert-danger p {
+  color: #e53935;
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+@media (max-width: 1199.98px) {
+  .login-left {
+    flex-basis: 55%;
+    max-width: 55%;
+  }
+
+  .login-right {
+    flex-basis: 45%;
+    max-width: 45%;
+    padding: 32px;
+  }
+
+  .login-card {
+    padding: 32px;
+  }
+}
+
+@media (max-width: 991.98px) {
+  .login-wrapper {
+    position: relative;
+  }
+
+  .login-left {
+    display: none;
+  }
+
+  .login-right {
+    flex-basis: 100%;
+    max-width: 100%;
+    min-height: 100vh;
+    padding: 24px;
+    background-image:
+      linear-gradient(135deg, rgba(18, 18, 18, 0.6), rgba(26, 52, 27, 0.45)),
+      url('/assets/img/backgrounds/18.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  .login-card {
+    max-width: 450px;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .login-right {
+    padding: 16px;
+  }
+
+  .login-card {
+    padding: 24px;
+    border-radius: 16px;
+  }
+
+  .login-card h4 {
+    font-size: 1.3rem;
+  }
+
+  .login-card .form-control,
+  .login-card .btn-primary,
+  .login-card .input-group-text {
+    height: 44px;
+  }
+}

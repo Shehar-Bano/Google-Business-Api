@@ -1,0 +1,549 @@
+/* ═══════════════════════════════════════════════════════════════
+   SQUASH PRO - HEADER / NAVBAR STYLES
+   Premium, Clean, Perfectly Aligned
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────
+   1. HEADER CONTAINER
+   ───────────────────────────────────────────────────────────── */
+.app-header {
+  height: 70px;
+  background: #FFFFFF;
+  border-bottom: 1px solid #E5E7EB;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  padding: 0;
+}
+
+.app-header .container-fluid,
+.app-header .container-xxl {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   2. HEADER CONTENT (Main Flex Container)
+   ───────────────────────────────────────────────────────────── */
+.app-header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 100%;
+  gap: 1.5rem;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   3. LEFT SECTION (Search)
+   ───────────────────────────────────────────────────────────── */
+.app-header-left {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  max-width: 500px;
+}
+
+/* Search Bar */
+.app-search {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  margin-left: 10px;
+}
+
+.app-search-icon {
+  position: absolute;
+  left: 14px;
+  font-size: 20px;
+  color: #9CA3AF;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.app-search-input {
+  width: 100%;
+  height: 42px;
+  padding: 0 1rem 0 2.75rem;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 10px;
+  background: #F9FAFB;
+  font-size: 0.875rem;
+  color: #374151;
+  transition: all 0.2s ease;
+}
+
+.app-search-input::placeholder {
+  color: #9CA3AF;
+}
+
+.app-search-input:focus {
+  outline: none;
+  border-color: #B5F23C;
+  background: #FFFFFF;
+  box-shadow: 0 0 0 3px rgba(181, 242, 60, 0.1);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   4. RIGHT SECTION (Notifications + Profile)
+   ───────────────────────────────────────────────────────────── */
+.app-header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.app-header-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   5. HEADER ICON (Notification Bell)
+   ───────────────────────────────────────────────────────────── */
+.app-header-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: #F9FAFB;
+  border: 1.5px solid #E5E7EB;
+  color: #6B7280;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.app-header-icon i {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.app-header-icon:hover {
+  background: #F3F4F6;
+  border-color: #D1D5DB;
+  color: #374151;
+}
+
+.app-header-icon:active {
+  transform: scale(0.95);
+}
+
+/* Notification Badge Dot */
+.app-badge-dot {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 8px;
+  height: 8px;
+  background: #EF4444;
+  border: 2px solid #FFFFFF;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   6. PROFILE AVATAR
+   ───────────────────────────────────────────────────────────── */
+.app-header-profile {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.app-header-profile:hover .app-avatar {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.app-avatar {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid #E5E7EB;
+  transition: all 0.2s ease;
+  margin-right: 15px;
+}
+
+.app-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.app-avatar-status {
+  position: absolute;
+  bottom: 5px;
+  right: 1px;
+  width: 12px;
+  height: 12px;
+  background: #10B981;
+  border: 2px solid #FFFFFF;
+  border-radius: 50%;
+}
+
+/* Avatar Sizes */
+.app-avatar-sm {
+  width: 32px;
+  height: 32px;
+}
+
+.app-avatar-sm .app-avatar-status {
+  width: 10px;
+  height: 10px;
+}
+
+/* Avatar with Background (for icons) */
+.app-avatar.bg-warning {
+  background: #FEF3C7;
+  color: #F59E0B;
+}
+
+.app-avatar.bg-success {
+  background: #D1FAE5;
+  color: #10B981;
+}
+
+.app-avatar.bg-danger {
+  background: #FEE2E2;
+  color: #EF4444;
+}
+
+.app-avatar i {
+  font-size: 18px;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   7. DROPDOWN MENUS
+   ───────────────────────────────────────────────────────────── */
+.app-dropdown-notifications,
+.app-dropdown-profile {
+  min-width: 360px;
+  border-radius: 12px;
+  border: 1px solid #E5E7EB;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  padding: 0;
+  margin-top: 0.5rem;
+}
+
+.dropdown-header {
+  padding: 0;
+  background: #F9FAFB;
+  border-bottom: 1px solid #E5E7EB;
+}
+
+.dropdown-header h6 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.dropdown-divider {
+  margin: 0;
+  border-color: #E5E7EB;
+}
+
+.dropdown-footer {
+  background: #F9FAFB;
+  border-top: 1px solid #E5E7EB;
+}
+
+.dropdown-footer a {
+  color: #6B7280;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.dropdown-footer a:hover {
+  color: #B5F23C;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   8. NOTIFICATION ITEMS
+   ───────────────────────────────────────────────────────────── */
+.dropdown-notifications-list {
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 0;
+}
+
+.dropdown-notifications-item {
+  border-bottom: 1px solid #F3F4F6;
+}
+
+.dropdown-notifications-item:last-child {
+  border-bottom: none;
+}
+
+.dropdown-notifications-item a {
+  display: flex;
+  padding: 1rem;
+  text-decoration: none;
+  transition: background 0.2s ease;
+}
+
+.dropdown-notifications-item a:hover {
+  background: #F9FAFB;
+}
+
+.dropdown-notifications-item h6 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 0.25rem;
+}
+
+.dropdown-notifications-item p {
+  font-size: 0.8125rem;
+  color: #6B7280;
+  margin-bottom: 0.25rem;
+  line-height: 1.4;
+}
+
+.dropdown-notifications-item small {
+  font-size: 0.75rem;
+  color: #9CA3AF;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   9. PROFILE DROPDOWN
+   ───────────────────────────────────────────────────────────── */
+.app-dropdown-profile {
+  min-width: 280px;
+}
+
+.app-dropdown-profile .dropdown-item {
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  transition: all 0.2s ease;
+}
+
+.app-dropdown-profile .dropdown-item i {
+  font-size: 18px;
+  color: #6B7280;
+}
+
+.app-dropdown-profile .dropdown-item:hover {
+  background: #F9FAFB;
+  color: #111827;
+}
+
+.app-dropdown-profile .dropdown-item:hover i {
+  color: #B5F23C;
+}
+
+.app-dropdown-profile .badge {
+  font-size: 0.6875rem;
+  padding: 0.25rem 0.5rem;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   10. MENU TOGGLE (Mobile)
+   ───────────────────────────────────────────────────────────── */
+.layout-menu-toggle {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.layout-menu-toggle .nav-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: #F9FAFB;
+  border: 1.5px solid #E5E7EB;
+  color: #6B7280;
+  transition: all 0.2s ease;
+}
+
+.layout-menu-toggle .nav-link:hover {
+  background: #F3F4F6;
+  border-color: #D1D5DB;
+  color: #374151;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   11. RESPONSIVE DESIGN
+   ───────────────────────────────────────────────────────────── */
+
+/* Tablet */
+@media (max-width: 1199.98px) {
+  .app-header-left {
+    max-width: 400px;
+  }
+}
+
+/* Mobile Landscape */
+@media (max-width: 991.98px) {
+  .app-header {
+    height: 64px;
+  }
+
+  .app-header .container-fluid,
+  .app-header .container-xxl {
+    padding: 0 1rem;
+  }
+
+  .app-header-content {
+    gap: 1rem;
+  }
+
+  .app-header-left {
+    max-width: 300px;
+  }
+
+  .app-search-input {
+    height: 40px;
+    font-size: 0.8125rem;
+  }
+
+  .app-header-icon,
+  .layout-menu-toggle .nav-link {
+    width: 40px;
+    height: 40px;
+  }
+
+  .app-avatar {
+    width: 38px;
+    height: 38px;
+  }
+}
+
+/* Mobile Portrait */
+@media (max-width: 767.98px) {
+  .app-header-content {
+    gap: 0.75rem;
+  }
+
+  .app-header-left {
+    flex: 1;
+    max-width: none;
+  }
+
+  .app-search-input {
+    padding-left: 2.5rem;
+  }
+
+  .app-header-right {
+    gap: 0.5rem;
+  }
+
+  .app-dropdown-notifications,
+  .app-dropdown-profile {
+    min-width: 320px;
+    max-width: calc(100vw - 2rem);
+  }
+}
+
+/* Small Mobile */
+@media (max-width: 575.98px) {
+  .app-header .container-fluid,
+  .app-header .container-xxl {
+    padding: 0 0.75rem;
+  }
+
+  .app-search {
+    max-width: 200px;
+  }
+
+  .app-search-input {
+    font-size: 0.75rem;
+    padding-left: 2.25rem;
+  }
+
+  .app-search-icon {
+    font-size: 18px;
+    left: 12px;
+  }
+
+  .app-header-icon,
+  .layout-menu-toggle .nav-link {
+    width: 38px;
+    height: 38px;
+  }
+
+  .app-header-icon i {
+    font-size: 20px;
+  }
+
+  .app-avatar {
+    width: 36px;
+    height: 36px;
+  }
+
+  .app-dropdown-notifications,
+  .app-dropdown-profile {
+    min-width: 280px;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   12. SCROLLBAR STYLING (Notifications)
+   ───────────────────────────────────────────────────────────── */
+.dropdown-notifications-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dropdown-notifications-list::-webkit-scrollbar-track {
+  background: #F3F4F6;
+}
+
+.dropdown-notifications-list::-webkit-scrollbar-thumb {
+  background: #D1D5DB;
+  border-radius: 3px;
+}
+
+.dropdown-notifications-list::-webkit-scrollbar-thumb:hover {
+  background: #B5F23C;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   13. ACCESSIBILITY & FOCUS STATES
+   ───────────────────────────────────────────────────────────── */
+.app-header-icon:focus,
+.app-header-profile:focus,
+.layout-menu-toggle .nav-link:focus {
+  outline: 2px solid #B5F23C;
+  outline-offset: 2px;
+}
+
+.app-search-input:focus-visible {
+  outline: none;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   14. DARK MODE SUPPORT (Optional)
+   ───────────────────────────────────────────────────────────── */
+@media (prefers-color-scheme: dark) {
+  /* Add dark mode styles if needed */
+}

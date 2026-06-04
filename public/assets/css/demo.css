@@ -1,0 +1,671 @@
+/*
+ * Squash Pro - Premium Admin Dashboard Theme
+ * Global Design System & Reusable Components
+ * ─────────────────────────────────────────────────────────────
+ */
+
+/* ═══════════════════════════════════════════════════════════════
+   1. SQUASH PRO DESIGN TOKENS
+   ═══════════════════════════════════════════════════════════════ */
+:root {
+  /* Squash Pro Brand Colors */
+  --primary: #121212;
+  --secondary-green: #B5F23C;
+  --danger-red: #E53935;
+  --border-color: #464646;
+  --dark-btn: #1F1F1F;
+  --orange: #F87216;
+  --white: #FFFFFF;
+  --black: #000000;
+  --gray: #F0F0F0;
+
+  /* Surface */
+  --sp-page-bg: #F0F0F0;
+  --sp-card-bg: #FFFFFF;
+  --sp-card-border: #E0E0E0;
+  --sp-card-radius: 12px;
+  --sp-card-shadow: 0 2px 8px rgba(0,0,0,.08);
+
+  /* Typography */
+  --sp-text-primary: #121212;
+  --sp-text-secondary: #424242;
+  --sp-text-muted: #757575;
+  --sp-text-light: #9E9E9E;
+
+  /* Table */
+  --sp-th-bg: #FAFAFA;
+  --sp-th-color: #616161;
+  --sp-row-hover: #F5F5F5;
+  --sp-row-divider: #EEEEEE;
+
+  /* Input */
+  --sp-input-height: 44px;
+  --sp-input-radius: 8px;
+  --sp-input-border: #D0D0D0;
+  --sp-input-focus: #B5F23C;
+
+  /* Button */
+  --sp-btn-height: 44px;
+  --sp-btn-radius: 8px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   2. GLOBAL OVERRIDES
+   ═══════════════════════════════════════════════════════════════ */
+body {
+  background-color: var(--sp-page-bg);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.layout-page .content-wrapper {
+  background: var(--sp-page-bg);
+  min-height: 100vh;
+}
+
+.container-p-y {
+  padding-top: 1.5rem !important;
+  padding-bottom: 2rem !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   3. APP PAGE WRAPPER
+   ═══════════════════════════════════════════════════════════════ */
+.app-page,
+.admin-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   4. APP PAGE HEADER
+   ═══════════════════════════════════════════════════════════════ */
+.app-page-header,
+.admin-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.app-page-header__left,
+.admin-page-header__left {
+  flex: 1;
+}
+
+.app-page-header__title,
+.admin-page-header__title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--sp-text-primary);
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+}
+
+.app-page-header__subtitle,
+.admin-page-header__subtitle {
+  margin: 0.375rem 0 0;
+  font-size: 0.875rem;
+  color: var(--sp-text-muted);
+  line-height: 1.5;
+}
+
+.app-page-header__actions,
+.admin-page-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   5. APP CARD
+   ═══════════════════════════════════════════════════════════════ */
+.app-card,
+.admin-card {
+  background: var(--sp-card-bg);
+  border: 1px solid var(--sp-card-border);
+  border-radius: var(--sp-card-radius);
+  box-shadow: var(--sp-card-shadow);
+  overflow: hidden;
+}
+
+.app-card-header,
+.admin-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--sp-card-border);
+  background: var(--sp-th-bg);
+  flex-wrap: wrap;
+}
+
+.app-card-header__title,
+.admin-card-header__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--sp-text-primary);
+  letter-spacing: -0.01em;
+}
+
+.app-card-header__subtitle,
+.admin-card-header__subtitle {
+  margin: 0.25rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--sp-text-muted);
+}
+
+.app-card-header__meta,
+.admin-card-header__meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.875rem;
+  color: var(--sp-text-muted);
+  font-weight: 500;
+}
+
+.app-card-header__meta strong,
+.admin-card-header__meta strong {
+  color: var(--sp-text-primary);
+  font-weight: 700;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   6. FILTER CARD
+   ═══════════════════════════════════════════════════════════════ */
+.app-filter-card,
+.admin-filter-card {
+  background: var(--sp-card-bg);
+  border: 1px solid var(--sp-card-border);
+  border-radius: var(--sp-card-radius);
+  box-shadow: var(--sp-card-shadow);
+  padding: 1.25rem 1.5rem;
+}
+
+.app-filter-card__label,
+.admin-filter-card__label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--sp-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 1rem;
+}
+
+.app-filter-grid,
+.admin-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  align-items: end;
+}
+
+.app-filter-grid .form-control,
+.app-filter-grid .form-select,
+.admin-filter-grid .form-control,
+.admin-filter-grid .form-select {
+  height: var(--sp-input-height);
+  border-radius: var(--sp-input-radius);
+  border-color: var(--sp-input-border);
+  font-size: 0.875rem;
+  color: var(--sp-text-secondary);
+  background-color: #FAFAFA;
+  transition: all .2s ease;
+}
+
+.app-filter-grid .form-control:focus,
+.app-filter-grid .form-select:focus,
+.admin-filter-grid .form-control:focus,
+.admin-filter-grid .form-select:focus {
+  border-color: var(--sp-input-focus);
+  box-shadow: 0 0 0 3px rgba(181, 242, 60, 0.15);
+  background-color: #fff;
+}
+
+.app-filter-grid label.form-label,
+.admin-filter-grid label.form-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--sp-text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.app-filter-grid__actions,
+.admin-filter-grid__actions {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   7. TABLE CARD
+   ═══════════════════════════════════════════════════════════════ */
+.app-table-card,
+.admin-table-card {
+  background: var(--sp-card-bg);
+  border: 1px solid var(--sp-card-border);
+  border-radius: var(--sp-card-radius);
+  box-shadow: var(--sp-card-shadow);
+  overflow: hidden;
+}
+
+.app-table-card .table-responsive,
+.admin-table-card .table-responsive {
+  margin: 0;
+  padding: 0;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   8. APP TABLE
+   ═══════════════════════════════════════════════════════════════ */
+.app-table,
+.admin-table {
+  width: 100%;
+  min-width: 720px;
+  margin-bottom: 0;
+  border-collapse: collapse;
+}
+
+.app-table thead th,
+.admin-table thead th {
+  padding: 1rem 1.25rem;
+  background: var(--sp-th-bg);
+  border-bottom: 1px solid var(--sp-card-border);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sp-th-color);
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.app-table thead th:first-child,
+.app-table tbody td:first-child,
+.admin-table thead th:first-child,
+.admin-table tbody td:first-child {
+  padding-left: 1.5rem;
+}
+
+.app-table thead th:last-child,
+.app-table tbody td:last-child,
+.admin-table thead th:last-child,
+.admin-table tbody td:last-child {
+  padding-right: 1.5rem;
+}
+
+.app-table tbody td,
+.admin-table tbody td {
+  padding: 1rem 1.25rem;
+  font-size: 0.875rem;
+  color: var(--sp-text-secondary);
+  vertical-align: middle;
+  border-bottom: 1px solid var(--sp-row-divider);
+  white-space: nowrap;
+}
+
+.app-table tbody tr:last-child td,
+.admin-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.app-table tbody tr,
+.admin-table tbody tr {
+  transition: background-color .15s ease;
+}
+
+.app-table tbody tr:hover,
+.admin-table tbody tr:hover {
+  background-color: var(--sp-row-hover);
+}
+
+.app-table .cell-primary,
+.admin-table .cell-primary {
+  font-weight: 600;
+  color: var(--sp-text-primary);
+}
+
+.app-table .cell-muted,
+.admin-table .cell-muted {
+  color: var(--sp-text-muted);
+  font-size: 0.8125rem;
+}
+
+.app-table .col-actions,
+.admin-table .col-actions {
+  width: 80px;
+  text-align: right;
+}
+
+.app-table .form-check-input,
+.admin-table .form-check-input {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  border-color: #D0D0D0;
+}
+
+.app-table .cell-avatar,
+.admin-table .cell-avatar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.app-table .cell-avatar img,
+.admin-table .cell-avatar img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   9. STATUS BADGES
+   ═══════════════════════════════════════════════════════════════ */
+.app-badge,
+.admin-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 26px;
+  padding: 0 12px;
+  border-radius: 6px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.app-badge-success,
+.admin-badge-success {
+  background: #E8F5E9;
+  color: #2E7D32;
+}
+
+.app-badge-warning,
+.admin-badge-warning {
+  background: #FFF3E0;
+  color: #E65100;
+}
+
+.app-badge-primary,
+.admin-badge-primary {
+  background: #E3F2FD;
+  color: #1565C0;
+}
+
+.app-badge-info,
+.admin-badge-info {
+  background: #E0F7FA;
+  color: #00838F;
+}
+
+.app-badge-danger,
+.admin-badge-danger {
+  background: #FFEBEE;
+  color: var(--danger-red);
+}
+
+.app-badge-secondary,
+.admin-badge-secondary {
+  background: #F5F5F5;
+  color: #616161;
+}
+
+/* Bootstrap badge overrides */
+.badge.bg-label-success {
+  background: #E8F5E9 !important;
+  color: #2E7D32 !important;
+}
+
+.badge.bg-label-warning {
+  background: #FFF3E0 !important;
+  color: #E65100 !important;
+}
+
+.badge.bg-label-primary {
+  background: #E3F2FD !important;
+  color: #1565C0 !important;
+}
+
+.badge.bg-label-info {
+  background: #E0F7FA !important;
+  color: #00838F !important;
+}
+
+.badge.bg-label-danger {
+  background: #FFEBEE !important;
+  color: var(--danger-red) !important;
+}
+
+.badge.bg-label-secondary {
+  background: #F5F5F5 !important;
+  color: #616161 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   10. BUTTONS
+   ═══════════════════════════════════════════════════════════════ */
+.app-btn-primary,
+.admin-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: var(--sp-btn-height);
+  padding: 0 1.5rem;
+  border-radius: var(--sp-btn-radius);
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+  background: var(--secondary-green);
+  color: var(--primary);
+  border: none;
+  box-shadow: 0 2px 8px rgba(181, 242, 60, 0.3);
+  transition: all .2s ease;
+  cursor: pointer;
+}
+
+.app-btn-primary:hover,
+.admin-btn-primary:hover {
+  background: #A8E635;
+  box-shadow: 0 4px 12px rgba(181, 242, 60, 0.4);
+  transform: translateY(-1px);
+  color: var(--primary);
+}
+
+.app-btn-primary:active,
+.admin-btn-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(181, 242, 60, 0.3);
+}
+
+.app-btn-dark,
+.admin-btn-dark {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: var(--sp-btn-height);
+  padding: 0 1.5rem;
+  border-radius: var(--sp-btn-radius);
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+  background: var(--dark-btn);
+  color: var(--white);
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: all .2s ease;
+  cursor: pointer;
+}
+
+.app-btn-dark:hover,
+.admin-btn-dark:hover {
+  background: var(--primary);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transform: translateY(-1px);
+  color: var(--white);
+}
+
+.app-btn-secondary,
+.admin-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: var(--sp-btn-height);
+  padding: 0 1.5rem;
+  border-radius: var(--sp-btn-radius);
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+  background: #fff;
+  color: var(--sp-text-secondary);
+  border: 1px solid var(--sp-card-border);
+  box-shadow: 0 1px 3px rgba(0,0,0,.08);
+  transition: all .2s ease;
+  cursor: pointer;
+}
+
+.app-btn-secondary:hover,
+.admin-btn-secondary:hover {
+  border-color: var(--secondary-green);
+  box-shadow: 0 2px 8px rgba(181, 242, 60, 0.15);
+  color: var(--sp-text-primary);
+}
+
+.app-btn-reset,
+.admin-btn-reset {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  height: var(--sp-input-height);
+  padding: 0 1rem;
+  border-radius: var(--sp-input-radius);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--sp-text-muted);
+  background: transparent;
+  border: 1px solid var(--sp-card-border);
+  cursor: pointer;
+  transition: all .2s ease;
+  white-space: nowrap;
+}
+
+.app-btn-reset:hover,
+.admin-btn-reset:hover {
+  color: var(--danger-red);
+  border-color: var(--danger-red);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   11. ACTION BUTTON
+   ═══════════════════════════════════════════════════════════════ */
+.app-action-btn,
+.admin-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  color: var(--sp-text-muted);
+  background: transparent;
+  border: none;
+  transition: all .2s ease;
+  cursor: pointer;
+}
+
+.app-action-btn:hover,
+.app-action-btn:focus,
+.admin-action-btn:hover,
+.admin-action-btn:focus {
+  background: #F5F5F5;
+  color: var(--sp-text-primary);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   12. CARD OVERRIDES
+   ═══════════════════════════════════════════════════════════════ */
+.card {
+  border-radius: var(--sp-card-radius) !important;
+  box-shadow: var(--sp-card-shadow) !important;
+  border: 1px solid var(--sp-card-border) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   13. RESPONSIVE
+   ═══════════════════════════════════════════════════════════════ */
+@media (max-width: 1199.98px) {
+  .app-filter-grid,
+  .admin-filter-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 991.98px) {
+  .container-p-y {
+    padding-top: 1.25rem !important;
+    padding-bottom: 1.5rem !important;
+  }
+
+  .app-page-header,
+  .admin-page-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .app-page-header__actions,
+  .admin-page-header__actions {
+    flex-direction: column;
+  }
+
+  .app-page-header__actions .app-btn-primary,
+  .app-page-header__actions .app-btn-dark,
+  .app-page-header__actions .app-btn-secondary,
+  .admin-page-header__actions .admin-btn-primary,
+  .admin-page-header__actions .admin-btn-dark,
+  .admin-page-header__actions .admin-btn-secondary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .app-card-header,
+  .admin-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .app-filter-card,
+  .admin-filter-card {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .app-filter-grid,
+  .admin-filter-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .app-table thead th,
+  .app-table tbody td,
+  .admin-table thead th,
+  .admin-table tbody td {
+    padding: 0.875rem 1rem;
+  }
+
+  .app-card-header,
+  .admin-card-header {
+    padding: 1rem;
+  }
+}

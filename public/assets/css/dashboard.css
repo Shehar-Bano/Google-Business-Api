@@ -1,0 +1,411 @@
+/* ═══════════════════════════════════════════════════════════════
+   SQUASH PRO - COMPACT HORIZONTAL STAT CARDS
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Dashboard Grid */
+.dashboard-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+/* Compact Horizontal Stat Card */
+.dashboard-stat-card {
+    background: #F8FAFC;
+    border-radius: 16px;
+    padding: 20px 24px;
+    border: 1px solid #E5EAF0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-height: 96px;
+    position: relative;
+}
+
+.dashboard-stat-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    transform: translateY(-1px);
+}
+
+.dashboard-stat-card.clickable {
+    cursor: pointer;
+}
+
+.dashboard-stat-card.clickable:hover {
+    border-color: #B5F23C;
+}
+
+/* Icon Circle */
+.stat-card-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.stat-card-icon i {
+    font-size: 24px;
+}
+
+/* Icon Color Variants */
+.icon-primary {
+    background: #EAF3FF;
+    color: #3B82F6;
+}
+
+.icon-success {
+    background: #ECFDF5;
+    color: #10B981;
+}
+
+.icon-warning {
+    background: #FFF7ED;
+    color: #F97316;
+}
+
+.icon-danger {
+    background: #FEF2F2;
+    color: #EF4444;
+}
+
+.icon-info {
+    background: #EFF6FF;
+    color: #3B82F6;
+}
+
+.icon-purple {
+    background: #F5F3FF;
+    color: #8B5CF6;
+}
+
+.icon-accent {
+    background: #FDF4FF;
+    color: #EC4899;
+}
+
+/* Card Content */
+.stat-card-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.stat-card-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: #64748B;
+    margin-bottom: 4px;
+    line-height: 1.4;
+}
+
+.stat-card-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: #0F172A;
+    line-height: 1.2;
+}
+
+/* Chevron for Clickable Cards */
+.stat-card-chevron {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #94A3B8;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+
+.dashboard-stat-card:hover .stat-card-chevron {
+    color: #B5F23C;
+    transform: translateX(2px);
+}
+
+/* Dashboard Chart Card */
+.dashboard-chart-card {
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 18px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+    transition: all 0.25s ease;
+}
+
+.dashboard-chart-card:hover {
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+}
+
+.chart-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem;
+    border-bottom: 1px solid #F3F4F6;
+    background: #FAFAFA;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.chart-card-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+    letter-spacing: -0.01em;
+}
+
+.chart-card-subtitle {
+    font-size: 0.8125rem;
+    color: #6B7280;
+    margin: 0.25rem 0 0;
+}
+
+.chart-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.chart-card-actions .form-select {
+    min-width: 150px;
+    height: 40px;
+    border-radius: 10px;
+    border: 1.5px solid #E5E7EB;
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 0.5rem 2rem 0.5rem 0.875rem;
+    background-color: #FFFFFF;
+    color: #374151;
+    transition: all 0.2s ease;
+}
+
+.chart-card-actions .form-select:focus {
+    border-color: #B5F23C;
+    box-shadow: 0 0 0 3px rgba(181, 242, 60, 0.12);
+    outline: none;
+}
+
+.chart-card-body {
+    padding: 1.5rem;
+}
+
+#platformOverviewChart {
+    width: 100%;
+    min-height: 380px;
+}
+
+/* Quick Actions Section */
+.dashboard-quick-actions {
+    margin-top: 0.5rem;
+}
+
+.quick-actions-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0 0 1rem;
+    letter-spacing: -0.01em;
+}
+
+.quick-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+}
+
+.quick-action-card {
+    background: #FFFFFF;
+    border: 1.5px solid #E5E7EB;
+    border-radius: 14px;
+    padding: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    text-decoration: none;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.quick-action-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 100%;
+    background: #B5F23C;
+    transform: scaleY(0);
+    transition: transform 0.25s ease;
+}
+
+.quick-action-card:hover {
+    border-color: #B5F23C;
+    box-shadow: 0 8px 24px rgba(181, 242, 60, 0.15);
+    transform: translateY(-2px);
+}
+
+.quick-action-card:hover::before {
+    transform: scaleY(1);
+}
+
+.quick-action-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #B5F23C 0%, #A8E635 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.25s ease;
+}
+
+.quick-action-card:hover .quick-action-icon {
+    transform: scale(1.08) rotate(5deg);
+}
+
+.quick-action-icon i {
+    font-size: 24px;
+    color: #121212;
+}
+
+.quick-action-content h6 {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 0 0 0.25rem;
+}
+
+.quick-action-content p {
+    font-size: 0.8125rem;
+    color: #6B7280;
+    margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 1199px) {
+    .dashboard-stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 991px) {
+    .dashboard-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+    
+    .dashboard-stat-card {
+        padding: 18px 20px;
+        min-height: 88px;
+    }
+    
+    .stat-card-icon {
+        width: 48px;
+        height: 48px;
+    }
+    
+    .stat-card-icon i {
+        font-size: 20px;
+    }
+    
+    .stat-card-value {
+        font-size: 22px;
+    }
+    
+    .stat-card-title {
+        font-size: 13px;
+    }
+
+    .chart-card-header {
+        padding: 1.25rem;
+    }
+
+    .chart-card-body {
+        padding: 1.25rem;
+    }
+
+    #platformOverviewChart {
+        min-height: 320px;
+    }
+
+    .quick-actions-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 767px) {
+    .dashboard-stats-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .dashboard-stat-card {
+        padding: 16px 20px;
+        min-height: 80px;
+    }
+    
+    .stat-card-icon {
+        width: 44px;
+        height: 44px;
+    }
+    
+    .stat-card-icon i {
+        font-size: 18px;
+    }
+    
+    .stat-card-value {
+        font-size: 20px;
+    }
+    
+    .stat-card-title {
+        font-size: 13px;
+    }
+
+    .chart-card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1rem;
+    }
+
+    .chart-card-actions {
+        width: 100%;
+    }
+
+    .chart-card-actions .form-select {
+        width: 100%;
+    }
+
+    .chart-card-body {
+        padding: 1rem;
+    }
+
+    #platformOverviewChart {
+        min-height: 280px;
+    }
+
+    .quick-actions-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .quick-action-card {
+        padding: 1rem;
+        border-radius: 12px;
+    }
+
+    .quick-action-icon {
+        width: 44px;
+        height: 44px;
+    }
+
+    .quick-action-icon i {
+        font-size: 22px;
+    }
+}
