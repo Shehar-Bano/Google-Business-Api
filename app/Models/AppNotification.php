@@ -3,27 +3,40 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AppNotification extends Model
 {
+    protected $table = 'app_notifications';
+
     protected $fillable = [
+        'notifiable_type',
+        'notifiable_id',
         'user_id',
         'title',
         'description',
         'type',
+        'data',
         'role_type',
         'read_at',
     ];
 
-    protected function casts(): array
+    protected $casts = [
+        'data' => 'array',
+        'read_at' => 'datetime',
+    ];
+
+    /**
+     * Polymorphic relation
+     */
+    public function notifiable()
     {
-        return [
-            'read_at' => 'datetime',
-        ];
+        return $this->morphTo();
     }
 
-    public function user(): BelongsTo
+    /**
+     * User who triggered the notification
+     */
+    public function user()
     {
         return $this->belongsTo(User::class);
     }

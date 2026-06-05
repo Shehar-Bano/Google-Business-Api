@@ -20,8 +20,9 @@ class NotificationController extends Controller
     {
         return response()->json([
             'success' => true,
-            'message' => 'Notifications fetched successfully.',
-            'data' => NotificationResource::collection($this->notificationService->forUser($request->user())),
+            'notifications' => NotificationResource::collection(
+                $this->notificationService->forUser($request->user(), $request->string('status')->toString() ?: null)
+            ),
         ]);
     }
 

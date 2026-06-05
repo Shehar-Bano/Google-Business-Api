@@ -21,17 +21,16 @@ use Illuminate\Http\Request;
 
 class AuthController extends Controller
 {
-    public function __construct(private readonly AuthService $authService)
-    {
-    }
+    public function __construct(private readonly AuthService $authService) {}
 
     public function registerPlayer(RegisterPlayerRequest $request): JsonResponse
     {
+        // dd($request->all());
         $result = $this->authService->registerPlayer($request);
 
         return response()->json([
             'success' => true,
-            'message' => 'Player registered successfully. OTP sent to email.',
+            'message' => 'User registered successfully. OTP sent to email.',
             'data' => AuthSessionResource::make($result),
         ], 201);
     }
@@ -136,6 +135,16 @@ class AuthController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Password changed successfully.',
+        ]);
+    }
+
+    public function logout(Request $request): JsonResponse
+    {
+        $this->authService->logout($request->user());
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Logged out successfully',
         ]);
     }
 

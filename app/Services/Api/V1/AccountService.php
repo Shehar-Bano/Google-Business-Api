@@ -56,25 +56,37 @@ class AccountService
     {
         $allowedFields = [
             'name',
-            'phone',
-            'club_name',
-            'owner_manager_name',
+            // 'phone',
+            // 'club_name',
+            // 'owner_manager_name',
             'address',
-            'city',
-            'number_of_courts',
-            'working_hours',
-            'facilities',
-            'dob',
-            'gender',
-            'playing_level',
-            'primary_hand',
-            'bio',
+
+            // 'city',
+            // 'number_of_courts',
+            // 'working_hours',
+            // 'facilities',
+            // 'dob',
+            // 'gender',
+            // 'playing_level',
+            // 'primary_hand',
+            // 'bio',
         ];
 
         foreach ($allowedFields as $field) {
             if (array_key_exists($field, $validated)) {
                 $user->{$field} = $validated[$field];
             }
+        }
+        // ✅ Profile Image Update
+        if (request()->hasFile('profile_image')) {
+
+            // old image delete
+            $this->deleteStoredImage($user->profile_image ?? null);
+
+            // new image store
+            $path = request()->file('profile_image')->store('profiles', 'public');
+
+            $user->profile_image = $path;
         }
 
         $user->save();

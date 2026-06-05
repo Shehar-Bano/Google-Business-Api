@@ -15,8 +15,8 @@ use App\Http\Requests\Api\V1\Auth\VerifyOtpRequest;
 use App\Mail\OtpMail;
 use App\Models\User;
 use App\Support\ApiErrorCode;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
@@ -187,6 +187,9 @@ class AuthService
         if (! User::where('email', $email)->exists()) {
             $this->throwApiError('User not found with this email.', ApiErrorCode::USER_NOT_FOUND, 404);
         }
+        if(! User::where('email', $email)->where('otp_verified', true)->exists()) {
+            $this->throwApiError('Email not verified. Please verify your email before requesting password reset.', ApiErrorCode::OTP_NOT_VERIFIED, 403);
+        }
 
         $this->createOtp($email, 'forgot_password');
 
@@ -250,6 +253,13 @@ class AuthService
         }
 
         $user->password = Hash::make($request->string('new_password')->toString());
+        $user->save();
+    }
+
+    public function logout(User $user): void
+    {
+        $user->api_access_token = null;
+        $user->api_refresh_token = null;
         $user->save();
     }
 
@@ -331,7 +341,7 @@ class AuthService
             'success' => false,
             'message' => $message,
             'error_code' => $errorCode,
-            'errors' => new \stdClass(),
+            'errors' => new \stdClass,
         ], $status));
     }
 }

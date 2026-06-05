@@ -12,11 +12,11 @@ class NotificationResource extends JsonResource
         return [
             'id' => $this->id,
             'title' => $this->title,
-            'description' => $this->description,
+            'message' => $this->description,
             'type' => $this->type,
-            'role_type' => $this->role_type ?? $request->user()?->role,
+            'payload' => $this->data ?? new \stdClass,
             'is_read' => $this->read_at !== null,
-            'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
+            'created_at' => $this->created_at?->toISOString(),
         ];
     }
 }
