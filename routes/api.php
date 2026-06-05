@@ -23,14 +23,12 @@ Route::prefix('v1')->group(function () {
         Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
         Route::post('forgot-password/verify-otp', [AuthController::class, 'verifyForgotPasswordOtp']);
         Route::post('reset-password', [AuthController::class, 'resetPassword']);
-        Route::post('logout', [AuthController::class, 'logout']);
-
 
     });
 
     Route::middleware('api.token')->group(function () {
         Route::get('notifications', [NotificationController::class, 'index']);
-
+        Route::post('logout', [AuthController::class, 'logout']);
         Route::prefix('player')->middleware('api.role:player')->group(function () {
             Route::post('complete-profile', [AuthController::class, 'completePlayerProfile']);
         });
