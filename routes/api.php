@@ -1,11 +1,13 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AccountController;
+use App\Http\Controllers\Api\V1\AccountFcmTokenController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\ContentController;
 use App\Http\Controllers\Api\V1\NotificationController;
 use App\Http\Controllers\Api\V1\OrderController;
 use Illuminate\Support\Facades\Route;
+
 
 Route::prefix('v1')->group(function () {
     Route::get('help-support', [ContentController::class, 'helpSupport']);
@@ -43,6 +45,8 @@ Route::prefix('v1')->group(function () {
             Route::get('notifications', [NotificationController::class, 'index']);
             Route::patch('notifications/read-all', [NotificationController::class, 'markAllAsRead']);
             Route::patch('notifications/{notification_id}/read', [NotificationController::class, 'markAsRead']);
+            Route::post('fcm-token', [AccountFcmTokenController::class, 'store']);
+
         });
     });
 
