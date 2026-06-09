@@ -13,6 +13,72 @@ class User extends Authenticatable
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, HasRoles;
 
+    // Statuses used throughout AuthService and auth flow
+    public const STATUS_OTP_PENDING       = 'otp_pending';
+    public const STATUS_PROFILE_INCOMPLETE = 'profile_incomplete';
+    public const STATUS_PENDING           = 'pending';
+    public const STATUS_ACTIVE            = 'active';
+    public const STATUS_REJECTED          = 'rejected';
+    public const STATUS_SUSPENDED         = 'suspended';
+
+    // All statuses (used for validation in API)
+    public const STATUSES = [
+        self::STATUS_OTP_PENDING,
+        self::STATUS_PROFILE_INCOMPLETE,
+        self::STATUS_PENDING,
+        self::STATUS_ACTIVE,
+        self::STATUS_REJECTED,
+        self::STATUS_SUSPENDED,
+    ];
+
+    // Only statuses shown/updatable in admin panel
+    public const ADMIN_STATUSES = [
+        self::STATUS_OTP_PENDING,
+        self::STATUS_SUSPENDED,
+    ];
+
+    public const STATUS_LABELS = [
+        self::STATUS_OTP_PENDING        => 'OTP Pending',
+        self::STATUS_PROFILE_INCOMPLETE => 'Profile Incomplete',
+        self::STATUS_PENDING            => 'Pending',
+        self::STATUS_ACTIVE             => 'Active',
+        self::STATUS_REJECTED           => 'Rejected',
+        self::STATUS_SUSPENDED          => 'Suspended',
+    ];
+
+    // Labels for admin panel only
+    public const ADMIN_STATUS_LABELS = [
+        self::STATUS_OTP_PENDING => 'OTP Pending',
+        self::STATUS_SUSPENDED   => 'Suspended',
+    ];
+
+    public const STATUS_ICONS = [
+        self::STATUS_OTP_PENDING        => 'mdi-email-outline',
+        self::STATUS_PROFILE_INCOMPLETE => 'mdi-account-edit-outline',
+        self::STATUS_PENDING            => 'mdi-clock-outline',
+        self::STATUS_ACTIVE             => 'mdi-account-check-outline',
+        self::STATUS_REJECTED           => 'mdi-account-cancel-outline',
+        self::STATUS_SUSPENDED          => 'mdi-account-lock-outline',
+    ];
+
+    // Icons for admin panel stats
+    public const ADMIN_STATUS_ICONS = [
+        self::STATUS_OTP_PENDING => 'mdi-email-outline',
+        self::STATUS_SUSPENDED   => 'mdi-account-lock-outline',
+    ];
+
+    public const ROLE_PLAYER     = 'player';
+    public const ROLE_CLUB       = 'club';
+    public const ROLE_ADMIN      = 'admin';
+    public const ROLE_SUPER_ADMIN = 'super_admin';
+
+    public const ROLES = [
+        self::ROLE_PLAYER,
+        self::ROLE_CLUB,
+        self::ROLE_ADMIN,
+        self::ROLE_SUPER_ADMIN,
+    ];
+
     /**
      * The attributes that are mass assignable.
      *
@@ -71,5 +137,10 @@ class User extends Authenticatable
     public function appNotifications(): HasMany
     {
         return $this->hasMany(AppNotification::class);
+    }
+
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
     }
 }

@@ -2,10 +2,12 @@
 
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ModulePlaceholderController;
+use App\Http\Controllers\Admin\OrderManagementController;
 use App\Http\Controllers\Admin\PrivacyPolicyController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\SupportOptionController;
 use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\UserRoleController;
 use Illuminate\Support\Facades\Route;
 
@@ -40,4 +42,14 @@ Route::middleware(['auth', 'verified', 'role:super_admin|admin'])
         Route::get('users', [UserRoleController::class, 'index'])->name('users.index');
         Route::get('users/{user}/roles', [UserRoleController::class, 'edit'])->name('users.roles.edit');
         Route::put('users/{user}/roles', [UserRoleController::class, 'update'])->name('users.roles.update');
+
+        // User Management
+        Route::get('user-management', [UserManagementController::class, 'index'])->name('user-management.index');
+        Route::get('user-management/{user}', [UserManagementController::class, 'show'])->name('user-management.show');
+        Route::patch('user-management/{user}/status', [UserManagementController::class, 'updateStatus'])->name('user-management.update-status');
+
+        // Order Management
+        Route::get('order-management', [OrderManagementController::class, 'index'])->name('order-management.index');
+        Route::get('order-management/{order}', [OrderManagementController::class, 'show'])->name('order-management.show');
+        Route::patch('order-management/{order}/status', [OrderManagementController::class, 'updateStatus'])->name('order-management.update-status');
     });

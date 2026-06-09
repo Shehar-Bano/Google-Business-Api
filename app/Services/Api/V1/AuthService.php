@@ -31,13 +31,13 @@ class AuthService
             'email' => strtolower($request->string('email')->toString()),
             'phone' => $request->string('phone')->toString(),
             'password' => Hash::make($request->string('password')->toString()),
-            'role' => 'player',
+            'role' => 'user',
             'status' => 'otp_pending',
             'otp_verified' => false,
         ]);
 
         ['access_token' => $accessToken, 'refresh_token' => $refreshToken] = $this->issueTokens($user);
-        $this->assignRoleIfPresent($user, 'player');
+        $this->assignRoleIfPresent($user, 'user');
         $this->createOtp($user->email, 'registration');
 
         return [
@@ -47,36 +47,36 @@ class AuthService
         ];
     }
 
-    public function registerClub(RegisterClubRequest $request): array
-    {
-        $logoPath = null;
-        if ($request->hasFile('club_logo')) {
-            $logoPath = $request->file('club_logo')->store('club-logos', 'public');
-        }
+    // public function registerClub(RegisterClubRequest $request): array
+    // {
+    //     $logoPath = null;
+    //     if ($request->hasFile('club_logo')) {
+    //         $logoPath = $request->file('club_logo')->store('club-logos', 'public');
+    //     }
 
-        $user = User::create([
-            'name' => $request->string('owner_manager_name')->toString(),
-            'email' => strtolower($request->string('email')->toString()),
-            'phone' => $request->string('phone')->toString(),
-            'password' => Hash::make($request->string('password')->toString()),
-            'role' => 'club',
-            'status' => 'otp_pending',
-            'otp_verified' => false,
-            'club_name' => $request->string('club_name')->toString(),
-            'owner_manager_name' => $request->string('owner_manager_name')->toString(),
-            'address' => $request->string('address')->toString(),
-            'city' => $request->string('city')->toString(),
-            'number_of_courts' => $request->integer('number_of_courts'),
-            'working_hours' => $request->string('working_hours')->toString(),
-            'club_logo' => $logoPath,
-            'facilities' => $request->input('facilities', []),
-        ]);
+    //     $user = User::create([
+    //         'name' => $request->string('owner_manager_name')->toString(),
+    //         'email' => strtolower($request->string('email')->toString()),
+    //         'phone' => $request->string('phone')->toString(),
+    //         'password' => Hash::make($request->string('password')->toString()),
+    //         'role' => 'club',
+    //         'status' => 'otp_pending',
+    //         'otp_verified' => false,
+    //         'club_name' => $request->string('club_name')->toString(),
+    //         'owner_manager_name' => $request->string('owner_manager_name')->toString(),
+    //         'address' => $request->string('address')->toString(),
+    //         'city' => $request->string('city')->toString(),
+    //         'number_of_courts' => $request->integer('number_of_courts'),
+    //         'working_hours' => $request->string('working_hours')->toString(),
+    //         'club_logo' => $logoPath,
+    //         'facilities' => $request->input('facilities', []),
+    //     ]);
 
-        $this->assignRoleIfPresent($user, 'club');
-        $this->createOtp($user->email, 'registration');
+    //     $this->assignRoleIfPresent($user, 'club');
+    //     $this->createOtp($user->email, 'registration');
 
-        return compact('user');
-    }
+    //     return compact('user');
+    // }
 
     public function verifyOtp(VerifyOtpRequest $request): array
     {
@@ -99,11 +99,11 @@ class AuthService
         if ($request->string('purpose')->toString() === 'registration') {
             $user->otp_verified = true;
 
-            if ($user->role === 'player') {
-                $user->status = 'profile_incomplete';
-            } else {
-                $user->status = 'pending';
-            }
+            // if ($user->role === 'player') {
+            //     $user->status = 'profile_incomplete';
+            // } else {
+            //     $user->status = 'pending';
+            // }
 
             $user->save();
         }
@@ -124,7 +124,7 @@ class AuthService
 
     public function completePlayerProfile(User $user, CompletePlayerProfileRequest $request): User
     {
-        if ($user->role !== 'player') {
+        if ($user->role !== 'user') {
             $this->throwApiError('Only players can complete this profile.', ApiErrorCode::FORBIDDEN, 403);
         }
 
@@ -162,15 +162,15 @@ class AuthService
             $this->throwApiError('Your account has been suspended. Please contact support.', ApiErrorCode::ACCOUNT_SUSPENDED, 403);
         }
 
-        if ($user->role === 'club') {
-            if ($user->status === 'pending') {
-                $this->throwApiError('Your club profile is pending admin approval.', ApiErrorCode::CLUB_PENDING_APPROVAL, 403);
-            }
+        // if ($user->role === 'club') {
+        //     if ($user->status === 'pending') {
+        //         $this->throwApiError('Your club profile is pending admin approval.', ApiErrorCode::CLUB_PENDING_APPROVAL, 403);
+        //     }
 
-            if ($user->status === 'rejected') {
-                $this->throwApiError('Your club profile has been rejected by admin.', ApiErrorCode::CLUB_REJECTED, 403);
-            }
-        }
+        //     if ($user->status === 'rejected') {
+        //         $this->throwApiError('Your club profile has been rejected by admin.', ApiErrorCode::CLUB_REJECTED, 403);
+        //     }
+        // }
 
         ['access_token' => $accessToken, 'refresh_token' => $refreshToken] = $this->issueTokens($user);
 
@@ -187,7 +187,7 @@ class AuthService
         if (! User::where('email', $email)->exists()) {
             $this->throwApiError('User not found with this email.', ApiErrorCode::USER_NOT_FOUND, 404);
         }
-        if(! User::where('email', $email)->where('otp_verified', true)->exists()) {
+        if (! User::where('email', $email)->where('otp_verified', true)->exists()) {
             $this->throwApiError('Email not verified. Please verify your email before requesting password reset.', ApiErrorCode::OTP_NOT_VERIFIED, 403);
         }
 

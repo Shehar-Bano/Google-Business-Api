@@ -10,11 +10,13 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->string('order_id')->unique();
             $table->string('status')->default('in_review');
             $table->timestamps();
 
             $table->index('status');
+            $table->index('user_id');
         });
 
         Schema::create('order_details', function (Blueprint $table) {

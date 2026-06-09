@@ -38,6 +38,7 @@ class OrderService
     {
         return DB::transaction(function () use ($request) {
             $order = Order::create([
+                'user_id' => $request->user()?->id,
                 'order_id' => $this->nextOrderId(),
                 'status' => Order::STATUS_IN_REVIEW,
             ]);

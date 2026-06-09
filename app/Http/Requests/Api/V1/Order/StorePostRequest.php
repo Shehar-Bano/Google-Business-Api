@@ -14,6 +14,7 @@ class StorePostRequest extends BaseApiRequest
     public function rules(): array
     {
         return [
+
             'images' => ['required', 'array', 'min:1', 'max:5'],
             'images.*' => ['required', 'file', 'mimes:jpg,jpeg,png', 'max:5120'],
             'description' => ['required', 'string'],

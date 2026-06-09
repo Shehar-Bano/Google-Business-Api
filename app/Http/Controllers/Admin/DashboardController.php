@@ -3,53 +3,34 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Models\Order;
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
-use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
 
 class DashboardController extends Controller
 {
     public function index(Request $request): View
     {
-        $stats = [
-            [
-                'title' => 'Total Users',
-                'value' => number_format(User::count()),
-                'icon' => 'mdi mdi-account-multiple',
-            ],
-            [
-                'title' => 'Verified Users',
-                'value' => number_format(User::whereNotNull('email_verified_at')->count()),
-                'icon' => 'mdi mdi-account-check',
-            ],
-            [
-                'title' => 'Roles',
-                'value' => number_format(Role::count()),
-                'icon' => 'mdi mdi-account-key',
-            ],
-            [
-                'title' => 'Permissions',
-                'value' => number_format(Permission::count()),
-                'icon' => 'mdi mdi-shield-key',
-            ],
-        ];
+        // User statistics — read all statuses from User model constants
+        $userStats = ['total' => User::count()];
+        foreach (User::STATUSES as $status) {
+            $userStats[$status] = User::where('status', $status)->count();
+        }
 
-        $recentUsers = User::query()
-            ->select(['id', 'name', 'email', 'created_at'])
+        // Order statistics — read all statuses from Order model constants
+        $orderStats = ['total' => Order::count()];
+        foreach (Order::STATUSES as $status) {
+            $orderStats[$status] = Order::where('status', $status)->count();
+        }
+
+        // Latest 10 orders with user and detail
+        $latestOrders = Order::query()
+            ->with(['user:id,name,email', 'detail:order_id,price'])
             ->latest()
-            ->limit(5)
+            ->limit(10)
             ->get();
 
-        $roleCounts = DB::table('model_has_roles')
-            ->join('roles', 'roles.id', '=', 'model_has_roles.role_id')
-            ->select('roles.name', DB::raw('COUNT(*) as total'))
-            ->groupBy('roles.name')
-            ->orderByDesc('total')
-            ->get();
-
-        return view('content.admin.dashboard.index', compact('stats', 'recentUsers', 'roleCounts'));
+        return view('content.admin.dashboard.index', compact('userStats', 'orderStats', 'latestOrders'));
     }
 }

@@ -23,7 +23,7 @@ class LoginRequest extends BaseApiRequest
         return [
             'email' => ['required', 'email'],
             'password' => ['required', 'string'],
-            'role' => ['required', 'in:player,club'],
+            'role' => ['required', 'in:user'],
         ];
     }
 }
