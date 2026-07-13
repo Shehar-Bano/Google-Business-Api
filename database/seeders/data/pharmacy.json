@@ -1,0 +1,154 @@
+{
+  "category": "Pharmacy",
+  "subcategories": [
+    {
+      "name": "Medicines & Prescription",
+      "products": [
+        "Panadol 500mg Tablets",
+        "Disprin Soluble Tablets",
+        "Aspirin 75mg",
+        "Paracetamol Pediatric Syrup",
+        "Amoxicillin 500mg Capsules",
+        "Azithromycin 500mg Tablets",
+        "Augmentin Tablets",
+        "Ibuprofen Tablets",
+        "Diclofenac Tablets",
+        "Cetirizine Tablets",
+        "Loratadine Tablets",
+        "Montelukast Tablets",
+        "Omeprazole Capsules",
+        "Esomeprazole Capsules",
+        "Metformin Tablets",
+        "Gliclazide Tablets",
+        "Insulin Injection Pen",
+        "Vitamin C Tablets",
+        "Vitamin D Capsules",
+        "Calcium Tablets",
+        "Iron Supplements",
+        "Multivitamin Tablets",
+        "ORS Sachets",
+        "Cough Syrup",
+        "Dry Cough Syrup",
+        "Nasal Spray",
+        "Eye Drops",
+        "Ear Drops",
+        "Antiseptic Solution",
+        "Pain Relief Gel"
+      ],
+      "services": [
+        "Prescription Dispensing",
+        "Pharmacist Consultation",
+        "Medicine Home Delivery",
+        "Prescription Refill",
+        "Medication Counseling",
+        "Generic Medicine Guidance"
+      ]
+    },
+    {
+      "name": "Medical Equipment & Diagnostics",
+      "products": [
+        "Digital Blood Pressure Monitor",
+        "Manual Blood Pressure Apparatus",
+        "Blood Glucose Testing Kit",
+        "Glucometer Strips",
+        "Infrared Thermometer",
+        "Digital Thermometer",
+        "Pulse Oximeter",
+        "Nebulizer Machine",
+        "Steam Vaporizer",
+        "Wheelchair",
+        "Walking Stick",
+        "Crutches",
+        "Hot Water Bottle",
+        "Heating Pad",
+        "Surgical Face Masks",
+        "N95 Face Mask",
+        "Disposable Gloves",
+        "First Aid Kit",
+        "Bandages",
+        "Cotton Roll",
+        "Medical Tape",
+        "Sterile Gauze Pads",
+        "Syringes",
+        "Alcohol Swabs"
+      ],
+      "services": [
+        "Blood Pressure Check",
+        "Blood Glucose Testing",
+        "Weight Measurement",
+        "BMI Assessment",
+        "Oxygen Saturation Check",
+        "Health Screening"
+      ]
+    },
+    {
+      "name": "Personal Care & Hygiene",
+      "products": [
+        "Toothpaste",
+        "Toothbrush",
+        "Mouthwash",
+        "Hand Sanitizer",
+        "Hand Wash",
+        "Bath Soap",
+        "Body Wash",
+        "Face Wash",
+        "Shampoo",
+        "Hair Conditioner",
+        "Hair Oil",
+        "Body Lotion",
+        "Moisturizing Cream",
+        "Lip Balm",
+        "Sunscreen",
+        "Deodorant",
+        "Wet Wipes",
+        "Facial Tissue",
+        "Cotton Buds"
+      ],
+      "services": []
+    },
+    {
+      "name": "Mother & Baby Care",
+      "products": [
+        "Baby Formula Milk",
+        "Feeding Bottle",
+        "Baby Diapers",
+        "Baby Wipes",
+        "Baby Shampoo",
+        "Baby Soap",
+        "Baby Lotion",
+        "Baby Powder",
+        "Baby Oil",
+        "Pregnancy Test Kit",
+        "Prenatal Vitamins",
+        "Nursing Pads"
+      ],
+      "services": [
+        "Baby Care Consultation",
+        "Mother Care Guidance"
+      ]
+    },
+    {
+      "name": "Health Supplements",
+      "products": [
+        "Multivitamins",
+        "Vitamin C",
+        "Vitamin D3",
+        "Vitamin B Complex",
+        "Calcium Supplements",
+        "Iron Supplements",
+        "Zinc Tablets",
+        "Fish Oil Capsules",
+        "Omega 3 Capsules",
+        "Protein Powder",
+        "Electrolyte Powder",
+        "Probiotics",
+        "Herbal Supplements",
+        "Immune Booster Capsules"
+      ],
+      "services": [
+        "Nutrition Consultation",
+        "Supplement Guidance"
+      ]
+    }
+  ]
+}

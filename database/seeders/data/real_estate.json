@@ -1,0 +1,126 @@
+{
+  "category": "Real Estate Agency",
+  "subcategories": [
+    {
+      "name": "Residential Properties",
+      "products": [
+        "House for Sale",
+        "House for Rent",
+        "Apartment",
+        "Flat",
+        "Studio Apartment",
+        "Villa",
+        "Penthouse",
+        "Farm House",
+        "Guest House",
+        "Townhouse"
+      ],
+      "services": [
+        "Property Buying Consultation",
+        "Property Selling Assistance",
+        "Residential Property Leasing",
+        "Rental Property Management",
+        "Home Valuation",
+        "Property Viewing",
+        "Investment Consultation"
+      ]
+    },
+    {
+      "name": "Commercial Properties",
+      "products": [
+        "Office Space",
+        "Commercial Shop",
+        "Shopping Mall Unit",
+        "Warehouse",
+        "Industrial Building",
+        "Factory",
+        "Commercial Plaza",
+        "Business Center",
+        "Retail Outlet",
+        "Office Floor"
+      ],
+      "services": [
+        "Commercial Property Leasing",
+        "Commercial Property Sales",
+        "Office Space Consultation",
+        "Commercial Investment Advisory",
+        "Property Marketing"
+      ]
+    },
+    {
+      "name": "Plots & Land",
+      "products": [
+        "Residential Plot",
+        "Commercial Plot",
+        "Agricultural Land",
+        "Industrial Plot",
+        "Farm Land",
+        "Corner Plot",
+        "Developed Plot",
+        "Overseas Plot"
+      ],
+      "services": [
+        "Plot Buying",
+        "Plot Selling",
+        "Land Verification",
+        "Land Investment Advisory",
+        "Plot Transfer Assistance"
+      ]
+    },
+    {
+      "name": "Property Documentation",
+      "products": [
+        "Property Listing Brochure",
+        "Sale Agreement",
+        "Purchase Agreement",
+        "Rental Agreement",
+        "Lease Agreement",
+        "Property Transfer Documents",
+        "Registry Documents",
+        "Mutation Documents",
+        "Possession Letter",
+        "Property File"
+      ],
+      "services": [
+        "Property Documentation",
+        "Registry Assistance",
+        "Title Verification",
+        "Ownership Verification",
+        "Legal Documentation Support"
+      ]
+    },
+    {
+      "name": "Property Management",
+      "products": [
+        "Property Inspection Report",
+        "Maintenance Schedule",
+        "Tenant Information File"
+      ],
+      "services": [
+        "Tenant Management",
+        "Property Maintenance",
+        "Rent Collection",
+        "Property Inspection",
+        "Building Management",
+        "Facility Management"
+      ]
+    },
+    {
+      "name": "Real Estate Consultancy",
+      "products": [
+        "Property Market Report",
+        "Investment Portfolio Report",
+        "Property Valuation Report"
+      ],
+      "services": [
+        "Real Estate Investment Advice",
+        "Property Market Analysis",
+        "Property Valuation",
+        "Mortgage Consultation",
+        "Property Tax Consultation",
+        "Overseas Property Consultancy",
+        "Luxury Property Consultancy"
+      ]
+    }
+  ]
+}

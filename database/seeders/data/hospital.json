@@ -1,0 +1,193 @@
+{
+  "category": "Hospital",
+  "subcategories": [
+    {
+      "name": "Emergency & Trauma",
+      "products": [
+        "Emergency Medical Kit",
+        "First Aid Kit",
+        "Wheelchair",
+        "Stretcher",
+        "Oxygen Cylinder",
+        "Emergency Patient File"
+      ],
+      "services": [
+        "24/7 Emergency Service",
+        "Ambulance Service",
+        "ICU Care",
+        "Trauma Care",
+        "Accident & Emergency Treatment",
+        "Critical Care Unit",
+        "Emergency Surgery"
+      ]
+    },
+    {
+      "name": "Clinical Diagnostics & Tests",
+      "products": [
+        "Complete Blood Count (CBC) Report",
+        "Lipid Profile Test Report",
+        "Liver Function Test (LFT) Report",
+        "Kidney Function Test (KFT) Report",
+        "Blood Sugar Test Report",
+        "HbA1c Test Report",
+        "Thyroid Profile Report",
+        "Urine Test Report",
+        "Stool Test Report",
+        "COVID-19 Test Report",
+        "Dengue Test Report",
+        "Hepatitis Test Report",
+        "Pregnancy Test Report",
+        "ECG Report",
+        "EEG Report",
+        "X-Ray Film Copy",
+        "MRI Scan Digital Copy",
+        "CT Scan Film",
+        "Ultrasound Report",
+        "Mammography Report"
+      ],
+      "services": [
+        "Laboratory Testing",
+        "Blood Collection",
+        "Home Sample Collection",
+        "MRI Scan",
+        "CT Scan",
+        "Digital X-Ray",
+        "Ultrasound",
+        "ECG",
+        "EEG",
+        "Pathology Services"
+      ]
+    },
+    {
+      "name": "General Consultation",
+      "products": [
+        "Patient Medical Record",
+        "Prescription Copy",
+        "Health Checkup Package"
+      ],
+      "services": [
+        "General Physician Consultation",
+        "Specialist Consultation",
+        "Follow-up Consultation",
+        "Family Medicine",
+        "Telemedicine Consultation"
+      ]
+    },
+    {
+      "name": "Surgery",
+      "products": [
+        "Surgical Kit",
+        "Post Surgery Care Kit",
+        "Operation Report"
+      ],
+      "services": [
+        "General Surgery",
+        "Laparoscopic Surgery",
+        "Orthopedic Surgery",
+        "Cardiac Surgery",
+        "Neurosurgery",
+        "Plastic Surgery",
+        "ENT Surgery"
+      ]
+    },
+    {
+      "name": "Maternity & Gynecology",
+      "products": [
+        "Pregnancy Care File",
+        "Baby Care Kit",
+        "Newborn Vaccination Card"
+      ],
+      "services": [
+        "Normal Delivery",
+        "C-Section Delivery",
+        "Pregnancy Checkup",
+        "Prenatal Care",
+        "Postnatal Care",
+        "Gynecology Consultation",
+        "Infertility Treatment"
+      ]
+    },
+    {
+      "name": "Pediatrics",
+      "products": [
+        "Child Vaccination Card",
+        "Growth Monitoring Chart",
+        "Baby Health Record"
+      ],
+      "services": [
+        "Child Specialist Consultation",
+        "Child Vaccination",
+        "Newborn Care",
+        "Pediatric Emergency",
+        "Nutrition Counseling"
+      ]
+    },
+    {
+      "name": "Cardiology",
+      "products": [
+        "ECG Report",
+        "Echocardiography Report",
+        "Heart Monitoring Report"
+      ],
+      "services": [
+        "Cardiology Consultation",
+        "ECG",
+        "ECHO",
+        "Stress Test",
+        "Heart Monitoring",
+        "Angiography"
+      ]
+    },
+    {
+      "name": "Orthopedics",
+      "products": [
+        "Knee Support",
+        "Back Support Belt",
+        "Walking Stick",
+        "Crutches"
+      ],
+      "services": [
+        "Bone Specialist Consultation",
+        "Fracture Treatment",
+        "Joint Replacement",
+        "Physiotherapy",
+        "Sports Injury Treatment"
+      ]
+    },
+    {
+      "name": "Pharmacy",
+      "products": [
+        "Panadol",
+        "Disprin",
+        "Paracetamol",
+        "Ibuprofen",
+        "Vitamin C Tablets",
+        "Multivitamins",
+        "Insulin Injection",
+        "Blood Pressure Medicine",
+        "Cough Syrup",
+        "Antibiotics"
+      ],
+      "services": [
+        "Prescription Medicine Dispensing",
+        "Medicine Home Delivery",
+        "Prescription Review"
+      ]
+    },
+    {
+      "name": "Health Packages",
+      "products": [
+        "Executive Health Package",
+        "Diabetes Screening Package",
+        "Cardiac Screening Package",
+        "Women's Health Package",
+        "Men's Health Package"
+      ],
+      "services": [
+        "Annual Health Checkup",
+        "Executive Medical Examination",
+        "Preventive Health Screening"
+      ]
+    }
+  ]
+}

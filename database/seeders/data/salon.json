@@ -1,0 +1,175 @@
+{
+  "category": "Beauty Salon",
+  "subcategories": [
+    {
+      "name": "Hair Care & Styling",
+      "products": [
+        "Professional Shampoo",
+        "Hair Conditioner",
+        "Hair Nourishing Serum",
+        "Hair Wax",
+        "Hair Gel",
+        "Hair Spray",
+        "Hair Color",
+        "Hair Bleach",
+        "Hair Mask",
+        "Keratin Treatment Kit",
+        "Hair Spa Cream",
+        "Argan Hair Oil",
+        "Coconut Hair Oil",
+        "Hair Straightening Cream",
+        "Hair Curling Cream",
+        "Anti Hair Fall Shampoo",
+        "Dry Shampoo",
+        "Hair Brush",
+        "Hair Dryer",
+        "Hair Straightener"
+      ],
+      "services": [
+        "Men's Hair Cut",
+        "Women's Hair Cut",
+        "Kids Hair Cut",
+        "Hair Wash",
+        "Hair Blow Dry",
+        "Hair Styling",
+        "Hair Straightening",
+        "Hair Rebonding",
+        "Keratin Treatment",
+        "Hair Smoothening",
+        "Hair Coloring",
+        "Hair Highlights",
+        "Hair Spa",
+        "Scalp Treatment",
+        "Beard Trim",
+        "Clean Shave"
+      ]
+    },
+    {
+      "name": "Skin Care & Facials",
+      "products": [
+        "Facial Kit",
+        "Whitening Facial Cream",
+        "Gold Facial Kit",
+        "Diamond Facial Kit",
+        "Charcoal Facial Kit",
+        "Vitamin C Serum",
+        "Moisturizing Face Mask",
+        "Face Scrub",
+        "Face Cleanser",
+        "Toner",
+        "Sunblock",
+        "Anti Aging Cream",
+        "Hydrating Gel",
+        "Eye Cream"
+      ],
+      "services": [
+        "Classic Facial",
+        "Whitening Facial",
+        "Gold Facial",
+        "Diamond Facial",
+        "Hydra Facial",
+        "Anti Aging Facial",
+        "Acne Treatment",
+        "Skin Polishing",
+        "Deep Cleansing Facial",
+        "Face Bleach",
+        "Threading",
+        "Eyebrow Shaping",
+        "Upper Lip Threading",
+        "Waxing"
+      ]
+    },
+    {
+      "name": "Makeup & Bridal",
+      "products": [
+        "Foundation",
+        "Concealer",
+        "Face Primer",
+        "Compact Powder",
+        "Lipstick",
+        "Lip Gloss",
+        "Mascara",
+        "Eyeliner",
+        "Eyeshadow Palette",
+        "Makeup Brush Set",
+        "Setting Spray",
+        "False Eyelashes"
+      ],
+      "services": [
+        "Bridal Makeup",
+        "Engagement Makeup",
+        "Party Makeup",
+        "HD Makeup",
+        "Airbrush Makeup",
+        "Nikah Makeup",
+        "Walima Makeup",
+        "Mehndi Makeup",
+        "Photoshoot Makeup",
+        "Makeup Trial"
+      ]
+    },
+    {
+      "name": "Nail Care",
+      "products": [
+        "Nail Polish",
+        "Gel Nail Polish",
+        "Nail Remover",
+        "Nail File",
+        "Cuticle Oil",
+        "Nail Extension Kit",
+        "Nail Art Kit"
+      ],
+      "services": [
+        "Manicure",
+        "Pedicure",
+        "Gel Manicure",
+        "Gel Pedicure",
+        "Nail Extensions",
+        "Acrylic Nails",
+        "Nail Art",
+        "French Manicure",
+        "Foot Spa"
+      ]
+    },
+    {
+      "name": "Spa & Wellness",
+      "products": [
+        "Body Massage Oil",
+        "Essential Oils",
+        "Body Scrub",
+        "Body Butter",
+        "Aromatherapy Oil",
+        "Spa Kit"
+      ],
+      "services": [
+        "Full Body Massage",
+        "Swedish Massage",
+        "Deep Tissue Massage",
+        "Hot Stone Massage",
+        "Body Polishing",
+        "Body Scrub",
+        "Steam Bath",
+        "Relaxation Therapy",
+        "Aromatherapy"
+      ]
+    },
+    {
+      "name": "Laser & Advanced Beauty",
+      "products": [
+        "Laser Aftercare Cream",
+        "Skin Repair Gel",
+        "Cooling Gel"
+      ],
+      "services": [
+        "Laser Hair Removal",
+        "Skin Rejuvenation",
+        "Pigmentation Treatment",
+        "Acne Scar Treatment",
+        "Carbon Facial",
+        "Hydra Facial",
+        "PRP Facial",
+        "Microneedling"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,244 @@
+{
+  "category": "Software House",
+  "subcategories": [
+    {
+      "name": "Web Development",
+      "products": [
+        "Business Website",
+        "Corporate Website",
+        "Portfolio Website",
+        "E-commerce Website",
+        "Multi Vendor Marketplace",
+        "Laravel Web Application",
+        "React Web Application",
+        "Vue.js Web Application",
+        "Next.js Website",
+        "WordPress Website",
+        "Shopify Store",
+        "WooCommerce Store",
+        "Custom CMS",
+        "Learning Management System (LMS)",
+        "Customer Relationship Management (CRM)",
+        "Inventory Management System",
+        "Restaurant Management System",
+        "Hospital Management System",
+        "School Management System",
+        "Hotel Booking System",
+        "Property Management System",
+        "Job Portal",
+        "Real Estate Portal",
+        "News Portal",
+        "Classified Website",
+        "Blog Website",
+        "Landing Page",
+        "Admin Dashboard",
+        "ERP Dashboard",
+        "Web Portal"
+      ],
+      "services": [
+        "Custom Web Development",
+        "Laravel Development",
+        "PHP Development",
+        "React Development",
+        "Vue.js Development",
+        "Node.js Development",
+        "Next.js Development",
+        "Frontend Development",
+        "Backend Development",
+        "Full Stack Development",
+        "API Development",
+        "Third Party API Integration",
+        "Payment Gateway Integration",
+        "Website Maintenance",
+        "Website Redesign",
+        "Website Speed Optimization",
+        "Bug Fixing",
+        "UI/UX Design",
+        "Website Hosting Setup",
+        "Domain Configuration"
+      ]
+    },
+    {
+      "name": "Mobile App Development",
+      "products": [
+        "Android App",
+        "iOS App",
+        "Flutter Application",
+        "React Native Application",
+        "Food Delivery App",
+        "Taxi Booking App",
+        "E-commerce Mobile App",
+        "Restaurant Ordering App",
+        "Hospital Mobile App",
+        "School Mobile App",
+        "Fitness App",
+        "Healthcare App",
+        "Banking App",
+        "Social Media App",
+        "Video Streaming App",
+        "Chat Application",
+        "Appointment Booking App",
+        "POS Mobile App"
+      ],
+      "services": [
+        "Android App Development",
+        "iOS App Development",
+        "Flutter Development",
+        "React Native Development",
+        "Cross Platform Development",
+        "App UI Design",
+        "App Testing",
+        "App Maintenance",
+        "Google Play Store Publishing",
+        "Apple App Store Publishing",
+        "Push Notification Integration",
+        "Firebase Integration"
+      ]
+    },
+    {
+      "name": "Enterprise Software",
+      "products": [
+        "ERP Software",
+        "CRM Software",
+        "HRMS",
+        "Payroll Management System",
+        "Accounting Software",
+        "Inventory Software",
+        "POS Software",
+        "Attendance Management System",
+        "Document Management System",
+        "Project Management Software",
+        "School ERP",
+        "Hospital ERP",
+        "Hotel Management System",
+        "Warehouse Management System",
+        "Manufacturing ERP",
+        "Procurement System",
+        "Finance Management System"
+      ],
+      "services": [
+        "ERP Development",
+        "CRM Development",
+        "HRMS Development",
+        "Business Process Automation",
+        "Database Design",
+        "Database Migration",
+        "Legacy System Modernization",
+        "Cloud ERP Deployment",
+        "Enterprise Software Integration",
+        "Technical Support"
+      ]
+    },
+    {
+      "name": "Cloud & DevOps",
+      "products": [
+        "AWS Infrastructure",
+        "Azure Cloud Setup",
+        "Google Cloud Platform",
+        "Docker Environment",
+        "Kubernetes Cluster",
+        "CI/CD Pipeline"
+      ],
+      "services": [
+        "AWS Deployment",
+        "Azure Deployment",
+        "Google Cloud Deployment",
+        "Docker Configuration",
+        "Kubernetes Management",
+        "CI/CD Setup",
+        "Server Configuration",
+        "Linux Administration",
+        "Cloud Migration",
+        "Backup & Disaster Recovery"
+      ]
+    },
+    {
+      "name": "AI & Data Science",
+      "products": [
+        "AI Chatbot",
+        "Virtual Assistant",
+        "Recommendation System",
+        "Image Recognition Model",
+        "OCR System",
+        "Speech Recognition System",
+        "Machine Learning Model",
+        "Predictive Analytics Dashboard",
+        "Business Intelligence Dashboard"
+      ],
+      "services": [
+        "Artificial Intelligence Development",
+        "Machine Learning Development",
+        "Deep Learning Solutions",
+        "Generative AI Integration",
+        "ChatGPT Integration",
+        "LLM Development",
+        "Computer Vision",
+        "Natural Language Processing",
+        "Data Analytics",
+        "Business Intelligence"
+      ]
+    },
+    {
+      "name": "Cyber Security",
+      "products": [
+        "Firewall Solution",
+        "VPN Solution",
+        "Security Audit Report",
+        "Penetration Testing Report",
+        "SSL Certificate"
+      ],
+      "services": [
+        "Cyber Security Audit",
+        "Penetration Testing",
+        "Vulnerability Assessment",
+        "Network Security",
+        "Web Application Security",
+        "Data Protection",
+        "Security Monitoring",
+        "Incident Response"
+      ]
+    },
+    {
+      "name": "Digital Services",
+      "products": [
+        "Company Logo",
+        "Brand Identity Kit",
+        "Business Card Design",
+        "Social Media Kit",
+        "SEO Report",
+        "Marketing Dashboard"
+      ],
+      "services": [
+        "Graphic Design",
+        "Logo Design",
+        "Brand Identity Design",
+        "SEO Optimization",
+        "Search Engine Marketing",
+        "Social Media Marketing",
+        "Content Writing",
+        "Email Marketing",
+        "Google Ads Management",
+        "Meta Ads Management"
+      ]
+    },
+    {
+      "name": "Quality Assurance & Support",
+      "products": [
+        "QA Test Report",
+        "Automation Test Suite",
+        "Bug Report",
+        "Performance Test Report"
+      ],
+      "services": [
+        "Manual Testing",
+        "Automation Testing",
+        "Performance Testing",
+        "Load Testing",
+        "Regression Testing",
+        "User Acceptance Testing",
+        "Software Maintenance",
+        "Annual Technical Support"
+      ]
+    }
+  ]
+}

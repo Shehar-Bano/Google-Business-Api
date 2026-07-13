@@ -1,0 +1,154 @@
+{
+  "category": "Lawyer",
+  "subcategories": [
+    {
+      "name": "Legal Consultancy & Court Work",
+      "products": [
+        "Legal Notice Draft",
+        "Power of Attorney Document",
+        "Partnership Deed",
+        "Affidavit Draft",
+        "Court Petition",
+        "Legal Agreement",
+        "Sale Agreement",
+        "Lease Agreement",
+        "Rental Agreement",
+        "Memorandum of Understanding (MOU)"
+      ],
+      "services": [
+        "Legal Consultation",
+        "Court Representation",
+        "Civil Litigation",
+        "Legal Opinion",
+        "Case Evaluation",
+        "Arbitration",
+        "Mediation",
+        "Legal Documentation",
+        "Notice Drafting",
+        "Legal Research"
+      ]
+    },
+    {
+      "name": "Corporate & Business Law",
+      "products": [
+        "Company Registration Documents",
+        "Shareholder Agreement",
+        "Employment Contract",
+        "Business Partnership Agreement",
+        "Non-Disclosure Agreement (NDA)",
+        "Terms & Conditions Document",
+        "Privacy Policy Document"
+      ],
+      "services": [
+        "Company Registration",
+        "Corporate Legal Advisory",
+        "Business Compliance",
+        "Contract Drafting",
+        "Trademark Registration",
+        "Copyright Registration",
+        "Intellectual Property Protection",
+        "Business Legal Consultation"
+      ]
+    },
+    {
+      "name": "Family Law",
+      "products": [
+        "Marriage Contract (Nikah Nama)",
+        "Divorce Papers",
+        "Child Custody Petition",
+        "Family Settlement Agreement",
+        "Guardianship Documents"
+      ],
+      "services": [
+        "Family Law Consultation",
+        "Divorce Proceedings",
+        "Khula Case",
+        "Child Custody Case",
+        "Inheritance Consultation",
+        "Family Mediation",
+        "Marriage Registration"
+      ]
+    },
+    {
+      "name": "Property & Real Estate Law",
+      "products": [
+        "Property Sale Deed",
+        "Property Transfer Documents",
+        "Property Verification Report",
+        "Mutation Documents",
+        "Registry Documents"
+      ],
+      "services": [
+        "Property Verification",
+        "Property Registration",
+        "Real Estate Legal Advice",
+        "Land Dispute Resolution",
+        "Property Transfer",
+        "Rental Agreement Drafting"
+      ]
+    },
+    {
+      "name": "Tax & Financial Law",
+      "products": [
+        "Tax Return Documents",
+        "Income Tax Filing Papers",
+        "Sales Tax Registration Documents"
+      ],
+      "services": [
+        "Income Tax Advisory",
+        "Sales Tax Consultation",
+        "Tax Return Filing",
+        "FBR Compliance",
+        "Tax Dispute Resolution",
+        "Financial Legal Consultation"
+      ]
+    },
+    {
+      "name": "Criminal Law",
+      "products": [
+        "Bail Application",
+        "Criminal Petition",
+        "Case File Documentation"
+      ],
+      "services": [
+        "Criminal Defense",
+        "Bail Application",
+        "Police Case Assistance",
+        "Court Representation",
+        "Criminal Legal Advice",
+        "Appeal Filing"
+      ]
+    },
+    {
+      "name": "Immigration & Visa Law",
+      "products": [
+        "Visa Application Documents",
+        "Immigration File",
+        "Appeal Documents"
+      ],
+      "services": [
+        "Immigration Consultation",
+        "Visa Processing",
+        "Work Permit Assistance",
+        "Student Visa Assistance",
+        "Citizenship Consultation",
+        "Immigration Appeals"
+      ]
+    },
+    {
+      "name": "Labour & Employment Law",
+      "products": [
+        "Employment Agreement",
+        "Employee Handbook",
+        "HR Policy Documents"
+      ],
+      "services": [
+        "Labour Law Consultation",
+        "Employment Dispute Resolution",
+        "Wrongful Termination Case",
+        "Employee Contract Drafting",
+        "Workplace Compliance"
+      ]
+    }
+  ]
+}

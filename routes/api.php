@@ -57,3 +57,7 @@ Route::prefix('v1')->group(function () {
 
     // TODO: Add future API modules here.
 });
+
+// Business Catalog Routes
+Route::get('offerings/search', [App\Http\Controllers\Api\OfferingController::class, 'search']);
+Route::post('businesses/{id}/offerings', [App\Http\Controllers\Api\OfferingController::class, 'saveBusinessOfferings']);

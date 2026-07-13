@@ -1,0 +1,115 @@
+{
+  "category": "Education",
+  "subcategories": [
+    {
+      "name": "School",
+      "products": [
+        "Admission Prospectus Pack",
+        "School Uniform Set",
+        "Grade Textbook Set",
+        "School Bag",
+        "Notebook Set",
+        "Stationery Kit",
+        "School Shoes",
+        "Art Supplies",
+        "Science Lab Kit",
+        "School Diary"
+      ],
+      "services": [
+        "Primary School Education",
+        "Secondary School Classes",
+        "Daycare & Playgroup",
+        "School Transport Facility",
+        "Exam Preparation",
+        "Parent Teacher Meeting",
+        "Sports Activities",
+        "Library Facility"
+      ]
+    },
+    {
+      "name": "College",
+      "products": [
+        "College Uniform",
+        "Course Books",
+        "Lab Manual",
+        "Student ID Card"
+      ],
+      "services": [
+        "Intermediate Education",
+        "Pre-Medical Program",
+        "Pre-Engineering Program",
+        "ICS Program",
+        "ICOM Program",
+        "Scholarship Guidance",
+        "Career Counseling"
+      ]
+    },
+    {
+      "name": "University",
+      "products": [
+        "Course Material",
+        "Research Journal",
+        "Lab Equipment Kit",
+        "Graduation Gown"
+      ],
+      "services": [
+        "Bachelor Degree Programs",
+        "Master Degree Programs",
+        "PhD Programs",
+        "Research Supervision",
+        "Internship Placement",
+        "Student Exchange Program",
+        "Career Development"
+      ]
+    },
+    {
+      "name": "Coaching Center",
+      "products": [
+        "Practice Notes",
+        "MCQs Book",
+        "Past Papers"
+      ],
+      "services": [
+        "Entry Test Preparation",
+        "Board Exam Preparation",
+        "CSS Preparation",
+        "IELTS Preparation",
+        "PTE Preparation",
+        "SAT Preparation"
+      ]
+    },
+    {
+      "name": "Training Institute",
+      "products": [
+        "Training Manual",
+        "Certification Kit",
+        "Course Notes"
+      ],
+      "services": [
+        "Graphic Designing Course",
+        "Web Development Course",
+        "Mobile App Development Course",
+        "Digital Marketing Course",
+        "Amazon VA Training",
+        "Freelancing Course",
+        "Office Management Course",
+        "English Language Course"
+      ]
+    },
+    {
+      "name": "Online Education",
+      "products": [
+        "Recorded Video Course",
+        "E-Books",
+        "Digital Study Material"
+      ],
+      "services": [
+        "Online Live Classes",
+        "Online Tutoring",
+        "Distance Learning",
+        "Virtual Classroom",
+        "Learning Management System"
+      ]
+    }
+  ]
+}
