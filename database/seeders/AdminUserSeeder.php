@@ -19,7 +19,7 @@ class AdminUserSeeder extends Seeder
                 'name' => 'Super Admin',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
-                'role' => 'super_admin',
+                'role' => 'user',
                 'status' => 'active',
                 'otp_verified' => true,
             ]

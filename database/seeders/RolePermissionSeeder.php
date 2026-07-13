@@ -10,6 +10,7 @@ use Spatie\Permission\PermissionRegistrar;
 class RolePermissionSeeder extends Seeder
 {
     private const ROLES = [
+        'super_admin',
         'user',
     ];
 
@@ -57,10 +58,22 @@ class RolePermissionSeeder extends Seeder
             ]);
         }
 
-        $superAdminRole = Role::where('name', 'user')->firstOrFail();
+        $superAdminRole = Role::where('name', 'super_admin')->firstOrFail();
+        $userRole = Role::where('name', 'user')->firstOrFail();
         // $adminRole = Role::where('name', 'admin')->firstOrFail();
 
         $superAdminRole->syncPermissions(self::PERMISSIONS);
+        $userRole->syncPermissions([
+            'view_dashboard',
+            'view_users',
+            'edit_user',
+            'assign_roles',
+            'view_roles',
+            'view_permissions',
+            'view_support_options',
+            'view_privacy_policy',
+            'view_notifications',
+        ]);
         // $adminRole->syncPermissions([
         //     'view_dashboard',
         //     'view_users',

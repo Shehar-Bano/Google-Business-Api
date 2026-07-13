@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\ContentController;
 use App\Http\Controllers\Api\V1\NotificationController;
 use App\Http\Controllers\Api\V1\OrderController;
+use App\Http\Controllers\Api\V1\OtpController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -15,11 +16,14 @@ Route::prefix('v1')->group(function () {
     Route::get('orders/{order_id}', [OrderController::class, 'show']);
 
     Route::prefix('auth')->group(function () {
+        Route::post('send-otp', [OtpController::class, 'sendOtp']);
+        Route::post('verify-otp', [OtpController::class, 'verifyOtp']);
+        Route::post('resend-otp', [OtpController::class, 'resendOtp']);
 
         Route::post('register/user', [AuthController::class, 'registerPlayer']);
         // Route::post('register/club', [AuthController::class, 'registerClub']);
-        Route::post('verify-otp', [AuthController::class, 'verifyOtp']);
-        Route::post('resend-otp', [AuthController::class, 'resendOtp']);
+        // Route::post('verify-otp', [AuthController::class, 'verifyOtp']);
+        // Route::post('resend-otp', [AuthController::class, 'resendOtp']);
         Route::post('login', [AuthController::class, 'login']);
         Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
         Route::post('forgot-password/verify-otp', [AuthController::class, 'verifyForgotPasswordOtp']);
@@ -28,7 +32,7 @@ Route::prefix('v1')->group(function () {
     });
 
     Route::middleware('api.token')->group(function () {
-        Route::post('orders', [OrderController::class, 'store']);
+        // Route::post('orders', [OrderController::class, 'store']);
 
         Route::get('notifications', [NotificationController::class, 'index']);
         Route::post('logout', [AuthController::class, 'logout']);

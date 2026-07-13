@@ -28,12 +28,12 @@
             </a>
         </li>
 
-        <li class="menu-item {{ request()->routeIs('admin.order-management.*') ? 'active' : '' }}">
+        {{-- <li class="menu-item {{ request()->routeIs('admin.order-management.*') ? 'active' : '' }}">
             <a href="{{ route('admin.order-management.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons mdi mdi-clipboard-list-outline"></i>
                 <div>Order Management</div>
             </a>
-        </li>
+        </li> --}}
 
         <li
             class="menu-item {{ request()->routeIs('admin.roles.*') || request()->routeIs('admin.permissions.*') || request()->routeIs('admin.users.*') ? 'open' : '' }}">

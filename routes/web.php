@@ -9,7 +9,7 @@ Route::get('/', [AuthenticatedSessionController::class, 'create'])->name('home')
 Route::get('/dashboard', function () {
     $user = auth()->user();
 
-    if ($user?->hasAnyRole(['super_admin', 'admin'])) {
+    if ($user?->hasAnyRole(['super_admin', 'user'])) {
         return redirect()->route('admin.dashboard.index');
     }
 
