@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\Otp;
 use App\Services\Otp\Contracts\OtpSenderInterface;
-use Carbon\Carbon;
 
 class OtpService
 {
@@ -14,9 +13,6 @@ class OtpService
 
     /**
      * Send OTP to a mobile number.
-     *
-     * @param string $mobileNumber
-     * @return array
      */
     public function sendOtp(string $mobileNumber): array
     {
@@ -56,9 +52,6 @@ class OtpService
 
     /**
      * Resend OTP to a mobile number.
-     *
-     * @param string $mobileNumber
-     * @return array
      */
     public function resendOtp(string $mobileNumber): array
     {
@@ -91,10 +84,6 @@ class OtpService
 
     /**
      * Verify OTP for a mobile number.
-     *
-     * @param string $mobileNumber
-     * @param string $otp
-     * @return array
      */
     public function verifyOtp(string $mobileNumber, string $otp): array
     {
@@ -104,7 +93,7 @@ class OtpService
             ->latest('id')
             ->first();
 
-        if (!$otpRecord) {
+        if (! $otpRecord) {
             return [
                 'success' => false,
                 'status' => 422,
