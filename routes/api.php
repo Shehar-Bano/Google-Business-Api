@@ -59,10 +59,26 @@ Route::prefix('v1')->group(function () {
         });
     });
 
+    Route::post('businesses/{id}/offerings', [App\Http\Controllers\Api\OfferingController::class, 'saveBusinessOfferings']);
+
+    Route::apiResource('businesses', App\Http\Controllers\Api\BusinessController::class);
+
+    // Authentication & Social Connections Routes
+    Route::post('auth/google/login', [App\Http\Controllers\Api\AuthController::class, 'googleLogin']);
+    Route::get('social/facebook/callback', [App\Http\Controllers\Api\SocialConnectionController::class, 'facebookCallback']);
+
+    Route::get('/social/facebook/redirect-url', [App\Http\Controllers\Api\SocialConnectionController::class, 'facebookRedirectUrl']);
+    // Config Credentials Routes
+    Route::get('config/google', [App\Http\Controllers\Api\ConfigController::class, 'googleConfig']);
+    Route::get('config/meta', [App\Http\Controllers\Api\ConfigController::class, 'metaConfig']);
+
+    Route::middleware('api.token')->group(function () {
+        Route::get('social/facebook/connect', [App\Http\Controllers\Api\SocialConnectionController::class, 'facebookConnect']);
+        // Route::post('social/facebook/connect-token', [App\Http\Controllers\Api\SocialConnectionController::class, 'facebookConnectToken']);
+        Route::get('social/accounts', [App\Http\Controllers\Api\SocialConnectionController::class, 'status']);
+        Route::delete('social/facebook/disconnect', [App\Http\Controllers\Api\SocialConnectionController::class, 'disconnectFacebook']);
+        Route::delete('social/instagram/disconnect', [App\Http\Controllers\Api\SocialConnectionController::class, 'disconnectInstagram']);
+    });
+
     // TODO: Add future API modules here.
 });
-
-// Business Catalog Routes
-Route::get('offerings/search', [App\Http\Controllers\Api\OfferingController::class, 'search']);
-Route::post('businesses/{id}/offerings', [App\Http\Controllers\Api\OfferingController::class, 'saveBusinessOfferings']);
-Route::apiResource('businesses', App\Http\Controllers\Api\BusinessController::class);

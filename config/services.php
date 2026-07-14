@@ -42,4 +42,16 @@ return [
         'auth_domain' => env('FIREBASE_AUTH_DOMAIN'),
     ],
 
+    'facebook' => [
+        'client_id' => env('FACEBOOK_CLIENT_ID'),
+        'client_secret' => env('FACEBOOK_CLIENT_SECRET'),
+        'redirect' => env('FACEBOOK_REDIRECT_URI'),
+    ],
+
+    'google' => [
+        'client_id' => env('Google_Client_ID'),
+        'client_secret' => env('Google_Client_Secret'),
+        'redirect' => env('Google_Redirect_URI'),
+    ],
+
 ];

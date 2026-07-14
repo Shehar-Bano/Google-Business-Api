@@ -143,4 +143,19 @@ class User extends Authenticatable
     {
         return $this->hasMany(Order::class);
     }
+
+    public function socialAccounts(): HasMany
+    {
+        return $this->hasMany(SocialAccount::class);
+    }
+
+    public function socialPages(): HasMany
+    {
+        return $this->hasMany(SocialPage::class);
+    }
+
+    public function instagramAccounts(): HasMany
+    {
+        return $this->hasMany(InstagramAccount::class);
+    }
 }
