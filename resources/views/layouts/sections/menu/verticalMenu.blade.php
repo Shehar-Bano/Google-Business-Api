@@ -27,6 +27,12 @@
                 <div>User Management</div>
             </a>
         </li>
+        <li class="menu-item {{ request()->routeIs('admin.business-management.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.business-management.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons mdi mdi-briefcase-outline"></i>
+                <div>Business Management</div>
+            </a>
+        </li>
 
         {{-- <li class="menu-item {{ request()->routeIs('admin.order-management.*') ? 'active' : '' }}">
             <a href="{{ route('admin.order-management.index') }}" class="menu-link">

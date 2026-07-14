@@ -48,6 +48,9 @@ Route::middleware(['auth', 'verified', 'role:super_admin|admin'])
         Route::get('user-management/{user}', [UserManagementController::class, 'show'])->name('user-management.show');
         Route::patch('user-management/{user}/status', [UserManagementController::class, 'updateStatus'])->name('user-management.update-status');
 
+        // Business Management
+        Route::resource('business-management', App\Http\Controllers\Admin\BusinessManagementController::class)->parameters(['business-management' => 'business']);
+
         // Order Management
         Route::get('order-management', [OrderManagementController::class, 'index'])->name('order-management.index');
         Route::get('order-management/{order}', [OrderManagementController::class, 'show'])->name('order-management.show');

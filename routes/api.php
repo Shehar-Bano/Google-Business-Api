@@ -63,5 +63,6 @@ Route::prefix('v1')->group(function () {
 });
 
 // Business Catalog Routes
-
-// Route::post('businesses/{id}/offerings', [App\Http\Controllers\Api\OfferingController::class, 'saveBusinessOfferings']);
+Route::get('offerings/search', [App\Http\Controllers\Api\OfferingController::class, 'search']);
+Route::post('businesses/{id}/offerings', [App\Http\Controllers\Api\OfferingController::class, 'saveBusinessOfferings']);
+Route::apiResource('businesses', App\Http\Controllers\Api\BusinessController::class);
