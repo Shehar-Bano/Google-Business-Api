@@ -37,4 +37,13 @@ class Offering extends Model
     {
         return $this->belongsTo(BusinessSubcategory::class, 'subcategory_id');
     }
+
+    /**
+     * Get businesses associated with this offering.
+     */
+    public function businesses()
+    {
+        return $this->belongsToMany(Business::class, 'business_offerings', 'offering_id', 'business_id')
+                    ->withTimestamps();
+    }
 }

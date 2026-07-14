@@ -12,10 +12,12 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('v1')->group(function () {
     Route::get('help-support', [ContentController::class, 'helpSupport']);
     Route::get('privacy-policy', [ContentController::class, 'privacyPolicy']);
-    Route::get('orders', [OrderController::class, 'index']);
-    Route::get('orders/{order_id}', [OrderController::class, 'show']);
+    // Route::get('orders', [OrderController::class, 'index']);
+    // Route::get('orders/{order_id}', [OrderController::class, 'show']);
+    Route::get('offerings/search', [App\Http\Controllers\Api\OfferingController::class, 'search']);
 
     Route::prefix('auth')->group(function () {
+
         Route::post('send-otp', [OtpController::class, 'sendOtp']);
         Route::post('verify-otp', [OtpController::class, 'verifyOtp']);
         Route::post('resend-otp', [OtpController::class, 'resendOtp']);
@@ -32,6 +34,8 @@ Route::prefix('v1')->group(function () {
     });
 
     Route::middleware('api.token')->group(function () {
+        Route::apiResource('businesses', App\Http\Controllers\Api\BusinessController::class);
+
         // Route::post('orders', [OrderController::class, 'store']);
 
         Route::get('notifications', [NotificationController::class, 'index']);
@@ -59,5 +63,5 @@ Route::prefix('v1')->group(function () {
 });
 
 // Business Catalog Routes
-Route::get('offerings/search', [App\Http\Controllers\Api\OfferingController::class, 'search']);
-Route::post('businesses/{id}/offerings', [App\Http\Controllers\Api\OfferingController::class, 'saveBusinessOfferings']);
+
+// Route::post('businesses/{id}/offerings', [App\Http\Controllers\Api\OfferingController::class, 'saveBusinessOfferings']);
