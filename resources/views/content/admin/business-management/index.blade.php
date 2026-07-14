@@ -10,11 +10,11 @@
             <h4 class="admin-page-header__title">Business Management</h4>
             <p class="admin-page-header__subtitle">View and manage registered businesses, catalog items, and top selling products.</p>
         </div>
-        <div>
+        {{-- <div>
             <a href="{{ route('admin.business-management.create') }}" class="btn btn-primary">
                 <i class="mdi mdi-plus me-1"></i> Register Business
             </a>
-        </div>
+        </div> --}}
     </div>
 
     {{-- Stats Grid --}}
