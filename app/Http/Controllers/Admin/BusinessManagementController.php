@@ -81,6 +81,7 @@ class BusinessManagementController extends Controller
 
         try {
             $business = Business::create([
+                'user_id' => $request->user()?->id,
                 'name' => $request->input('name'),
                 'location' => $request->input('location'),
                 'top_selling_items' => array_values($items),

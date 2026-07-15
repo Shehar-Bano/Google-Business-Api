@@ -12,6 +12,7 @@ class Business extends Model
     protected $table = 'businesses';
 
     protected $fillable = [
+        'user_id',
         'name',
         'location',
         'top_selling_items',
@@ -20,6 +21,14 @@ class Business extends Model
     protected $casts = [
         'top_selling_items' => 'array',
     ];
+
+    /**
+     * Get the user who owns this business.
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
     /**
      * Get offerings (products and services) associated with this business.

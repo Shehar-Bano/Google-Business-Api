@@ -59,9 +59,8 @@ Route::prefix('v1')->group(function () {
         });
     });
 
-    Route::post('businesses/{id}/offerings', [App\Http\Controllers\Api\OfferingController::class, 'saveBusinessOfferings']);
-
-    Route::apiResource('businesses', App\Http\Controllers\Api\BusinessController::class);
+    Route::get('businesses', [App\Http\Controllers\Api\BusinessController::class, 'index']);
+    Route::get('businesses/{business}', [App\Http\Controllers\Api\BusinessController::class, 'show']);
 
     // Authentication & Social Connections Routes
     Route::post('auth/google/login', [App\Http\Controllers\Api\AuthController::class, 'googleLogin']);
@@ -78,6 +77,12 @@ Route::prefix('v1')->group(function () {
         Route::get('social/accounts', [App\Http\Controllers\Api\SocialConnectionController::class, 'status']);
         Route::delete('social/facebook/disconnect', [App\Http\Controllers\Api\SocialConnectionController::class, 'disconnectFacebook']);
         Route::delete('social/instagram/disconnect', [App\Http\Controllers\Api\SocialConnectionController::class, 'disconnectInstagram']);
+
+        // Authenticated Business Write Routes
+        Route::post('businesses', [App\Http\Controllers\Api\BusinessController::class, 'store']);
+        Route::put('businesses/{business}', [App\Http\Controllers\Api\BusinessController::class, 'update']);
+        Route::delete('businesses/{business}', [App\Http\Controllers\Api\BusinessController::class, 'destroy']);
+        Route::post('businesses/{id}/offerings', [App\Http\Controllers\Api\OfferingController::class, 'saveBusinessOfferings']);
 
         // AI Poster Generation Routes
         Route::post('business/generate-poster', [App\Http\Controllers\Api\PosterController::class, 'generateWithTemplate']);

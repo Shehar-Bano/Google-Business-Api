@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Business;
 use App\Models\Offering;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -54,8 +55,10 @@ class BusinessController extends Controller
         DB::beginTransaction();
 
         try {
+            // dd(Auth::user());
             // Create Business (top_selling_items will be automatically cast to json due to model casting)
             $business = Business::create([
+                'user_id' => $request->user()?->id,
                 'name' => $request->input('name'),
                 'location' => $request->input('location'),
                 'top_selling_items' => $request->input('top_selling_items'),
@@ -74,9 +77,10 @@ class BusinessController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+
             return response()->json([
                 'success' => false,
-                'message' => 'Error registering business: ' . $e->getMessage(),
+                'message' => 'Error registering business: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -88,7 +92,7 @@ class BusinessController extends Controller
     {
         $business = Business::with(['offerings.subcategory.category'])->find($id);
 
-        if (!$business) {
+        if (! $business) {
             return response()->json([
                 'success' => false,
                 'message' => 'Business not found.',
@@ -108,7 +112,7 @@ class BusinessController extends Controller
     {
         $business = Business::find($id);
 
-        if (!$business) {
+        if (! $business) {
             return response()->json([
                 'success' => false,
                 'message' => 'Business not found.',
@@ -161,9 +165,10 @@ class BusinessController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+
             return response()->json([
                 'success' => false,
-                'message' => 'Error updating business: ' . $e->getMessage(),
+                'message' => 'Error updating business: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -175,7 +180,7 @@ class BusinessController extends Controller
     {
         $business = Business::find($id);
 
-        if (!$business) {
+        if (! $business) {
             return response()->json([
                 'success' => false,
                 'message' => 'Business not found.',
@@ -198,9 +203,10 @@ class BusinessController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+
             return response()->json([
                 'success' => false,
-                'message' => 'Error deleting business: ' . $e->getMessage(),
+                'message' => 'Error deleting business: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -216,12 +222,12 @@ class BusinessController extends Controller
                 [
                     'subcategory_id' => $custom['subcategory_id'],
                     'name' => trim($custom['name']),
-                    'type' => $custom['type']
+                    'type' => $custom['type'],
                 ],
                 [
                     'slug' => Str::slug($custom['name']),
                     'keywords' => 'custom',
-                    'status' => 'active'
+                    'status' => 'active',
                 ]
             );
 
