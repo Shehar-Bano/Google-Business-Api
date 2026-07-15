@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Api\Otp;
+namespace App\Http\Requests\Api\v1\Otp;
 
 use App\Http\Requests\Api\BaseApiRequest;
 
