@@ -146,12 +146,20 @@ class AuthService
 
     public function login(LoginRequest $request): array
     {
-        $user = User::where('email', strtolower($request->string('email')->toString()))
-            ->where('role', $request->string('role')->toString())
+        $loginValue = $request->input('phone') ?? $request->input('mobile_number');
+        
+        if (!$loginValue) {
+            $this->throwApiError('Phone or mobile number is required.', ApiErrorCode::INVALID_CREDENTIALS, 422);
+        }
+
+        $role = $request->input('role', 'user') ?: 'user';
+
+        $user = User::where('phone', $loginValue)
+            ->where('role', $role)
             ->first();
 
-        if (! $user || ! Hash::check($request->string('password')->toString(), $user->password)) {
-            $this->throwApiError('Invalid credentials.', ApiErrorCode::INVALID_CREDENTIALS, 401);
+        if (! $user) {
+            $this->throwApiError('User not found with this phone number.', ApiErrorCode::USER_NOT_FOUND, 404);
         }
 
         if (! $user->otp_verified) {

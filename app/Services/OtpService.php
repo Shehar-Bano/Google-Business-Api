@@ -3,7 +3,10 @@
 namespace App\Services;
 
 use App\Models\Otp;
+use App\Models\User;
 use App\Services\Otp\Contracts\OtpSenderInterface;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class OtpService
 {
@@ -129,10 +132,54 @@ class OtpService
             ->where('verified', false)
             ->delete();
 
+        // 1. Find or create the user using their mobile number
+        $user = User::where('phone', $mobileNumber)->first();
+
+        if (! $user) {
+            $user = User::create([
+                'name' => null,
+                'email' => null,
+                'phone' => $mobileNumber,
+                'password' => null,
+                'role' => 'user',
+                'status' => 'active',
+                'otp_verified' => true,
+            ]);
+
+            // Assign standard role if Spatie is present
+            if (class_exists(\Spatie\Permission\Models\Role::class) && \Spatie\Permission\Models\Role::where('name', 'player')->exists()) {
+                $user->assignRole('player');
+            }
+        } else {
+            // Update phone if not set
+            if (empty($user->phone)) {
+                $user->phone = $mobileNumber;
+            }
+            // Update otp_verified status if not verified
+            if (! $user->otp_verified) {
+                $user->otp_verified = true;
+                if ($user->status === 'otp_pending') {
+                    $user->status = 'active';
+                }
+                $user->save();
+            }
+        }
+
+        // 2. Issue session tokens (matching EnsureApiTokenIsValid custom token design)
+        $plainAccessToken = bin2hex(random_bytes(32));
+        $plainRefreshToken = bin2hex(random_bytes(32));
+
+        $user->api_access_token = hash('sha256', $plainAccessToken);
+        $user->api_refresh_token = hash('sha256', $plainRefreshToken);
+        $user->save();
+
         return [
             'success' => true,
             'status' => 200,
             'message' => 'OTP verified successfully.',
+            'access_token' => $plainAccessToken,
+            'refresh_token' => $plainRefreshToken,
+            'user' => $user,
         ];
     }
 }

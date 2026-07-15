@@ -55,6 +55,9 @@ class OtpController extends Controller
         return response()->json([
             'success' => true,
             'message' => $result['message'],
+            'access_token' => $result['access_token'] ?? null,
+            'refresh_token' => $result['refresh_token'] ?? null,
+            'user' => $result['user'] ?? null,
         ], 200);
     }
 }
