@@ -33,6 +33,18 @@
                 <div>Business Management</div>
             </a>
         </li>
+        <li class="menu-item {{ request()->routeIs('admin.posters.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.posters.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons mdi mdi-image-multiple-outline"></i>
+                <div>Poster Templates</div>
+            </a>
+        </li>
+        <li class="menu-item {{ request()->routeIs('admin.ai-generated-posters.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.ai-generated-posters.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons mdi mdi-creation-outline"></i>
+                <div>AI Generated Posters</div>
+            </a>
+        </li>
 
         {{-- <li class="menu-item {{ request()->routeIs('admin.order-management.*') ? 'active' : '' }}">
             <a href="{{ route('admin.order-management.index') }}" class="menu-link">

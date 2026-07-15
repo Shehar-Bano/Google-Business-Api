@@ -55,4 +55,12 @@ Route::middleware(['auth', 'verified', 'role:super_admin|admin'])
         Route::get('order-management', [OrderManagementController::class, 'index'])->name('order-management.index');
         Route::get('order-management/{order}', [OrderManagementController::class, 'show'])->name('order-management.show');
         Route::patch('order-management/{order}/status', [OrderManagementController::class, 'updateStatus'])->name('order-management.update-status');
+
+        // Poster Management
+        Route::resource('posters', App\Http\Controllers\Admin\PosterController::class);
+        
+        // AI Generated Posters Management
+        Route::resource('ai-generated-posters', App\Http\Controllers\Admin\AiGeneratedPosterController::class)->only(['index', 'show']);
+        Route::post('ai-generated-posters/{ai_generated_poster}/approve', [App\Http\Controllers\Admin\AiGeneratedPosterController::class, 'approve'])->name('ai-generated-posters.approve');
+        Route::post('ai-generated-posters/{ai_generated_poster}/reject', [App\Http\Controllers\Admin\AiGeneratedPosterController::class, 'reject'])->name('ai-generated-posters.reject');
     });

@@ -78,6 +78,10 @@ Route::prefix('v1')->group(function () {
         Route::get('social/accounts', [App\Http\Controllers\Api\SocialConnectionController::class, 'status']);
         Route::delete('social/facebook/disconnect', [App\Http\Controllers\Api\SocialConnectionController::class, 'disconnectFacebook']);
         Route::delete('social/instagram/disconnect', [App\Http\Controllers\Api\SocialConnectionController::class, 'disconnectInstagram']);
+
+        // AI Poster Generation Routes
+        Route::post('business/generate-poster', [App\Http\Controllers\Api\PosterController::class, 'generateWithTemplate']);
+        Route::post('business/generate-poster-direct', [App\Http\Controllers\Api\PosterController::class, 'generateDirect']);
     });
 
     // TODO: Add future API modules here.
