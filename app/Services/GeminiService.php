@@ -17,8 +17,7 @@ class GeminiService
     }
 
     /**
-     * Call Google Gemini API to generate poster text details (title, caption, image prompt)
-     * and construct the final image using an image generation fallback.
+     * Call Google Gemini API to generate marketing copy text details (title, caption, marketing_instructions).
      */
     public function generatePosterContent(array $businessInfo, string $userPrompt, ?string $templateImageBase64 = null): ?array
     {
@@ -32,22 +31,14 @@ class GeminiService
 
             $businessDetailsText = json_encode($businessInfo, JSON_PRETTY_PRINT);
 
-            $systemInstructions = "You are a professional graphic designer and branding expert.\n"
-                . "Your task is to generate a HIGH-QUALITY MARKETING POSTER by using the uploaded poster template as the BASE DESIGN.\n"
-                . "IMPORTANT RULES:\n"
-                . "1. The uploaded poster image is NOT only a reference. It is the DESIGN TEMPLATE.\n"
-                . "2. Keep the SAME layout, composition, spacing, colors, shapes, background, buttons, text positions, image positions, and overall visual hierarchy.\n"
-                . "3. DO NOT redesign the poster.\n"
-                . "4. Replace ONLY the editable content with the user's business details: Business Name, Business Category, Business Description, Products, Services, Phone, Email, Website, Address, City, Country, and CTA Button Text.\n"
-                . "5. Every text must be perfectly readable, correctly spelled, and clean.\n"
-                . "You must output a valid JSON block containing exactly three keys: 'title', 'caption', and 'image_prompt'.\n"
-                . "The 'image_prompt' must be a detailed, high-quality prompt for the FLUX text-to-image model. The FLUX model renders text exactly as written inside double quotes in the prompt. Describe the template scene in vivid detail (colors, leaves, cosmetics bottles, backgrounds) and explicitly state the text to render in double quotes (e.g. 'The text \"MY BUSINESS NAME\" must be written in a clean white elegant font at the top-right'). Output raw JSON only.";
+            $systemInstructions = "You are a professional marketing copywriter and branding expert.\n"
+                . "Your task is to generate marketing copy (title, caption, and precise inline editing instructions) for a business poster.\n"
+                . "You must output a valid JSON block containing exactly three keys: 'title', 'caption', and 'marketing_instructions'.\n"
+                . "The 'marketing_instructions' must describe clearly what promotional text should be written onto the template poster, including headers, deals, and details. Output raw JSON only.";
 
             $contents = [];
 
-            // Add the template image if base64 is provided
             if ($templateImageBase64) {
-                // Remove base64 data header if present
                 if (preg_match('/^data:image\/(\w+);base64,/', $templateImageBase64, $type)) {
                     $templateImageBase64 = substr($templateImageBase64, strpos($templateImageBase64, ',') + 1);
                 }
@@ -55,7 +46,7 @@ class GeminiService
                 $contents[] = [
                     'parts' => [
                         [
-                            'text' => "Here is the poster template image for design inspiration."
+                            'text' => "Here is the poster template design for context."
                         ],
                         [
                             'inlineData' => [
@@ -67,7 +58,6 @@ class GeminiService
                 ];
             }
 
-            // Add main prompt text
             $contents[] = [
                 'parts' => [
                     [
@@ -92,20 +82,15 @@ class GeminiService
             $text = $result['candidates'][0]['content']['parts'][0]['text'] ?? '';
             $jsonDecoded = json_decode(trim($text), true);
 
-            if (!$jsonDecoded || !isset($jsonDecoded['title']) || !isset($jsonDecoded['image_prompt'])) {
+            if (!$jsonDecoded || !isset($jsonDecoded['title']) || !isset($jsonDecoded['marketing_instructions'])) {
                 Log::warning('Gemini response format mismatch: ' . $text);
                 return $this->getMockResponse($businessInfo, $userPrompt);
             }
 
-            // Generate image using pollinations.ai with the optimized image prompt using the state-of-the-art FLUX model
-            $imagePrompt = $jsonDecoded['image_prompt'];
-            $escapedPrompt = urlencode($imagePrompt);
-            $generatedImageUrl = "https://image.pollinations.ai/prompt/{$escapedPrompt}?width=1080&height=1080&nologo=true&model=flux";
-
             return [
                 'title' => $jsonDecoded['title'],
                 'caption' => $jsonDecoded['caption'] ?? '',
-                'image_url' => $generatedImageUrl,
+                'marketing_instructions' => $jsonDecoded['marketing_instructions'],
             ];
 
         } catch (\Exception $e) {
@@ -121,17 +106,13 @@ class GeminiService
     {
         $businessName = $businessInfo['name'] ?? 'Our Business';
         $location = $businessInfo['location'] ?? 'Lahore';
-        $title = "Stunning Marketing Campaign for " . $businessName;
+        $title = "Special Offer from " . $businessName;
         $caption = "Transform your experience with {$businessName}! 🌟 Located in {$location}, we bring you the finest quality services custom-made for your lifestyle. Contact us today to find out more! #business #marketing #branding";
-
-        $imagePrompt = "A professional social media banner for a business named {$businessName} in {$location}. Modern corporate design, high resolution, 1080x1080 square format, professional typography and graphic elements.";
-        $escapedPrompt = urlencode($imagePrompt);
-        $generatedImageUrl = "https://image.pollinations.ai/prompt/{$escapedPrompt}?width=1080&height=1080&nologo=true";
 
         return [
             'title' => $title,
             'caption' => $caption,
-            'image_url' => $generatedImageUrl,
+            'marketing_instructions' => "Get 30% off all premium offerings at {$businessName} in {$location}. Limitless quality, limited time only!",
         ];
     }
 }

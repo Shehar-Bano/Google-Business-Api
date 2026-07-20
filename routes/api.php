@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\V1\ContentController;
 use App\Http\Controllers\Api\V1\NotificationController;
 use App\Http\Controllers\Api\V1\OrderController;
 use App\Http\Controllers\Api\V1\OtpController;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -87,7 +88,29 @@ Route::prefix('v1')->group(function () {
         // AI Poster Generation Routes
         Route::post('business/generate-poster', [App\Http\Controllers\Api\PosterController::class, 'generateWithTemplate']);
         Route::post('business/generate-poster-direct', [App\Http\Controllers\Api\PosterController::class, 'generateDirect']);
-    });
 
+    });
+    Route::get('/test', function () {
+
+        $apiKey = config('services.gemini.api_key');
+
+        $response = Http::post(
+            "https://generativelanguage.googleapis.com/v1beta/models/nano-banana-pro-preview:generateContent?key={$apiKey}",
+            [
+                'contents' => [
+                    [
+                        'parts' => [
+                            [
+                                'text' => 'Create a simple marketing poster for a coffee shop.',
+                            ],
+                        ],
+                    ],
+                ],
+            ]
+        );
+
+        dd($response->json());
+
+    });
     // TODO: Add future API modules here.
 });
