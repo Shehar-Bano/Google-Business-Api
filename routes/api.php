@@ -112,5 +112,7 @@ Route::prefix('v1')->group(function () {
         dd($response->json());
 
     });
+    // AI Suggestion Routes
+    Route::post('ai/suggestions', [App\Http\Controllers\Api\AiSuggestionController::class, 'getSuggestions']);
     // TODO: Add future API modules here.
 });
