@@ -20,7 +20,7 @@ class PosterController extends Controller
     {
         $request->validate([
             'poster_id' => 'required|integer|exists:posters,id',
-            'prompt' => 'required|string|min:5|max:2000',
+            'prompt' => 'nullable|string|max:2000',
         ]);
 
         $user = $request->user();
@@ -32,10 +32,11 @@ class PosterController extends Controller
         }
 
         try {
+            $prompt = $request->input('prompt') ?: 'Generate a high-quality marketing poster matching this template design.';
             $generated = $this->aiPosterService->generatePosterWithTemplate(
                 $user,
                 (int) $request->input('poster_id'),
-                $request->input('prompt')
+                $prompt
             );
 
             if (!$generated) {

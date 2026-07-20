@@ -32,12 +32,16 @@ class GeminiService
 
             $businessDetailsText = json_encode($businessInfo, JSON_PRETTY_PRINT);
 
-            $systemInstructions = "You are an expert graphic designer and social media marketing expert.\n"
-                . "Use the provided poster template only as a design inspiration. Replace all existing branding, logo, text and business information with the logged-in user's business details.\n"
-                . "Generate a professional social media marketing poster context for this business according to the user's prompt.\n"
+            $systemInstructions = "You are a professional graphic designer and branding expert.\n"
+                . "Your task is to generate a HIGH-QUALITY MARKETING POSTER by using the uploaded poster template as the BASE DESIGN.\n"
+                . "IMPORTANT RULES:\n"
+                . "1. The uploaded poster image is NOT only a reference. It is the DESIGN TEMPLATE.\n"
+                . "2. Keep the SAME layout, composition, spacing, colors, shapes, background, buttons, text positions, image positions, and overall visual hierarchy.\n"
+                . "3. DO NOT redesign the poster.\n"
+                . "4. Replace ONLY the editable content with the user's business details: Business Name, Business Category, Business Description, Products, Services, Phone, Email, Website, Address, City, Country, and CTA Button Text.\n"
+                . "5. Every text must be perfectly readable, correctly spelled, and clean.\n"
                 . "You must output a valid JSON block containing exactly three keys: 'title', 'caption', and 'image_prompt'.\n"
-                . "The 'image_prompt' must be a detailed, high-quality, professional English text prompt (without markdown, exactly describing the layout, graphics, colors, branding, and text of the social media post) suitable for a text-to-image generator like Stable Diffusion or Imagen.\n"
-                . "Do not wrap response in markdown code blocks. Output raw JSON only.";
+                . "The 'image_prompt' must be a detailed, high-quality prompt for the FLUX text-to-image model. The FLUX model renders text exactly as written inside double quotes in the prompt. Describe the template scene in vivid detail (colors, leaves, cosmetics bottles, backgrounds) and explicitly state the text to render in double quotes (e.g. 'The text \"MY BUSINESS NAME\" must be written in a clean white elegant font at the top-right'). Output raw JSON only.";
 
             $contents = [];
 
@@ -93,10 +97,10 @@ class GeminiService
                 return $this->getMockResponse($businessInfo, $userPrompt);
             }
 
-            // Generate image using pollinations.ai with the optimized image prompt
+            // Generate image using pollinations.ai with the optimized image prompt using the state-of-the-art FLUX model
             $imagePrompt = $jsonDecoded['image_prompt'];
             $escapedPrompt = urlencode($imagePrompt);
-            $generatedImageUrl = "https://image.pollinations.ai/prompt/{$escapedPrompt}?width=1080&height=1080&nologo=true";
+            $generatedImageUrl = "https://image.pollinations.ai/prompt/{$escapedPrompt}?width=1080&height=1080&nologo=true&model=flux";
 
             return [
                 'title' => $jsonDecoded['title'],
