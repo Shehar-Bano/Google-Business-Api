@@ -68,6 +68,13 @@ class BusinessManagementController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'location' => 'required|string|max:255',
+            'phone_number' => 'nullable|string|max:50',
+            'address' => 'nullable|string|max:255',
+            'brand_logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:5120',
+            'rating' => 'nullable|numeric|between:0,5',
+            'reviews' => 'nullable|integer|min:0',
+            'isVerified' => 'nullable|boolean',
+            'category' => 'nullable|string|max:255',
             'top_selling_items' => 'required|string',
             'offering_ids' => 'nullable|array',
             'offering_ids.*' => 'exists:offerings,id',
@@ -80,10 +87,24 @@ class BusinessManagementController extends Controller
         DB::beginTransaction();
 
         try {
+            // Handle logo upload
+            $logoPath = null;
+            if ($request->hasFile('brand_logo')) {
+                $path = $request->file('brand_logo')->store('businesses', 'public');
+                $logoPath = 'storage/' . $path;
+            }
+
             $business = Business::create([
                 'user_id' => $request->user()?->id,
                 'name' => $request->input('name'),
                 'location' => $request->input('location'),
+                'phone_number' => $request->input('phone_number'),
+                'address' => $request->input('address'),
+                'brand_logo' => $logoPath,
+                'rating' => $request->input('rating'),
+                'reviews' => $request->input('reviews'),
+                'isVerified' => $request->has('isVerified'),
+                'category' => $request->input('category'),
                 'top_selling_items' => array_values($items),
             ]);
 
@@ -140,6 +161,13 @@ class BusinessManagementController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'location' => 'required|string|max:255',
+            'phone_number' => 'nullable|string|max:50',
+            'address' => 'nullable|string|max:255',
+            'brand_logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:5120',
+            'rating' => 'nullable|numeric|between:0,5',
+            'reviews' => 'nullable|integer|min:0',
+            'isVerified' => 'nullable|boolean',
+            'category' => 'nullable|string|max:255',
             'top_selling_items' => 'required|string',
             'offering_ids' => 'nullable|array',
             'offering_ids.*' => 'exists:offerings,id',
@@ -151,11 +179,31 @@ class BusinessManagementController extends Controller
         DB::beginTransaction();
 
         try {
-            $business->update([
+            $updateData = [
                 'name' => $request->input('name'),
                 'location' => $request->input('location'),
+                'phone_number' => $request->input('phone_number'),
+                'address' => $request->input('address'),
+                'rating' => $request->input('rating'),
+                'reviews' => $request->input('reviews'),
+                'isVerified' => $request->has('isVerified'),
+                'category' => $request->input('category'),
                 'top_selling_items' => array_values($items),
-            ]);
+            ];
+
+            // Handle logo update
+            if ($request->hasFile('brand_logo')) {
+                if ($business->brand_logo) {
+                    $oldPath = str_replace('storage/', '', $business->brand_logo);
+                    if (\Illuminate\Support\Facades\Storage::disk('public')->exists($oldPath)) {
+                        \Illuminate\Support\Facades\Storage::disk('public')->delete($oldPath);
+                    }
+                }
+                $path = $request->file('brand_logo')->store('businesses', 'public');
+                $updateData['brand_logo'] = 'storage/' . $path;
+            }
+
+            $business->update($updateData);
 
             // Sync offerings
             $offeringIds = $request->input('offering_ids', []);

@@ -23,7 +23,7 @@ class UserManagementController extends Controller
 
     public function show(User $user): View
     {
-        $user->load('roles');
+        $user->load(['roles', 'businesses']);
 
         return view('content.admin.user-management.show', compact('user'));
     }

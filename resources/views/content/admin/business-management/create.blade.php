@@ -15,7 +15,7 @@
     <div class="card mb-4">
         <div class="card-header"><h5 class="mb-0">Business Profile Details</h5></div>
         <div class="card-body">
-            <form action="{{ route('admin.business-management.store') }}" method="POST">
+            <form action="{{ route('admin.business-management.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
 
                 <div class="row">
@@ -29,6 +29,25 @@
                         <label class="form-label fw-semibold">Business Location</label>
                         <input type="text" name="location" class="form-control" value="{{ old('location') }}" placeholder="e.g. Lahore, Pakistan" required>
                         @error('location')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Phone Number</label>
+                        <input type="text" name="phone_number" class="form-control" value="{{ old('phone_number') }}" placeholder="e.g. +92 300 1234567">
+                        @error('phone_number')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Address</label>
+                        <input type="text" name="address" class="form-control" value="{{ old('address') }}" placeholder="e.g. Main Boulevard, Gulberg">
+                        @error('address')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                    </div>
+
+                    <div class="col-12 mb-3">
+                        <label class="form-label fw-semibold">Brand Logo</label>
+                        <input type="file" name="brand_logo" class="form-control">
+                        <small class="text-muted">Only images (jpeg, png, jpg, gif, svg, webp) up to 5MB are allowed.</small>
+                        @error('brand_logo')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
                     </div>
 
                     <div class="col-12 mb-3">

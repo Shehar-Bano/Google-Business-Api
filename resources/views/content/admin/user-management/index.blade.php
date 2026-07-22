@@ -112,7 +112,9 @@
                             <select name="status" class="form-select form-select-sm um-status-select"
                                 onchange="this.form.submit()" title="Update Status">
                                 @foreach(\App\Models\User::ADMIN_STATUS_LABELS as $val => $label)
-                                    <option value="{{ $val }}" @selected($user->status === $val)>{{ $label }}</option>
+                                    <option value="{{ $val }}" @selected($user->status === $val)>
+                                        {{ ($val === 'otp_pending' && $user->otp_verified) ? 'OTP Verified' : $label }}
+                                    </option>
                                 @endforeach
                             </select>
                         </form>

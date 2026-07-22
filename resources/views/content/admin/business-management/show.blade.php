@@ -17,20 +17,60 @@
         </div>
     </div>
 
-    <div class="row g-4">
+    <div class="row g-4 justify-content-center">
         {{-- Profile Card --}}
-        <div class="col-lg-4">
+        <div class="col-lg-7">
             <div class="card h-100">
                 <div class="card-body text-center pt-4">
-                    <div class="um-detail-avatar-placeholder mx-auto mb-3 bg-label-primary text-primary">
-                        {{ strtoupper(substr($business->name, 0, 1)) }}
-                    </div>
+                    @if($business->brand_logo)
+                        <img src="{{ asset($business->brand_logo) }}" alt="Logo" class="rounded mb-3" style="width: 80px; height: 80px; object-fit: cover; border: 1px solid #eef2ff;">
+                    @else
+                        <div class="um-detail-avatar-placeholder mx-auto mb-3 bg-label-primary text-primary">
+                            {{ strtoupper(substr($business->name, 0, 1)) }}
+                        </div>
+                    @endif
 
-                    <h5 class="mb-1 fw-bold">{{ $business->name }}</h5>
+                    <h5 class="mb-1 fw-bold">
+                        {{ $business->name }}
+                        @if($business->isVerified)
+                            <i class="mdi mdi-decagram text-primary" title="Verified Business"></i>
+                        @endif
+                    </h5>
                     <p class="text-muted mb-3"><i class="mdi mdi-map-marker me-1 text-danger"></i>{{ $business->location }}</p>
 
                     <div class="text-start mt-4">
                         <div class="border-bottom py-2">
+                            <span class="text-muted small d-block">Verification Status</span>
+                            @if($business->isVerified)
+                                <span class="badge bg-label-primary">Verified</span>
+                            @else
+                                <span class="badge bg-label-secondary">Not Verified</span>
+                            @endif
+                        </div>
+
+                        <div class="border-bottom py-2 mt-2">
+                            <span class="text-muted small d-block">Rating & Reviews</span>
+                            <strong class="cell-primary">
+                                <i class="mdi mdi-star text-warning"></i> {{ number_format($business->rating ?? 0.0, 1) }} ({{ $business->reviews ?? 0 }} reviews)
+                            </strong>
+                        </div>
+
+                        <div class="border-bottom py-2 mt-2">
+                            <span class="text-muted small d-block">Category</span>
+                            <strong class="cell-primary text-capitalize">{{ $business->category ?? '—' }}</strong>
+                        </div>
+
+                        <div class="border-bottom py-2 mt-2">
+                            <span class="text-muted small d-block">Phone Number</span>
+                            <strong class="cell-primary">{{ $business->phone_number ?? '—' }}</strong>
+                        </div>
+
+                        <div class="border-bottom py-2 mt-2">
+                            <span class="text-muted small d-block">Address</span>
+                            <strong class="cell-primary">{{ $business->address ?? '—' }}</strong>
+                        </div>
+
+                        <div class="border-bottom py-2 mt-2">
                             <span class="text-muted small d-block">Registered Date</span>
                             <strong class="cell-primary">{{ $business->created_at?->format('Y-m-d H:i') ?? '—' }}</strong>
                         </div>
@@ -54,54 +94,6 @@
                             <i class="mdi mdi-pencil me-1"></i> Edit Profile
                         </a>
                     </div>
-                </div>
-            </div>
-        </div>
-
-        {{-- Products & Services Catalog Card --}}
-        <div class="col-lg-8">
-            <div class="card h-100">
-                <div class="card-header border-bottom d-flex justify-content-between align-items-center">
-                    <h6 class="mb-0 fw-bold">Products & Services Catalog</h6>
-                    <span class="badge bg-primary">{{ $business->offerings->count() }} Offerings</span>
-                </div>
-                <div class="card-body pt-3">
-                    @if($business->offerings->count() > 0)
-                        @php
-                            // Group offerings by subcategory
-                            $groupedOfferings = $business->offerings->groupBy(function($offering) {
-                                return ($offering->subcategory->category->name ?? 'Category') . ' — ' . ($offering->subcategory->name ?? 'Subcategory');
-                            });
-                        @endphp
-
-                        <div class="list-group list-group-flush">
-                            @foreach($groupedOfferings as $subName => $offerings)
-                                <div class="mb-3 border-bottom pb-2">
-                                    <h6 class="fw-semibold text-primary mb-2">
-                                        <i class="mdi mdi-folder-open-outline me-1"></i> {{ $subName }}
-                                    </h6>
-                                    <div class="row">
-                                        @foreach($offerings as $offering)
-                                            <div class="col-md-6 mb-2">
-                                                <div class="d-flex align-items-center gap-2">
-                                                    <i class="mdi {{ $offering->type === 'product' ? 'mdi-tag text-info' : 'mdi-hand-heart text-warning' }} mdi-18px"></i>
-                                                    <div>
-                                                        <span class="cell-primary fw-medium">{{ $offering->name }}</span>
-                                                        <span class="badge {{ $offering->type === 'product' ? 'bg-label-info' : 'bg-label-warning' }} btn-xs ms-1">{{ $offering->type }}</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    @else
-                        <div class="text-center py-5 text-muted">
-                            <i class="mdi mdi-package-variant-closed mdi-48px mb-2 d-block"></i>
-                            No offerings associated with this business. Click edit to assign items from the master catalog.
-                        </div>
-                    @endif
                 </div>
             </div>
         </div>

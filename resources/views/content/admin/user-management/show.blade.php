@@ -80,7 +80,9 @@
                             <div class="input-group input-group-sm">
                                 <select name="status" class="form-select">
                                     @foreach(\App\Models\User::ADMIN_STATUS_LABELS as $val => $label)
-                                        <option value="{{ $val }}" @selected($user->status === $val)>{{ $label }}</option>
+                                        <option value="{{ $val }}" @selected($user->status === $val)>
+                                            {{ ($val === 'otp_pending' && $user->otp_verified) ? 'OTP Verified' : $label }}
+                                        </option>
                                     @endforeach
                                 </select>
                                 <button class="btn btn-dark" type="submit">Update</button>
@@ -163,47 +165,57 @@
                 </div>
             @endif
 
-            {{-- Orders --}}
+            {{-- Registered Businesses --}}
             <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h6 class="mb-0">Orders</h6>
-                    <a href="{{ route('admin.order-management.index', ['search' => $user->name]) }}" class="btn btn-sm btn-outline-primary">View All</a>
+                <div class="card-header d-flex justify-content-between align-items-center border-bottom mb-0 py-3">
+                    <h6 class="mb-0 fw-bold">Registered Businesses</h6>
+                    <span class="badge bg-primary">{{ $user->businesses->count() }} Businesses</span>
                 </div>
                 <div class="table-responsive">
                     <table class="table table-hover mb-0">
                         <thead>
                             <tr>
-                                <th>Order #</th>
-                                <th>Status</th>
-                                <th>Amount</th>
-                                <th>Date</th>
+                                <th>Logo</th>
+                                <th>Business Name</th>
+                                <th>Location</th>
+                                <th>Rating</th>
+                                <th>Verification</th>
                                 <th class="text-end">Action</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($user->orders()->with('detail:order_id,price')->latest()->limit(10)->get() as $order)
-                                @php
-                                    $orderBadge = match($order->status) {
-                                        'active'    => 'bg-label-success',
-                                        'in_review' => 'bg-label-warning',
-                                        'cancelled' => 'bg-label-danger',
-                                        'completed' => 'bg-label-primary',
-                                        default     => 'bg-label-secondary',
-                                    };
-                                @endphp
+                            @forelse($user->businesses as $business)
                                 <tr>
-                                    <td class="fw-semibold">{{ $order->order_id }}</td>
-                                    <td><span class="badge {{ $orderBadge }} text-capitalize">{{ \App\Models\Order::STATUS_LABELS[$order->status] ?? $order->status }}</span></td>
-                                    <td>{{ number_format($order->detail?->price ?? 0) }}</td>
-                                    <td class="text-muted small">{{ $order->created_at?->format('Y-m-d') }}</td>
+                                    <td>
+                                        @if($business->brand_logo)
+                                            <img src="{{ asset($business->brand_logo) }}" alt="Logo" class="rounded" style="width: 40px; height: 40px; object-fit: cover;">
+                                        @else
+                                            <div class="bg-label-primary rounded d-flex align-items-center justify-content-center fw-bold" style="width: 40px; height: 40px;">
+                                                {{ strtoupper(substr($business->name, 0, 1)) }}
+                                            </div>
+                                        @endif
+                                    </td>
+                                    <td><strong class="cell-primary">{{ $business->name }}</strong></td>
+                                    <td><i class="mdi mdi-map-marker text-danger me-1"></i>{{ $business->location }}</td>
+                                    <td>
+                                        <i class="mdi mdi-star text-warning"></i> 
+                                        {{ number_format($business->rating ?? 0.0, 1) }} ({{ $business->reviews ?? 0 }})
+                                    </td>
+                                    <td>
+                                        @if($business->isVerified)
+                                            <span class="badge bg-label-primary">Verified</span>
+                                        @else
+                                            <span class="badge bg-label-secondary">Not Verified</span>
+                                        @endif
+                                    </td>
                                     <td class="text-end">
-                                        <a href="{{ route('admin.order-management.show', $order) }}" class="action-icon-btn action-icon-view" title="View Order">
-                                            <i class="mdi mdi-eye-outline"></i>
+                                        <a href="{{ route('admin.business-management.show', $business) }}" class="action-icon-btn action-icon-view" title="View Business">
+                                            <i class="mdi mdi-eye-outline text-primary"></i>
                                         </a>
                                     </td>
                                 </tr>
                             @empty
-                                <tr><td colspan="5" class="text-center text-muted py-3">No orders found.</td></tr>
+                                <tr><td colspan="6" class="text-center text-muted py-3">No businesses registered.</td></tr>
                             @endforelse
                         </tbody>
                     </table>

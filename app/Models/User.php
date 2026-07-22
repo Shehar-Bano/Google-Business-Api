@@ -158,4 +158,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(InstagramAccount::class);
     }
+
+    public function businesses(): HasMany
+    {
+        return $this->hasMany(Business::class);
+    }
 }

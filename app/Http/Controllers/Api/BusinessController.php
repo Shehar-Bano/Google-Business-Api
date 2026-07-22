@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Business;
 use App\Models\Offering;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -34,6 +33,14 @@ class BusinessController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'location' => 'required|string|max:255',
+            'phone_number' => 'nullable|string|max:50',
+            'address' => 'nullable|string|max:255',
+            'email' => 'nullable|email|max:255',
+            'brand_logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:5120',
+            'rating' => 'nullable|numeric|between:0,5',
+            'reviews' => 'nullable|integer|min:0',
+            'isVerified' => 'nullable|boolean',
+            'category' => 'nullable|string|max:255',
             'top_selling_items' => 'required|array',
             'top_selling_items.*' => 'required|string|max:255',
             'offering_ids' => 'nullable|array',
@@ -55,12 +62,26 @@ class BusinessController extends Controller
         DB::beginTransaction();
 
         try {
-            // dd(Auth::user());
-            // Create Business (top_selling_items will be automatically cast to json due to model casting)
+            // Handle logo upload
+            $logoPath = null;
+            if ($request->hasFile('brand_logo')) {
+                $path = $request->file('brand_logo')->store('businesses', 'public');
+                $logoPath = 'storage/'.$path;
+            }
+
+            // Create Business
             $business = Business::create([
                 'user_id' => $request->user()?->id,
                 'name' => $request->input('name'),
                 'location' => $request->input('location'),
+                'phone_number' => $request->input('phone_number'),
+                'address' => $request->input('address'),
+                'email' => $request->input('email'),
+                'brand_logo' => $logoPath,
+                'rating' => $request->input('rating'),
+                'reviews' => $request->input('reviews'),
+                'isVerified' => $request->boolean('isVerified'),
+                'category' => $request->input('category'),
                 'top_selling_items' => $request->input('top_selling_items'),
             ]);
 
@@ -122,6 +143,13 @@ class BusinessController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'sometimes|required|string|max:255',
             'location' => 'sometimes|required|string|max:255',
+            'phone_number' => 'nullable|string|max:50',
+            'address' => 'nullable|string|max:255',
+            'brand_logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:5120',
+            'rating' => 'nullable|numeric|between:0,5',
+            'reviews' => 'nullable|integer|min:0',
+            'isVerified' => 'nullable|boolean',
+            'category' => 'nullable|string|max:255',
             'top_selling_items' => 'sometimes|required|array',
             'top_selling_items.*' => 'required|string|max:255',
             'offering_ids' => 'nullable|array',
@@ -144,7 +172,25 @@ class BusinessController extends Controller
 
         try {
             // Update fields
-            $business->update($request->only(['name', 'location', 'top_selling_items']));
+            $updateData = $request->only(['name', 'location', 'phone_number', 'address', 'rating', 'reviews', 'category', 'top_selling_items']);
+
+            if ($request->has('isVerified')) {
+                $updateData['isVerified'] = $request->boolean('isVerified');
+            }
+
+            // Handle logo update
+            if ($request->hasFile('brand_logo')) {
+                if ($business->brand_logo) {
+                    $oldPath = str_replace('storage/', '', $business->brand_logo);
+                    if (\Illuminate\Support\Facades\Storage::disk('public')->exists($oldPath)) {
+                        \Illuminate\Support\Facades\Storage::disk('public')->delete($oldPath);
+                    }
+                }
+                $path = $request->file('brand_logo')->store('businesses', 'public');
+                $updateData['brand_logo'] = 'storage/'.$path;
+            }
+
+            $business->update($updateData);
 
             // If offerings or custom offerings are provided, sync them
             if ($request->has('offering_ids') || $request->has('custom_offerings')) {

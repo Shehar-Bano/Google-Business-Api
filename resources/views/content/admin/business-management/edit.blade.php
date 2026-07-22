@@ -15,7 +15,7 @@
     <div class="card mb-4">
         <div class="card-header"><h5 class="mb-0">Edit Business Details</h5></div>
         <div class="card-body">
-            <form action="{{ route('admin.business-management.update', $business) }}" method="POST">
+            <form action="{{ route('admin.business-management.update', $business) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
 
@@ -30,6 +30,62 @@
                         <label class="form-label fw-semibold">Business Location</label>
                         <input type="text" name="location" class="form-control" value="{{ old('location', $business->location) }}" required>
                         @error('location')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Phone Number</label>
+                        <input type="text" name="phone_number" class="form-control" value="{{ old('phone_number', $business->phone_number) }}" placeholder="e.g. +92 300 1234567">
+                        @error('phone_number')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Address</label>
+                        <input type="text" name="address" class="form-control" value="{{ old('address', $business->address) }}" placeholder="e.g. Main Boulevard, Gulberg">
+                        @error('address')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Category</label>
+                        <input type="text" name="category" class="form-control" value="{{ old('category', $business->category) }}" placeholder="e.g. Restaurant, Electronics">
+                        @error('category')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                    </div>
+
+                    <div class="col-md-8 mb-3">
+                        <label class="form-label fw-semibold">Brand Logo</label>
+                        <input type="file" name="brand_logo" class="form-control">
+                        <small class="text-muted">Only images (jpeg, png, jpg, gif, svg, webp) up to 5MB are allowed. Leave blank to keep current.</small>
+                        @error('brand_logo')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label d-block fw-semibold">Current Logo</label>
+                        @if($business->brand_logo)
+                            <img src="{{ asset($business->brand_logo) }}" alt="Logo" class="rounded" style="width: 80px; height: 80px; object-fit: cover; border: 1px solid #cbd5e1;">
+                        @else
+                            <span class="text-muted small">No logo uploaded.</span>
+                        @endif
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-semibold">Rating (0.0 to 5.0)</label>
+                        <input type="number" step="0.1" min="0" max="5" name="rating" class="form-control" value="{{ old('rating', $business->rating) }}" placeholder="e.g. 4.5">
+                        @error('rating')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label fw-semibold">Reviews Count</label>
+                        <input type="number" min="0" name="reviews" class="form-control" value="{{ old('reviews', $business->reviews) }}" placeholder="e.g. 120">
+                        @error('reviews')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                    </div>
+
+                    <div class="col-md-4 mb-3 d-flex align-items-center mt-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="isVerified" value="1" id="isVerified" @checked(old('isVerified', $business->isVerified))>
+                            <label class="form-check-label fw-semibold" for="isVerified">
+                                Is Verified Business?
+                            </label>
+                        </div>
+                        @error('isVerified')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
                     </div>
 
                     <div class="col-12 mb-3">
@@ -85,4 +141,43 @@
     </div>
 
 </div>
+@endsection
+
+@section('page-script')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const topSellingInput = document.querySelector('input[name="top_selling_items"]');
+    const checkboxes = document.querySelectorAll('input[name="offering_ids[]"]');
+
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function () {
+            const label = document.querySelector(`label[for="${this.id}"]`);
+            if (!label) return;
+            
+            // Get only the text node contents ignoring children (badges)
+            let text = "";
+            for (let i = 0; i < label.childNodes.length; i++) {
+                if (label.childNodes[i].nodeType === Node.TEXT_NODE) {
+                    text += label.childNodes[i].textContent;
+                }
+            }
+            text = text.trim();
+
+            if (!text) return;
+
+            let currentVal = topSellingInput.value.split(',').map(item => item.trim()).filter(item => item.length > 0);
+            
+            if (this.checked) {
+                if (!currentVal.includes(text)) {
+                    currentVal.push(text);
+                }
+            } else {
+                currentVal = currentVal.filter(item => item !== text);
+            }
+            
+            topSellingInput.value = currentVal.join(', ');
+        });
+    });
+});
+</script>
 @endsection

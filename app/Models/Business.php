@@ -15,11 +15,19 @@ class Business extends Model
         'user_id',
         'name',
         'location',
+        'phone_number',
+        'address',
+        'brand_logo',
+        'rating',
+        'reviews',
+        'isVerified',
+        'category',
         'top_selling_items',
     ];
 
     protected $casts = [
         'top_selling_items' => 'array',
+        'isVerified' => 'boolean',
     ];
 
     /**
