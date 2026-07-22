@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Otp;
+namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\Otp\ResendOtpRequest;
-use App\Http\Requests\Api\v1\Otp\SendOtpRequest;
+use App\Http\Requests\Api\V1\Otp\SendOtpRequest;
 use App\Http\Requests\Api\V1\Otp\VerifyOtpRequest;
 use App\Services\OtpService;
 use Illuminate\Http\JsonResponse;
