@@ -41,6 +41,7 @@ class BusinessController extends Controller
             'reviews' => 'nullable|integer|min:0',
             'isVerified' => 'nullable|boolean',
             'category' => 'nullable|string|max:255',
+            'google_place_id' => 'nullable|string|max:255',
             'top_selling_items' => 'required|array',
             'top_selling_items.*' => 'required|string|max:255',
             'offering_ids' => 'nullable|array',
@@ -82,6 +83,7 @@ class BusinessController extends Controller
                 'reviews' => $request->input('reviews'),
                 'isVerified' => $request->boolean('isVerified'),
                 'category' => $request->input('category'),
+                'google_place_id' => $request->input('google_place_id'),
                 'top_selling_items' => $request->input('top_selling_items'),
             ]);
 
@@ -106,12 +108,9 @@ class BusinessController extends Controller
         }
     }
 
-    /**
-     * Display the specified business with offerings.
-     */
     public function show($id)
     {
-        $business = Business::with(['offerings.subcategory.category'])->find($id);
+        $business = Business::with(['offerings.subcategory.category', 'preferences'])->find($id);
 
         if (! $business) {
             return response()->json([

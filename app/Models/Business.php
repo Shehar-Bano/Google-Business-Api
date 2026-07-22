@@ -22,7 +22,12 @@ class Business extends Model
         'reviews',
         'isVerified',
         'category',
+        'google_place_id',
         'top_selling_items',
+    ];
+
+    protected $hidden = [
+        'google_place_id',
     ];
 
     protected $casts = [
@@ -45,5 +50,13 @@ class Business extends Model
     {
         return $this->belongsToMany(Offering::class, 'business_offerings', 'business_id', 'offering_id')
                     ->withTimestamps();
+    }
+
+    /**
+     * Get preferences associated with this business.
+     */
+    public function preferences()
+    {
+        return $this->hasOne(Preference::class);
     }
 }

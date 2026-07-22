@@ -85,6 +85,11 @@ Route::prefix('v1')->group(function () {
         Route::delete('businesses/{business}', [App\Http\Controllers\Api\BusinessController::class, 'destroy']);
         Route::post('businesses/{id}/offerings', [App\Http\Controllers\Api\OfferingController::class, 'saveBusinessOfferings']);
 
+        // Preferences Routes
+        Route::get('businesses/{businessId}/preferences', [App\Http\Controllers\Api\PreferenceController::class, 'show']);
+        Route::post('businesses/{businessId}/preferences', [App\Http\Controllers\Api\PreferenceController::class, 'storeOrUpdate']);
+        Route::delete('businesses/{businessId}/preferences', [App\Http\Controllers\Api\PreferenceController::class, 'destroy']);
+
         // AI Poster Generation Routes
         Route::post('business/generate-poster', [App\Http\Controllers\Api\PosterController::class, 'generateWithTemplate']);
         Route::post('business/generate-poster-direct', [App\Http\Controllers\Api\PosterController::class, 'generateDirect']);

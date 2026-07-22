@@ -166,61 +166,93 @@
             @endif
 
             {{-- Registered Businesses --}}
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center border-bottom mb-0 py-3">
-                    <h6 class="mb-0 fw-bold">Registered Businesses</h6>
-                    <span class="badge bg-primary">{{ $user->businesses->count() }} Businesses</span>
-                </div>
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead>
-                            <tr>
-                                <th>Logo</th>
-                                <th>Business Name</th>
-                                <th>Location</th>
-                                <th>Rating</th>
-                                <th>Verification</th>
-                                <th class="text-end">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($user->businesses as $business)
-                                <tr>
-                                    <td>
-                                        @if($business->brand_logo)
-                                            <img src="{{ asset($business->brand_logo) }}" alt="Logo" class="rounded" style="width: 40px; height: 40px; object-fit: cover;">
-                                        @else
-                                            <div class="bg-label-primary rounded d-flex align-items-center justify-content-center fw-bold" style="width: 40px; height: 40px;">
-                                                {{ strtoupper(substr($business->name, 0, 1)) }}
-                                            </div>
-                                        @endif
-                                    </td>
-                                    <td><strong class="cell-primary">{{ $business->name }}</strong></td>
-                                    <td><i class="mdi mdi-map-marker text-danger me-1"></i>{{ $business->location }}</td>
-                                    <td>
-                                        <i class="mdi mdi-star text-warning"></i> 
-                                        {{ number_format($business->rating ?? 0.0, 1) }} ({{ $business->reviews ?? 0 }})
-                                    </td>
-                                    <td>
+            <h5 class="mb-3 fw-bold mt-4">Registered Businesses ({{ $user->businesses->count() }})</h5>
+            @forelse($user->businesses as $business)
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between border-bottom pb-3 mb-3">
+                            <div class="d-flex align-items-center gap-3">
+                                @if($business->brand_logo)
+                                    <img src="{{ asset($business->brand_logo) }}" alt="Logo" class="rounded" style="width: 60px; height: 60px; object-fit: cover; border: 1px solid #eef2ff;">
+                                @else
+                                    <div class="bg-label-primary rounded d-flex align-items-center justify-content-center fw-bold" style="width: 60px; height: 60px; font-size: 1.5rem;">
+                                        {{ strtoupper(substr($business->name, 0, 1)) }}
+                                    </div>
+                                @endif
+                                <div>
+                                    <h5 class="mb-1 fw-bold">
+                                        {{ $business->name }}
                                         @if($business->isVerified)
-                                            <span class="badge bg-label-primary">Verified</span>
-                                        @else
-                                            <span class="badge bg-label-secondary">Not Verified</span>
+                                            <i class="mdi mdi-decagram text-primary" title="Verified Business"></i>
                                         @endif
-                                    </td>
-                                    <td class="text-end">
-                                        <a href="{{ route('admin.business-management.show', $business) }}" class="action-icon-btn action-icon-view" title="View Business">
-                                            <i class="mdi mdi-eye-outline text-primary"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr><td colspan="6" class="text-center text-muted py-3">No businesses registered.</td></tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+                                    </h5>
+                                    <p class="text-muted mb-0">
+                                        <span class="badge bg-label-info text-capitalize me-2">{{ $business->category ?? 'General' }}</span>
+                                        <i class="mdi mdi-map-marker me-1 text-danger"></i>{{ $business->location }}
+                                    </p>
+                                </div>
+                            </div>
+                            <div>
+                                <a href="{{ route('admin.business-management.show', $business) }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="mdi mdi-eye-outline me-1"></i> View Detail Page
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-sm-4">
+                                <span class="text-muted small d-block">Verification Status</span>
+                                @if($business->isVerified)
+                                    <span class="badge bg-label-primary mt-1">Verified</span>
+                                @else
+                                    <span class="badge bg-label-secondary mt-1">Not Verified</span>
+                                @endif
+                            </div>
+
+                            <div class="col-sm-4">
+                                <span class="text-muted small d-block">Rating & Reviews</span>
+                                <strong class="cell-primary d-block mt-1">
+                                    <i class="mdi mdi-star text-warning"></i> {{ number_format($business->rating ?? 0.0, 1) }} ({{ $business->reviews ?? 0 }} reviews)
+                                </strong>
+                            </div>
+
+                            <div class="col-sm-4">
+                                <span class="text-muted small d-block">Phone Number</span>
+                                <strong class="cell-primary d-block mt-1">{{ $business->phone_number ?? '—' }}</strong>
+                            </div>
+
+                            <div class="col-sm-4">
+                                <span class="text-muted small d-block">Address</span>
+                                <strong class="cell-primary d-block mt-1">{{ $business->address ?? '—' }}</strong>
+                            </div>
+
+                            <div class="col-sm-4">
+                                <span class="text-muted small d-block">Registered Date</span>
+                                <strong class="cell-primary d-block mt-1">{{ $business->created_at?->format('Y-m-d H:i') ?? '—' }}</strong>
+                            </div>
+
+                            <div class="col-12 mt-2">
+                                <span class="text-muted small d-block mb-1">Top Selling Items</span>
+                                @if(is_array($business->top_selling_items) && count($business->top_selling_items) > 0)
+                                    <div class="d-flex flex-wrap gap-1 mt-1">
+                                        @foreach($business->top_selling_items as $item)
+                                            <span class="badge bg-label-success">{{ $item }}</span>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <span class="text-muted">—</span>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            @empty
+                <div class="card">
+                    <div class="card-body text-center py-4 text-muted">
+                        No businesses registered for this user.
+                    </div>
+                </div>
+            @endforelse
         </div>
     </div>
 

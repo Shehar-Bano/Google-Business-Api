@@ -4,7 +4,7 @@
             <span class="app-brand-logo demo me-1">
                 @include('_partials.macros', ['height' => 20, 'color' => '#B5F23C'])
             </span>
-            <span class="app-brand-text demo menu-text fw-semibold ms-2">Laravel Starter</span>
+            <span class="app-brand-text demo menu-text fw-semibold ms-2">Google Business's</span>
         </a>
 
         <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto">
