@@ -23,7 +23,7 @@ class UserRepository
     {
         $user = $this->findByEmail($details['email']);
 
-        if (!$user) {
+        if (! $user) {
             $user = User::create([
                 'name' => $details['name'],
                 'email' => $details['email'],
@@ -34,7 +34,7 @@ class UserRepository
 
             // Assign standard role e.g. player/client if roles system exists
             if (class_exists(\Spatie\Permission\Models\Role::class)) {
-                $user->assignRole('player');
+                $user->assignRole('user');
             }
         }
 

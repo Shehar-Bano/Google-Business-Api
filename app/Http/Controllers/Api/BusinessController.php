@@ -60,6 +60,18 @@ class BusinessController extends Controller
             ], 422);
         }
 
+        // Check if user already owns a business
+        $userId = $request->user()?->id;
+        if ($userId) {
+            $existingBusiness = Business::where('user_id', $userId)->first();
+            if ($existingBusiness) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User business already exist.',
+                ], 422);
+            }
+        }
+
         DB::beginTransaction();
 
         try {
@@ -72,7 +84,7 @@ class BusinessController extends Controller
 
             // Create Business
             $business = Business::create([
-                'user_id' => $request->user()?->id,
+                'user_id' => $userId,
                 'name' => $request->input('name'),
                 'location' => $request->input('location'),
                 'phone_number' => $request->input('phone_number'),
@@ -95,8 +107,8 @@ class BusinessController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Business registered successfully.',
-                'data' => $business->load('offerings.subcategory.category'),
-            ], 211); // Standard created code or 201. Let's use 201 for standard created or 200. Let's return 201.
+                'data' => $business->load(['offerings.subcategory.category', 'user']),
+            ], 200);
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -110,7 +122,7 @@ class BusinessController extends Controller
 
     public function show($id)
     {
-        $business = Business::with(['offerings.subcategory.category', 'preferences'])->find($id);
+        $business = Business::with(['offerings.subcategory.category', 'preferences', 'user'])->find($id);
 
         if (! $business) {
             return response()->json([
