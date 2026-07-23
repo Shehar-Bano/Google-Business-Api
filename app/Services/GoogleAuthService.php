@@ -15,13 +15,19 @@ class GoogleAuthService
         try {
             $clientId = config('services.google.client_id');
             
+            // Clean token (trim and restore spaces back to plus signs if url-decoded incorrectly)
+            $idToken = trim($idToken);
+            $idToken = str_replace(' ', '+', $idToken);
+            
+            Log::info('Google Auth incoming token string: ' . substr($idToken, 0, 50) . '...' . substr($idToken, -20));
+
             // Validate via Google oauth2 tokeninfo endpoint
             $response = Http::get('https://oauth2.googleapis.com/tokeninfo', [
                 'id_token' => $idToken,
             ]);
 
             if (!$response->successful()) {
-                Log::warning('Google Token Verification failed: ' . $response->body());
+                Log::warning('Google Token Verification failed: ' . $response->body() . ' | Token sent: ' . $idToken);
                 return null;
             }
 
