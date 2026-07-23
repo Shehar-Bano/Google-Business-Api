@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\BusinessController;
 use App\Http\Controllers\Api\V1\AccountController;
 use App\Http\Controllers\Api\V1\AccountFcmTokenController;
 use App\Http\Controllers\Api\V1\AuthController;
@@ -60,11 +61,9 @@ Route::prefix('v1')->group(function () {
         });
     });
 
-    Route::get('businesses', [App\Http\Controllers\Api\BusinessController::class, 'index']);
-    Route::get('businesses/{business}', [App\Http\Controllers\Api\BusinessController::class, 'show']);
+    Route::get('/user/businesses/{userId}', [BusinessController::class, 'show']);
 
     // Authentication & Social Connections Routes
-    Route::post('auth/google/login', [App\Http\Controllers\Api\AuthController::class, 'googleLogin']);
     Route::get('social/facebook/callback', [App\Http\Controllers\Api\SocialConnectionController::class, 'facebookCallback']);
 
     Route::get('/social/facebook/redirect-url', [App\Http\Controllers\Api\SocialConnectionController::class, 'facebookRedirectUrl']);
@@ -73,6 +72,7 @@ Route::prefix('v1')->group(function () {
     Route::get('config/meta', [App\Http\Controllers\Api\ConfigController::class, 'metaConfig']);
 
     Route::middleware('api.token')->group(function () {
+        Route::post('auth/google/login', [App\Http\Controllers\Api\AuthController::class, 'googleLogin']);
         Route::get('social/facebook/connect', [App\Http\Controllers\Api\SocialConnectionController::class, 'facebookConnect']);
         // Route::post('social/facebook/connect-token', [App\Http\Controllers\Api\SocialConnectionController::class, 'facebookConnectToken']);
         Route::get('social/accounts', [App\Http\Controllers\Api\SocialConnectionController::class, 'status']);

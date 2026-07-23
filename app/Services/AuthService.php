@@ -14,9 +14,9 @@ class AuthService
     ) {}
 
     /**
-     * Authenticate or register a user via Google ID Token and generate Sanctum token.
+     * Link verified Google ID Token details to the current authenticated user.
      */
-    public function loginWithGoogle(string $idToken): ?array
+    public function loginWithGoogle(string $idToken, User $user, ?string $currentToken = null): ?array
     {
         // 1. Verify Google token via service
         $googleUser = $this->googleAuthService->verifyToken($idToken);
@@ -24,20 +24,34 @@ class AuthService
             return null;
         }
 
-        // 2. Find or create user
-        $user = $this->userRepo->findOrCreateGoogleUser($googleUser);
-
-        // 3. Create API access token (matching local EnsureApiTokenIsValid middleware)
-        $plainAccessToken = bin2hex(random_bytes(32));
-        $plainRefreshToken = bin2hex(random_bytes(32));
-
-        $user->api_access_token = hash('sha256', $plainAccessToken);
-        $user->api_refresh_token = hash('sha256', $plainRefreshToken);
+        // 2. Link Google details to the current logged-in user (no new user creation)
+        if (empty($user->email)) {
+            $user->email = $googleUser['email'];
+        }
+        if (empty($user->name)) {
+            $user->name = $googleUser['name'];
+        }
         $user->save();
+
+        // 3. Link Google Social Account
+        \App\Models\SocialAccount::updateOrCreate(
+            [
+                'user_id' => $user->id,
+                'provider' => 'google',
+            ],
+            [
+                'provider_user_id' => $googleUser['provider_user_id'],
+                'name' => $googleUser['name'],
+                'email' => $googleUser['email'],
+                'profile_picture' => $googleUser['profile_picture'] ?? null,
+                'access_token' => 'oauth_id_token_verified',
+                'connected_at' => now(),
+            ]
+        );
 
         return [
             'user' => $user,
-            'token' => $plainAccessToken,
+            'token' => $currentToken,
         ];
     }
 }

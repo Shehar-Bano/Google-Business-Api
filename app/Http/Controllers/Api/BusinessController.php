@@ -120,9 +120,12 @@ class BusinessController extends Controller
         }
     }
 
-    public function show($id)
+    public function show(Request $request, $userId)
     {
-        $business = Business::with(['offerings.subcategory.category', 'preferences', 'user'])->find($id);
+        // dd($userId);
+        $business = Business::with(['offerings.subcategory.category', 'preferences', 'user'])
+            ->where('user_id', $userId)
+            ->first();
 
         if (! $business) {
             return response()->json([

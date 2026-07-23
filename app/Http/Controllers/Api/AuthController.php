@@ -16,7 +16,11 @@ class AuthController extends Controller
      */
     public function googleLogin(GoogleLoginRequest $request): JsonResponse
     {
-        $result = $this->authService->loginWithGoogle($request->input('id_token'));
+        $result = $this->authService->loginWithGoogle(
+            $request->input('id_token'),
+            $request->user(),
+            $request->bearerToken()
+        );
 
         if (!$result) {
             return response()->json([
