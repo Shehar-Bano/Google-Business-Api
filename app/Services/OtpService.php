@@ -132,8 +132,12 @@ class OtpService
             ->where('verified', false)
             ->delete();
 
-        // 1. Find or create the user using their mobile number
-        $user = User::where('phone', $mobileNumber)->first();
+        // 1. Find or create the user using their mobile number (format-insensitive check to prevent duplicates)
+        $cleanNumber = preg_replace('/[^0-9]/', '', $mobileNumber);
+        $user = User::where(function($query) use ($mobileNumber, $cleanNumber) {
+            $query->where('phone', $mobileNumber)
+                  ->orWhereRaw("REPLACE(REPLACE(REPLACE(REPLACE(phone, ' ', ''), '-', ''), '+', ''), '(', '') = ?", [$cleanNumber]);
+        })->first();
 
         if (! $user) {
             $user = User::create([
