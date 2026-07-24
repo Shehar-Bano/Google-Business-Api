@@ -50,6 +50,9 @@ class BusinessController extends Controller
             'custom_offerings.*.name' => 'required|string|max:255',
             'custom_offerings.*.type' => 'required|in:product,service',
             'custom_offerings.*.subcategory_id' => 'required|exists:business_subcategories,id',
+            'google_scores' => 'nullable|array',
+            'google_scores.*.name' => 'required|string|in:google_reviews,active_days,reviews_replied,google_ratings,business_description,primary_category,business_category,contact_phone_number,business_photos,post_upload_frequency,country,state,city,pincode',
+            'google_scores.*.points' => 'required|integer|min:0',
         ]);
 
         if ($validator->fails()) {
@@ -99,15 +102,28 @@ class BusinessController extends Controller
                 'top_selling_items' => $request->input('top_selling_items'),
             ]);
 
+            // Save raw google scores from request
+            if ($request->has('google_scores')) {
+                foreach ($request->input('google_scores') as $scoreData) {
+                    $business->googleScores()->create([
+                        'name' => $scoreData['name'],
+                        'points' => $scoreData['points'],
+                    ]);
+                }
+            }
+
             // Sync offerings
             $this->syncOfferings($business, $request->input('offering_ids', []), $request->input('custom_offerings', []));
+
+            // Recalculate score after offerings are linked
+            \App\Services\BusinessScoreCalculator::recalculate($business);
 
             DB::commit();
 
             return response()->json([
                 'success' => true,
                 'message' => 'Business registered successfully.',
-                'data' => $business->load(['offerings.subcategory.category', 'user']),
+                'data' => $business->load(['offerings.subcategory.category', 'user', 'googleScores']),
             ], 200);
 
         } catch (\Exception $e) {
@@ -172,6 +188,9 @@ class BusinessController extends Controller
             'custom_offerings.*.name' => 'required|string|max:255',
             'custom_offerings.*.type' => 'required|in:product,service',
             'custom_offerings.*.subcategory_id' => 'required|exists:business_subcategories,id',
+            'google_scores' => 'nullable|array',
+            'google_scores.*.name' => 'required|string|in:google_reviews,active_days,reviews_replied,google_ratings,business_description,primary_category,business_category,contact_phone_number,business_photos,post_upload_frequency,country,state,city,pincode',
+            'google_scores.*.points' => 'required|integer|min:0',
         ]);
 
         if ($validator->fails()) {
@@ -206,6 +225,17 @@ class BusinessController extends Controller
 
             $business->update($updateData);
 
+            // Update raw google scores from request
+            if ($request->has('google_scores')) {
+                $business->googleScores()->delete();
+                foreach ($request->input('google_scores') as $scoreData) {
+                    $business->googleScores()->create([
+                        'name' => $scoreData['name'],
+                        'points' => $scoreData['points'],
+                    ]);
+                }
+            }
+
             // If offerings or custom offerings are provided, sync them
             if ($request->has('offering_ids') || $request->has('custom_offerings')) {
                 $this->syncOfferings(
@@ -214,6 +244,9 @@ class BusinessController extends Controller
                     $request->input('custom_offerings', [])
                 );
             }
+
+            // Recalculate score after update and sync
+            \App\Services\BusinessScoreCalculator::recalculate($business);
 
             DB::commit();
 
@@ -297,5 +330,26 @@ class BusinessController extends Controller
         // Clean & Sync via Eloquent belongsToMany relationship
         $offeringIds = array_unique($offeringIds);
         $business->offerings()->sync($offeringIds);
+    }
+
+    /**
+     * Get only name and points from estimated scores for a business.
+     */
+    public function getEstimatedScores($businessId)
+    {
+        $business = Business::find($businessId);
+        if (!$business) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Business not found.'
+            ], 404);
+        }
+
+        $scores = $business->estimatedScores()->select('name', 'points')->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $scores
+        ], 200);
     }
 }

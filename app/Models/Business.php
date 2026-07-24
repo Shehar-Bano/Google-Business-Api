@@ -59,4 +59,27 @@ class Business extends Model
     {
         return $this->hasOne(Preference::class);
     }
+
+    /**
+     * Get estimated scores for this business.
+     */
+    public function estimatedScores()
+    {
+        return $this->hasMany(BusinessEstimatedScore::class);
+    }
+
+    /**
+     * Get raw google scores for this business.
+     */
+    public function googleScores()
+    {
+        return $this->hasMany(GoogleScore::class);
+    }
+
+    protected static function booted()
+    {
+        static::saved(function ($business) {
+            \App\Services\BusinessScoreCalculator::recalculate($business);
+        });
+    }
 }

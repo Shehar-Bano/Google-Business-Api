@@ -90,6 +90,9 @@ Route::prefix('v1')->group(function () {
         Route::post('businesses/{businessId}/preferences', [App\Http\Controllers\Api\PreferenceController::class, 'storeOrUpdate']);
         Route::delete('businesses/{businessId}/preferences', [App\Http\Controllers\Api\PreferenceController::class, 'destroy']);
 
+        // Estimated Scores Route
+        Route::get('businesses/{businessId}/estimated-scores', [App\Http\Controllers\Api\BusinessController::class, 'getEstimatedScores']);
+
         // AI Poster Generation Routes
         Route::post('business/generate-poster', [App\Http\Controllers\Api\PosterController::class, 'generateWithTemplate']);
         Route::post('business/generate-poster-direct', [App\Http\Controllers\Api\PosterController::class, 'generateDirect']);

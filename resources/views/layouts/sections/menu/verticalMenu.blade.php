@@ -33,6 +33,12 @@
                 <div>Business Management</div>
             </a>
         </li>
+        <li class="menu-item {{ request()->routeIs('admin.estimated-scores.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.estimated-scores.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons mdi mdi-star-box-outline"></i>
+                <div>Estimated Scores</div>
+            </a>
+        </li>
         <li class="menu-item {{ request()->routeIs('admin.posters.*') ? 'active' : '' }}">
             <a href="{{ route('admin.posters.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons mdi mdi-image-multiple-outline"></i>

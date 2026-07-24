@@ -113,6 +113,9 @@ class BusinessManagementController extends Controller
                 $business->offerings()->sync($request->input('offering_ids'));
             }
 
+            // Recalculate score after offerings are synced
+            \App\Services\BusinessScoreCalculator::recalculate($business);
+
             DB::commit();
 
             return redirect()->route('admin.business-management.index')
@@ -208,6 +211,9 @@ class BusinessManagementController extends Controller
             // Sync offerings
             $offeringIds = $request->input('offering_ids', []);
             $business->offerings()->sync($offeringIds);
+
+            // Recalculate score after update and sync
+            \App\Services\BusinessScoreCalculator::recalculate($business);
 
             DB::commit();
 

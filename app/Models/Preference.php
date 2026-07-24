@@ -48,4 +48,13 @@ class Preference extends Model
     {
         return $this->belongsTo(Business::class);
     }
+
+    protected static function booted()
+    {
+        static::saved(function ($preference) {
+            if ($preference->business) {
+                \App\Services\BusinessScoreCalculator::recalculate($preference->business);
+            }
+        });
+    }
 }

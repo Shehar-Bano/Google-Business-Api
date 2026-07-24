@@ -51,6 +51,9 @@ Route::middleware(['auth', 'verified', 'role:super_admin|admin'])
         // Business Management
         Route::resource('business-management', App\Http\Controllers\Admin\BusinessManagementController::class)->parameters(['business-management' => 'business']);
 
+        // Estimated Scores Management
+        Route::get('estimated-scores', [App\Http\Controllers\Admin\EstimatedScoreController::class, 'index'])->name('estimated-scores.index');
+
         // Order Management
         Route::get('order-management', [OrderManagementController::class, 'index'])->name('order-management.index');
         Route::get('order-management/{order}', [OrderManagementController::class, 'show'])->name('order-management.show');

@@ -140,6 +140,12 @@ class OfferingController extends Controller
                 DB::table('business_offerings')->insertOrIgnore($pivotData);
             }
 
+            // Recalculate score after updating offerings
+            $business = \App\Models\Business::find($businessId);
+            if ($business) {
+                \App\Services\BusinessScoreCalculator::recalculate($business);
+            }
+
             DB::commit();
 
             return response()->json([
