@@ -23,7 +23,6 @@ class Business extends Model
         'isVerified',
         'category',
         'google_place_id',
-        'top_selling_items',
     ];
 
     protected $hidden = [
@@ -31,7 +30,6 @@ class Business extends Model
     ];
 
     protected $casts = [
-        'top_selling_items' => 'array',
         'isVerified' => 'boolean',
     ];
 
@@ -74,6 +72,14 @@ class Business extends Model
     public function googleScores()
     {
         return $this->hasMany(GoogleScore::class);
+    }
+
+    /**
+     * Get top selling items associated with this business.
+     */
+    public function topSellingItems()
+    {
+        return $this->hasMany(TopSellingItem::class);
     }
 
     protected static function booted()

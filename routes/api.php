@@ -93,6 +93,10 @@ Route::prefix('v1')->group(function () {
         // Estimated Scores Route
         Route::get('businesses/{businessId}/estimated-scores', [App\Http\Controllers\Api\BusinessController::class, 'getEstimatedScores']);
 
+        // Top Selling Items Routes
+        Route::post('top-selling-items/{id}', [App\Http\Controllers\Api\TopSellingItemController::class, 'update']);
+        Route::delete('top-selling-items/{id}', [App\Http\Controllers\Api\TopSellingItemController::class, 'destroy']);
+
         // AI Poster Generation Routes
         Route::post('business/generate-poster', [App\Http\Controllers\Api\PosterController::class, 'generateWithTemplate']);
         Route::post('business/generate-poster-direct', [App\Http\Controllers\Api\PosterController::class, 'generateDirect']);

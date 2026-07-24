@@ -43,7 +43,10 @@ class BusinessController extends Controller
             'category' => 'nullable|string|max:255',
             'google_place_id' => 'nullable|string|max:255',
             'top_selling_items' => 'required|array',
-            'top_selling_items.*' => 'required|string|max:255',
+            'top_selling_items.*.item_name' => 'required|string|max:255',
+            'top_selling_items.*.description' => 'nullable|string',
+            'top_selling_items.*.price' => 'nullable|numeric|min:0',
+            'top_selling_items.*.media' => 'nullable',
             'offering_ids' => 'nullable|array',
             'offering_ids.*' => 'exists:offerings,id',
             'custom_offerings' => 'nullable|array',
@@ -99,7 +102,6 @@ class BusinessController extends Controller
                 'isVerified' => $request->boolean('isVerified'),
                 'category' => $request->input('category'),
                 'google_place_id' => $request->input('google_place_id'),
-                'top_selling_items' => $request->input('top_selling_items'),
             ]);
 
             // Save raw google scores from request
@@ -108,6 +110,26 @@ class BusinessController extends Controller
                     $business->googleScores()->create([
                         'name' => $scoreData['name'],
                         'points' => $scoreData['points'],
+                    ]);
+                }
+            }
+
+            // Save top selling items
+            if ($request->has('top_selling_items')) {
+                foreach ($request->input('top_selling_items') as $index => $itemData) {
+                    $mediaPath = null;
+                    if ($request->hasFile("top_selling_items.{$index}.media")) {
+                        $path = $request->file("top_selling_items.{$index}.media")->store('items', 'public');
+                        $mediaPath = 'storage/'.$path;
+                    } elseif (isset($itemData['media']) && is_string($itemData['media'])) {
+                        $mediaPath = $itemData['media'];
+                    }
+
+                    $business->topSellingItems()->create([
+                        'item_name' => $itemData['item_name'],
+                        'description' => $itemData['description'] ?? null,
+                        'price' => $itemData['price'] ?? null,
+                        'media' => $mediaPath,
                     ]);
                 }
             }
@@ -123,7 +145,7 @@ class BusinessController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Business registered successfully.',
-                'data' => $business->load(['offerings.subcategory.category', 'user', 'googleScores']),
+                'data' => $business->load(['offerings.subcategory.category', 'user', 'googleScores', 'topSellingItems']),
             ], 200);
 
         } catch (\Exception $e) {
@@ -139,7 +161,7 @@ class BusinessController extends Controller
     public function show(Request $request, $userId)
     {
         // dd($userId);
-        $business = Business::with(['offerings.subcategory.category', 'preferences', 'user'])
+        $business = Business::with(['offerings.subcategory.category', 'preferences', 'user', 'topSellingItems'])
             ->where('user_id', $userId)
             ->first();
 
