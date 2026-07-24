@@ -24,8 +24,6 @@ class Preference extends Model
         'common_mistakes_by_customers',
         'guidelines_to_customer',
         'nearest_landmark',
-        'interior_photos',
-        'team_photos',
         'target_gender',
         'target_age_group',
         'region',
@@ -36,8 +34,6 @@ class Preference extends Model
     ];
 
     protected $casts = [
-        'interior_photos' => 'array',
-        'team_photos' => 'array',
         'stop_creative_auto_approval' => 'boolean',
     ];
 
@@ -47,6 +43,14 @@ class Preference extends Model
     public function business()
     {
         return $this->belongsTo(Business::class);
+    }
+
+    /**
+     * Get the images associated with this preference.
+     */
+    public function images()
+    {
+        return $this->hasMany(PreferenceImage::class);
     }
 
     protected static function booted()

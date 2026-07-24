@@ -71,6 +71,9 @@ Route::prefix('v1')->group(function () {
     Route::get('config/google', [App\Http\Controllers\Api\ConfigController::class, 'googleConfig']);
     Route::get('config/meta', [App\Http\Controllers\Api\ConfigController::class, 'metaConfig']);
 
+    // Google Ads Route
+    Route::post('google/keyword-ideas', [App\Http\Controllers\Api\GoogleAdsController::class, 'getKeywordIdeas']);
+
     Route::middleware('api.token')->group(function () {
         Route::post('auth/google/login', [App\Http\Controllers\Api\AuthController::class, 'googleLogin']);
         Route::get('social/facebook/connect', [App\Http\Controllers\Api\SocialConnectionController::class, 'facebookConnect']);
@@ -87,7 +90,7 @@ Route::prefix('v1')->group(function () {
 
         // Preferences Routes
         Route::get('businesses/{businessId}/preferences', [App\Http\Controllers\Api\PreferenceController::class, 'show']);
-        Route::post('businesses/{businessId}/preferences', [App\Http\Controllers\Api\PreferenceController::class, 'storeOrUpdate']);
+
         Route::delete('businesses/{businessId}/preferences', [App\Http\Controllers\Api\PreferenceController::class, 'destroy']);
 
         // Estimated Scores Route
@@ -126,5 +129,7 @@ Route::prefix('v1')->group(function () {
     });
     // AI Suggestion Routes
     Route::post('ai/suggestions', [App\Http\Controllers\Api\AiSuggestionController::class, 'getSuggestions']);
+
+    Route::post('businesses/{businessId}/preferences', [App\Http\Controllers\Api\PreferenceController::class, 'storeOrUpdate']);
     // TODO: Add future API modules here.
 });

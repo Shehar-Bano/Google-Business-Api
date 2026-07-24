@@ -25,12 +25,13 @@ class PreferenceController extends Controller
             ], 404);
         }
 
-        $preferences = Preference::with('business')->where('business_id', $businessId)->first();
+        $preferences = Preference::with(['business', 'images'])->where('business_id', $businessId)->first();
 
         if (! $preferences) {
             $preferences = new Preference;
             $preferences->business_id = $business->id;
             $preferences->setRelation('business', $business);
+            $preferences->setRelation('images', collect());
         }
 
         return response()->json([
@@ -43,8 +44,9 @@ class PreferenceController extends Controller
      * Store or Update preferences for a business.
      * POST /api/businesses/{businessId}/preferences
      */
-    public function storeOrUpdate(Request $request, $businessId): JsonResponse
+    public function storeOrUpdate(Request $request, $businessId)
     {
+
         $business = Business::find($businessId);
         if (! $business) {
             return response()->json([
@@ -65,12 +67,6 @@ class PreferenceController extends Controller
             'common_mistakes_by_customers' => 'nullable|string',
             'guidelines_to_customer' => 'nullable|string',
             'nearest_landmark' => 'nullable|string|max:255',
-            'interior_photos' => 'nullable|array',
-            'interior_photos.*' => 'nullable|string',
-            'team_photos' => 'nullable|array',
-            'team_photos.*' => 'image|mimes:jpg,jpeg,png,webp|max:2048',
-            // 'team_photos' => 'nullable|array',
-            // 'team_photos.*' => 'nullable|string',
             'target_gender' => 'nullable|string|max:100',
             'target_age_group' => 'nullable|string|max:100',
             'region' => 'nullable|string|max:255',
@@ -78,6 +74,10 @@ class PreferenceController extends Controller
             'audience' => 'nullable|string|max:255',
             'cta' => 'nullable|string|max:255',
             'stop_creative_auto_approval' => 'nullable|boolean',
+            'images' => 'nullable|array',
+            'images.*.type' => 'required|string|in:interior_photos,team_photos',
+            'images.*.label' => 'nullable|string|max:255',
+            'images.*.image' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -100,8 +100,6 @@ class PreferenceController extends Controller
             'common_mistakes_by_customers',
             'guidelines_to_customer',
             'nearest_landmark',
-            'interior_photos',
-            'team_photos',
             'target_gender',
             'target_age_group',
             'region',
@@ -120,10 +118,34 @@ class PreferenceController extends Controller
             $data
         );
 
+        // Store preference images
+        if ($request->has('images')) {
+            // Delete old images associated with this preference
+            $preferences->images()->delete();
+
+            foreach ($request->input('images') as $index => $imageData) {
+                $imagePath = null;
+                if ($request->hasFile("images.{$index}.image")) {
+                    $path = $request->file("images.{$index}.image")->store('preferences', 'public');
+                    $imagePath = 'storage/'.$path;
+                } elseif (is_string($imageData['image'] ?? null)) {
+                    $imagePath = $imageData['image'];
+                }
+
+                if ($imagePath) {
+                    $preferences->images()->create([
+                        'type' => $imageData['type'],
+                        'label' => $imageData['label'] ?? null,
+                        'image' => $imagePath,
+                    ]);
+                }
+            }
+        }
+
         return response()->json([
             'success' => true,
             'message' => 'Preferences saved successfully.',
-            'data' => $preferences,
+            'data' => $preferences->load('images'),
         ], 200);
     }
 

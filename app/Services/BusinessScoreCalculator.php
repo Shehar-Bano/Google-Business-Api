@@ -62,9 +62,10 @@ class BusinessScoreCalculator
         $contactPhoneNumberPoints = (!empty($business->phone_number)) ? 3 : 0;
 
         // Rule 9: business_photos
-        $interiorPhotos = is_array($business->preferences->interior_photos ?? null) ? $business->preferences->interior_photos : [];
-        $teamPhotos = is_array($business->preferences->team_photos ?? null) ? $business->preferences->team_photos : [];
-        $photosCount = count(array_filter($interiorPhotos)) + count(array_filter($teamPhotos));
+        $photosCount = 0;
+        if ($business->preferences) {
+            $photosCount = $business->preferences->images()->count();
+        }
         $businessPhotosPoints = ($photosCount >= 10) ? 3 : 0;
 
         // Rule 10: post_upload_frequency

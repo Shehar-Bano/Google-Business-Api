@@ -59,4 +59,12 @@ return [
         'model' => env('GEMINI_MODEL', 'gemini-2.0-flash-lite'),
     ],
 
+    'google_ads' => [
+        'developer_token' => env('DEVELOPER_API_TOKEN'),
+        'client_id' => env('Google_Client_ID'),
+        'client_secret' => env('Google_Client_Secret'),
+        'refresh_token' => env('REFRESH_TOKEN'),
+        'customer_id' => env('Customer_ID', env('GOOGLE_ADS_CUSTOMER_ID')),
+    ],
+
 ];
