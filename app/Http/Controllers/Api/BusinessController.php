@@ -202,8 +202,11 @@ class BusinessController extends Controller
             'reviews' => 'nullable|integer|min:0',
             'isVerified' => 'nullable|boolean',
             'category' => 'nullable|string|max:255',
-            'top_selling_items' => 'sometimes|required|array',
-            'top_selling_items.*' => 'required|string|max:255',
+            'top_selling_items' => 'nullable|array',
+            'top_selling_items.*.item_name' => 'required|string|max:255',
+            'top_selling_items.*.description' => 'nullable|string',
+            'top_selling_items.*.price' => 'nullable|numeric|min:0',
+            'top_selling_items.*.media' => 'nullable',
             'offering_ids' => 'nullable|array',
             'offering_ids.*' => 'exists:offerings,id',
             'custom_offerings' => 'nullable|array',
@@ -227,7 +230,7 @@ class BusinessController extends Controller
 
         try {
             // Update fields
-            $updateData = $request->only(['name', 'location', 'phone_number', 'address', 'rating', 'reviews', 'category', 'top_selling_items']);
+            $updateData = $request->only(['name', 'location', 'phone_number', 'address', 'rating', 'reviews', 'category']);
 
             if ($request->has('isVerified')) {
                 $updateData['isVerified'] = $request->boolean('isVerified');
@@ -258,6 +261,27 @@ class BusinessController extends Controller
                 }
             }
 
+            // Update top selling items
+            if ($request->has('top_selling_items')) {
+                $business->topSellingItems()->delete();
+                foreach ($request->input('top_selling_items') as $index => $itemData) {
+                    $mediaPath = null;
+                    if ($request->hasFile("top_selling_items.{$index}.media")) {
+                        $path = $request->file("top_selling_items.{$index}.media")->store('items', 'public');
+                        $mediaPath = 'storage/'.$path;
+                    } elseif (isset($itemData['media']) && is_string($itemData['media'])) {
+                        $mediaPath = $itemData['media'];
+                    }
+
+                    $business->topSellingItems()->create([
+                        'item_name' => $itemData['item_name'],
+                        'description' => $itemData['description'] ?? null,
+                        'price' => $itemData['price'] ?? null,
+                        'media' => $mediaPath,
+                    ]);
+                }
+            }
+
             // If offerings or custom offerings are provided, sync them
             if ($request->has('offering_ids') || $request->has('custom_offerings')) {
                 $this->syncOfferings(
@@ -275,7 +299,7 @@ class BusinessController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Business updated successfully.',
-                'data' => $business->load('offerings.subcategory.category'),
+                'data' => $business->load(['offerings.subcategory.category', 'user', 'googleScores', 'topSellingItems']),
             ]);
 
         } catch (\Exception $e) {
