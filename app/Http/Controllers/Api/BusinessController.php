@@ -203,6 +203,7 @@ class BusinessController extends Controller
             'isVerified' => 'nullable|boolean',
             'category' => 'nullable|string|max:255',
             'top_selling_items' => 'nullable|array',
+            'top_selling_items.*.id' => 'nullable|integer|exists:top_selling_items,id',
             'top_selling_items.*.item_name' => 'required|string|max:255',
             'top_selling_items.*.description' => 'nullable|string',
             'top_selling_items.*.price' => 'nullable|numeric|min:0',
@@ -263,7 +264,8 @@ class BusinessController extends Controller
 
             // Update top selling items
             if ($request->has('top_selling_items')) {
-                $business->topSellingItems()->delete();
+                $incomingIds = [];
+
                 foreach ($request->input('top_selling_items') as $index => $itemData) {
                     $mediaPath = null;
                     if ($request->hasFile("top_selling_items.{$index}.media")) {
@@ -273,13 +275,42 @@ class BusinessController extends Controller
                         $mediaPath = $itemData['media'];
                     }
 
-                    $business->topSellingItems()->create([
-                        'item_name' => $itemData['item_name'],
-                        'description' => $itemData['description'] ?? null,
-                        'price' => $itemData['price'] ?? null,
-                        'media' => $mediaPath,
-                    ]);
+                    $itemId = $itemData['id'] ?? null;
+                    if ($itemId) {
+                        $existingItem = $business->topSellingItems()->find($itemId);
+                        if ($existingItem) {
+                            $updateFields = [
+                                'item_name' => $itemData['item_name'],
+                                'description' => $itemData['description'] ?? null,
+                                'price' => $itemData['price'] ?? null,
+                            ];
+                            if ($mediaPath !== null) {
+                                // Delete old media if a new file is uploaded
+                                if ($existingItem->media) {
+                                    $oldPath = str_replace('storage/', '', $existingItem->media);
+                                    if (\Illuminate\Support\Facades\Storage::disk('public')->exists($oldPath)) {
+                                        \Illuminate\Support\Facades\Storage::disk('public')->delete($oldPath);
+                                    }
+                                }
+                                $updateFields['media'] = $mediaPath;
+                            }
+                            $existingItem->update($updateFields);
+                            $incomingIds[] = $existingItem->id;
+                        }
+                    } else {
+                        // Create a new one
+                        $newItem = $business->topSellingItems()->create([
+                            'item_name' => $itemData['item_name'],
+                            'description' => $itemData['description'] ?? null,
+                            'price' => $itemData['price'] ?? null,
+                            'media' => $mediaPath,
+                        ]);
+                        $incomingIds[] = $newItem->id;
+                    }
                 }
+
+                // Delete items that were not present in the update request payload
+                $business->topSellingItems()->whereNotIn('id', $incomingIds)->delete();
             }
 
             // If offerings or custom offerings are provided, sync them
