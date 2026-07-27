@@ -104,6 +104,9 @@ Route::prefix('v1')->group(function () {
         Route::post('business/generate-poster', [App\Http\Controllers\Api\PosterController::class, 'generateWithTemplate']);
         Route::post('business/generate-poster-direct', [App\Http\Controllers\Api\PosterController::class, 'generateDirect']);
 
+        // WhatsApp Review Request Routes
+        Route::post('whatsapp/review-request', [App\Http\Controllers\Api\ReviewRequestController::class, 'sendWhatsAppRequest']);
+
     });
     Route::get('/test', function () {
 

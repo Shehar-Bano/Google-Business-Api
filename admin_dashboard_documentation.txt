@@ -1,0 +1,121 @@
+================================================================================
+                       GOOGLE BUSINESS - ADMIN DASHBOARD DOCUMENTATION
+================================================================================
+
+Yeh document Admin Panel ke tamam modules, functions, search filters, aur allowed
+actions (operations) ko detail me summarize karta hai.
+
+--------------------------------------------------------------------------------
+1. MAIN DASHBOARD (Home Screen)
+--------------------------------------------------------------------------------
+- Description: 
+  System statistics aur highlights display karne ke liye central command view.
+- Actions:
+  * View Statistics Summary (Real-time count verification).
+  * Navigation Links to detailed sub-modules (Users, Businesses, Scores).
+- Filters & Sorting:
+  * None (static high-level counters).
+- Detailed Metrics:
+  * Total Users count, Active/Pending/Blocked status metrics.
+  * Total Businesses, Unique Locations, and Eager offerings count ratios.
+  * Quick-view listing of the latest 10 registered businesses.
+
+--------------------------------------------------------------------------------
+2. USER MANAGEMENT (User Management Module)
+--------------------------------------------------------------------------------
+- Description:
+  System Users list, details, and active states control management.
+- Actions:
+  * View Users list (Index action).
+  * Show User Details (Show profile view, related businesses, roles).
+  * Update User Status (Change user state to Active, Pending, or Blocked).
+  * OTP Verification tracking (View if user phone registration is OTP Verified).
+- Filters & Sorting:
+  * Search Filter: Search by Name, Email, or Phone Number (Text search).
+  * Status Filter: Filter users matching 'active', 'pending', or 'blocked'.
+  * Pagination: Dynamically load page lists (10, 25, 50, 100 entries per page).
+  * Sortable: Sortable by registration date (`created_at`).
+
+--------------------------------------------------------------------------------
+3. BUSINESS MANAGEMENT (Business Management Module)
+--------------------------------------------------------------------------------
+- Description:
+  All registered businesses profiles, linked offerings, and top selling products.
+- Actions:
+  * Register New Business (Create/Store action including name, address, phone).
+  * Edit Business Details (Edit/Update action for changing categories, phone, address).
+  * Upload Brand Logo (File upload processing and storage sync).
+  * Sync Offerings (Sync catalog items / products / services with the business).
+  * Manage Top Selling Items (Update, save, and handle media file uploads per item).
+  * Recalculate estimated scorecard points (Trigger recalculation hook on save).
+- Filters & Sorting:
+  * Search Filter: Filter businesses by Name, Address, or Location text matches.
+  * Sorting Options: Sort list by Business Name, Location, or Created Date.
+  * Sort Direction: Ascending (`asc`) or Descending (`desc`).
+  * Pagination Limit: Change entries view (10, 25, 50, 100 per page).
+
+--------------------------------------------------------------------------------
+4. BUSINESSES ESTIMATED SCORES (Estimated Score Module)
+--------------------------------------------------------------------------------
+- Description:
+  Read-only panel displaying calculated points scorecard metrics per business.
+- Actions:
+  * View Score Records list (Index action).
+  * View calculated point breakdown per criteria.
+  * Search and verify total scorecard metrics.
+  * (Edit, delete, or create are disabled for this module to maintain score integrity).
+- Filters & Sorting:
+  * Search Filter: Search by Business Name or Score Field criteria name (e.g. active_days).
+  * Sorting: Ordered by calculation record ID descending by default.
+  * Pagination: Load page segments (10, 25, 50, 100 entries per page).
+
+--------------------------------------------------------------------------------
+5. ROLES & PERMISSIONS MANAGEMENT (ACL Module)
+--------------------------------------------------------------------------------
+- Description:
+  Configure security access rules using Spatie permissions package.
+- Actions:
+  * Create New Role / Permission (Create/Store action).
+  * Update Role / Permission details (Edit/Update name and keys).
+  * Delete Role / Permission (Destroy action to remove from system).
+  * Assign Roles to Users (Associate permission groups to user profiles).
+- Filters & Sorting:
+  * Search Filter: Filter Roles or Permissions by Name.
+  * Pagination: Standard database pagination controls.
+
+--------------------------------------------------------------------------------
+6. ORDER MANAGEMENT (Order Management Module)
+--------------------------------------------------------------------------------
+- Description:
+  Manage and trace orders placed by clients/businesses.
+- Actions:
+  * View Orders List (Index action).
+  * Show Order Details (Show invoice details, customer details, and price).
+  * Update Order Status (Mark status as Pending, Completed, or Cancelled).
+- Filters & Sorting:
+  * Search Filter: Search by Order Reference ID or Customer Name.
+  * Status Filter: Filter orders matching 'pending', 'completed', or 'failed'.
+  * Sorting: Sort by order date or grand price.
+
+--------------------------------------------------------------------------------
+7. AI POSTER & CREATIVES MANAGEMENT (Poster Module)
+--------------------------------------------------------------------------------
+- Description:
+  Review AI-generated posters, designs, and templates catalog.
+- Actions:
+  * View Generated Posters (Review output list).
+  * Delete Poster (Remove design template/image).
+- Filters & Sorting:
+  * None.
+
+--------------------------------------------------------------------------------
+8. SETTINGS & APP CONTENT (Support Options & Privacy Policy)
+--------------------------------------------------------------------------------
+- Description:
+  Configure global mobile app options, help guides, and policy texts.
+- Actions:
+  * Edit Support Category Option (Create, update, or remove support options).
+  * Edit Privacy Policy text (Update markdown privacy guidelines text).
+- Filters & Sorting:
+  * Search Filter: Search support categories by label name.
+================================================================================
