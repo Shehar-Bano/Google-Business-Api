@@ -23,6 +23,7 @@ class Business extends Model
         'isVerified',
         'category',
         'google_place_id',
+        'status',
     ];
 
     protected $hidden = [

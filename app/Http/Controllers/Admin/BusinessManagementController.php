@@ -5,10 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Business;
 use App\Models\BusinessSubcategory;
-use App\Models\Offering;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class BusinessManagementController extends Controller
 {
@@ -31,9 +29,10 @@ class BusinessManagementController extends Controller
             ? $request->string('direction', 'desc')->toString() : 'desc';
 
         $businesses = Business::query()
+            ->with('topSellingItems')
             ->when($search !== '', function ($query) use ($search) {
                 $query->where('name', 'like', "%{$search}%")
-                      ->orWhere('location', 'like', "%{$search}%");
+                    ->orWhere('location', 'like', "%{$search}%");
             })
             ->orderBy($sort, $direction)
             ->paginate($perPage)
@@ -91,7 +90,7 @@ class BusinessManagementController extends Controller
             $logoPath = null;
             if ($request->hasFile('brand_logo')) {
                 $path = $request->file('brand_logo')->store('businesses', 'public');
-                $logoPath = 'storage/' . $path;
+                $logoPath = 'storage/'.$path;
             }
 
             $business = Business::create([
@@ -123,7 +122,8 @@ class BusinessManagementController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->withInput()->with('error', 'Error creating business: ' . $e->getMessage());
+
+            return back()->withInput()->with('error', 'Error creating business: '.$e->getMessage());
         }
     }
 
@@ -132,7 +132,7 @@ class BusinessManagementController extends Controller
      */
     public function show(Business $business)
     {
-        $business->load(['offerings.subcategory.category']);
+        $business->load(['offerings.subcategory.category', 'topSellingItems', 'estimatedScores', 'googleScores']);
 
         return view('content.admin.business-management.show', compact('business'));
     }
@@ -142,88 +142,36 @@ class BusinessManagementController extends Controller
      */
     public function edit(Business $business)
     {
-        $business->load('offerings');
-        $subcategories = BusinessSubcategory::with('offerings')->get();
-        $selectedOfferingIds = $business->offerings->pluck('id')->all();
-
-        // Convert top selling items array back to comma-separated string for editing
-        $topSellingString = is_array($business->top_selling_items) 
-            ? implode(', ', $business->top_selling_items) 
-            : '';
-
-        return view('content.admin.business-management.edit', compact(
-            'business', 'subcategories', 'selectedOfferingIds', 'topSellingString'
-        ));
+        return view('content.admin.business-management.edit', compact('business'));
     }
 
     /**
-     * Update the specified business in storage.
+     * Update the specified business status in storage.
      */
     public function update(Request $request, Business $business)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'location' => 'required|string|max:255',
-            'phone_number' => 'nullable|string|max:50',
-            'address' => 'nullable|string|max:255',
-            'brand_logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:5120',
-            'rating' => 'nullable|numeric|between:0,5',
-            'reviews' => 'nullable|integer|min:0',
-            'isVerified' => 'nullable|boolean',
-            'category' => 'nullable|string|max:255',
-            'top_selling_items' => 'required|string',
-            'offering_ids' => 'nullable|array',
-            'offering_ids.*' => 'exists:offerings,id',
+            'status' => 'required|in:approved,suspended',
         ]);
 
-        $items = array_map('trim', explode(',', $request->input('top_selling_items')));
-        $items = array_filter($items);
+        $oldStatus = $business->status ?? 'approved';
+        $newStatus = $request->input('status');
 
-        DB::beginTransaction();
+        $business->update([
+            'status' => $newStatus,
+        ]);
 
-        try {
-            $updateData = [
-                'name' => $request->input('name'),
-                'location' => $request->input('location'),
-                'phone_number' => $request->input('phone_number'),
-                'address' => $request->input('address'),
-                'rating' => $request->input('rating'),
-                'reviews' => $request->input('reviews'),
-                'isVerified' => $request->has('isVerified'),
-                'category' => $request->input('category'),
-                'top_selling_items' => array_values($items),
-            ];
+        // Log the action to admin audit logs
+        \App\Models\AdminAuditLog::log(
+            'business_status_update',
+            'Business',
+            (string) $business->id,
+            "Updated business '{$business->name}' status from '{$oldStatus}' to '{$newStatus}'.",
+            ['business_id' => $business->id, 'old_status' => $oldStatus, 'new_status' => $newStatus]
+        );
 
-            // Handle logo update
-            if ($request->hasFile('brand_logo')) {
-                if ($business->brand_logo) {
-                    $oldPath = str_replace('storage/', '', $business->brand_logo);
-                    if (\Illuminate\Support\Facades\Storage::disk('public')->exists($oldPath)) {
-                        \Illuminate\Support\Facades\Storage::disk('public')->delete($oldPath);
-                    }
-                }
-                $path = $request->file('brand_logo')->store('businesses', 'public');
-                $updateData['brand_logo'] = 'storage/' . $path;
-            }
-
-            $business->update($updateData);
-
-            // Sync offerings
-            $offeringIds = $request->input('offering_ids', []);
-            $business->offerings()->sync($offeringIds);
-
-            // Recalculate score after update and sync
-            \App\Services\BusinessScoreCalculator::recalculate($business);
-
-            DB::commit();
-
-            return redirect()->route('admin.business-management.index')
-                ->with('success', 'Business updated successfully.');
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return back()->withInput()->with('error', 'Error updating business: ' . $e->getMessage());
-        }
+        return redirect()->route('admin.business-management.index')
+            ->with('success', 'Business status updated successfully.');
     }
 
     /**
@@ -244,8 +192,9 @@ class BusinessManagementController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+
             return redirect()->route('admin.business-management.index')
-                ->with('error', 'Error deleting business: ' . $e->getMessage());
+                ->with('error', 'Error deleting business: '.$e->getMessage());
         }
     }
 }
