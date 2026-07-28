@@ -39,17 +39,38 @@ class GoogleAdsController extends Controller
         $country = $request->input('country');
         $city = $request->input('city');
         $keyword = $request->input('keyword');
+        $businessId = $request->input('business_id');
 
         try {
             $data = $this->googleAdsService->generateKeywordIdeas($country, $city, $keyword);
 
+            // Store in database if business_id is resolved or provided
+            if ($businessId) {
+                \App\Models\BusinessKeywordIdea::where('business_id', $businessId)
+                    ->where('search_query', $keyword)
+                    ->delete();
+
+                foreach ($data as $item) {
+                    \App\Models\BusinessKeywordIdea::create([
+                        'business_id' => $businessId,
+                        'search_query' => $keyword,
+                        'keyword' => $item['keyword'] ?? '',
+                        'avg_monthly_searches' => $item['avg_monthly_searches'] ?? null,
+                        'competition' => $item['competition'] ?? null,
+                        'low_range_bid' => $item['low_range_bid'] ?? null,
+                        'high_range_bid' => $item['high_range_bid'] ?? null,
+                    ]);
+                }
+            }
+
             return response()->json([
                 'success' => true,
-                'message' => 'Keyword ideas fetched successfully.',
+                'message' => 'Keyword ideas fetched and stored successfully.',
                 'request' => [
                     'country' => $country,
                     'city' => $city,
-                    'keyword' => $keyword
+                    'keyword' => $keyword,
+                    'business_id' => $businessId,
                 ],
                 'data' => $data
             ], 200);

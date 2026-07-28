@@ -53,10 +53,14 @@ Route::middleware(['auth', 'verified', 'role:super_admin|admin'])
 
         // Business Management
         Route::get('business-management/{business}/preferences', [App\Http\Controllers\Admin\BusinessManagementController::class, 'showPreferences'])->name('business-management.preferences');
+        Route::get('business-management/{business}/keyword-ideas', [App\Http\Controllers\Admin\BusinessManagementController::class, 'showKeywordIdeas'])->name('business-management.keyword-ideas');
         Route::resource('business-management', App\Http\Controllers\Admin\BusinessManagementController::class)->parameters(['business-management' => 'business']);
 
         // Estimated Scores Management
         Route::get('estimated-scores', [App\Http\Controllers\Admin\EstimatedScoreController::class, 'index'])->name('estimated-scores.index');
+
+        // Google Business Connections
+        Route::get('google-business-connections', [App\Http\Controllers\Admin\GoogleBusinessConnectionController::class, 'index'])->name('google-business-connections.index');
 
         // Order Management
         // Route::get('order-management', [OrderManagementController::class, 'index'])->name('order-management.index');

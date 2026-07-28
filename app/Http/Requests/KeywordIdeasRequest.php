@@ -25,6 +25,7 @@ class KeywordIdeasRequest extends FormRequest
             'country' => 'required|string|max:255',
             'city' => 'required|string|max:255',
             'keyword' => 'required|string|max:255',
+            'business_id' => 'nullable|integer|exists:businesses,id',
         ];
     }
 

@@ -132,7 +132,7 @@ class BusinessManagementController extends Controller
      */
     public function show(Business $business)
     {
-        $business->load(['offerings.subcategory.category', 'topSellingItems', 'estimatedScores', 'googleScores']);
+        $business->load(['offerings.subcategory.category', 'topSellingItems', 'estimatedScores', 'googleScores', 'keywordIdeas']);
 
         return view('content.admin.business-management.show', compact('business'));
     }
@@ -206,5 +206,15 @@ class BusinessManagementController extends Controller
         $business->load('preferences.images');
 
         return view('content.admin.business-management.preferences', compact('business'));
+    }
+
+    /**
+     * Display keyword ideas of the business.
+     */
+    public function showKeywordIdeas(Business $business)
+    {
+        $business->load('keywordIdeas');
+
+        return view('content.admin.business-management.keyword-ideas', compact('business'));
     }
 }

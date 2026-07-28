@@ -60,6 +60,14 @@ class Business extends Model
     }
 
     /**
+     * Get keyword ideas associated with this business.
+     */
+    public function keywordIdeas()
+    {
+        return $this->hasMany(BusinessKeywordIdea::class);
+    }
+
+    /**
      * Get estimated scores for this business.
      */
     public function estimatedScores()

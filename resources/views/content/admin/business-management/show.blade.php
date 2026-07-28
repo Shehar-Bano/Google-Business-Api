@@ -17,7 +17,7 @@
             </div>
         </div>
 
-        <div class="row g-4">
+        <div class="row">
             {{-- Profile Card --}}
             <div class="col-lg-4">
                 <div class="card mb-4">
@@ -87,35 +87,22 @@
                                 <strong
                                     class="cell-primary">{{ $business->created_at?->format('Y-m-d H:i') ?? '—' }}</strong>
                             </div>
+                            <div class="mt-4 border-top pt-3 text-center d-grid gap-2">
+                                <a href="{{ route('admin.business-management.edit', $business) }}"
+                                    class="btn btn-primary btn-sm w-100 d-flex align-items-center justify-content-center gap-1">
+                                    <i class="mdi mdi-pencil me-1"></i> Edit Status
+                                </a>
+                                <a href="{{ route('admin.business-management.keyword-ideas', $business) }}"
+                                    class="btn btn-outline-primary btn-sm w-100 d-flex align-items-center justify-content-center gap-1">
+                                    <i class="mdi mdi-google me-1"></i> View Keyword Ideas
+                                </a>
+                            </div>
                         </div>
+                    </div> {{-- Closes Card --}}
+                </div> {{-- Closes col-lg-4 --}}
 
-                        <div class="mt-4 border-top pt-3 text-center">
-                            <a href="{{ route('admin.business-management.edit', $business) }}"
-                                class="btn btn-primary btn-sm w-100 d-flex align-items-center justify-content-center gap-1">
-                                <i class="mdi mdi-pencil me-1"></i> Edit Status
-                            </a>
-                        </div>
-                    </div>
-                </div>
 
-                {{-- Offerings Panel --}}
-                {{-- <div class="card">
-                <div class="card-header pb-2"><h6 class="mb-0 fw-bold">Linked Catalog (Offerings)</h6></div>
-                <div class="card-body">
-                    @forelse($business->offerings as $offering)
-                        <span class="badge bg-label-info mb-1 me-1">
-                            {{ $offering->name }}
-                            @if ($offering->subcategory?->category)
-                                <small class="text-muted">({{ $offering->subcategory->category->name }})</small>
-                            @endif
-                        </span>
-                    @empty
-                        <span class="text-muted small">No offerings linked.</span>
-                    @endforelse
-                </div>
-            </div> --}}
             </div>
-
             {{-- Top Selling & Scores Panels --}}
             <div class="col-lg-8">
                 {{-- Top Selling Items --}}
@@ -190,12 +177,14 @@
                                         </td>
                                         <td class="font-monospace text-muted">{{ $score->name }}</td>
                                         <td>
-                                            <span class="badge bg-label-primary fw-bold">{{ $score->points }} Points</span>
+                                            <span class="badge bg-label-primary fw-bold">{{ $score->points }}
+                                                Points</span>
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="3" class="text-center text-muted py-4">No Google scores calculated
+                                        <td colspan="3" class="text-center text-muted py-4">No Google scores
+                                            calculated
                                             yet.</td>
                                     </tr>
                                 @endforelse
@@ -205,27 +194,25 @@
                 </div>
             </div>
         </div>
+    @endsection
 
-    </div>
-@endsection
+    @push('my-styles')
+        <style>
+            .um-detail-avatar-placeholder {
+                width: 90px;
+                height: 90px;
+                border-radius: 20px;
+                background: #eef2ff;
+                color: #4f46e5;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 2.2rem;
+                font-weight: 800;
+            }
 
-@push('my-styles')
-    <style>
-        .um-detail-avatar-placeholder {
-            width: 90px;
-            height: 90px;
-            border-radius: 20px;
-            background: #eef2ff;
-            color: #4f46e5;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2.2rem;
-            font-weight: 800;
-        }
-
-        .font-monospace {
-            font-family: SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-        }
-    </style>
-@endpush
+            .font-monospace {
+                font-family: SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            }
+        </style>
+    @endpush
