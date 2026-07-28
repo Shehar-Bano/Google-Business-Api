@@ -18,21 +18,38 @@ class AiGeneratedPosterRepository
     /**
      * Paginate AI Generated Posters for admin.
      */
-    public function paginate(int $perPage = 10, ?string $search = null): LengthAwarePaginator
+    public function paginate(int $perPage = 10, ?string $search = null, string $sort = 'created_at', string $direction = 'desc'): LengthAwarePaginator
     {
-        return AiGeneratedPoster::query()
-            ->with(['user', 'business', 'poster'])
-            ->when($search, function ($query) use ($search) {
-                $query->where('prompt', 'like', "%{$search}%")
-                    ->orWhereHas('user', function ($q) use ($search) {
-                        $q->where('name', 'like', "%{$search}%");
+        $query = AiGeneratedPoster::query()
+            ->select('ai_generated_posters.*')
+            ->with(['user', 'business', 'poster']);
+
+        // Handle relation sorting
+        if ($sort === 'user') {
+            $query->join('users', 'ai_generated_posters.user_id', '=', 'users.id')
+                  ->orderBy('users.name', $direction);
+        } elseif ($sort === 'business') {
+            $query->leftJoin('businesses', 'ai_generated_posters.business_id', '=', 'businesses.id')
+                  ->orderBy('businesses.name', $direction);
+        } else {
+            // Protect column mapping
+            $sortColumn = in_array($sort, ['id', 'prompt', 'status', 'created_at'], true) ? $sort : 'created_at';
+            $query->orderBy('ai_generated_posters.' . $sortColumn, $direction);
+        }
+
+        $query->when($search, function ($q) use ($search) {
+            $q->where(function($sub) use ($search) {
+                $sub->where('ai_generated_posters.prompt', 'like', "%{$search}%")
+                    ->orWhereHas('user', function ($uq) use ($search) {
+                        $uq->where('name', 'like', "%{$search}%");
                     })
-                    ->orWhereHas('business', function ($q) use ($search) {
-                        $q->where('name', 'like', "%{$search}%");
+                    ->orWhereHas('business', function ($bq) use ($search) {
+                        $bq->where('name', 'like', "%{$search}%");
                     });
-            })
-            ->latest()
-            ->paginate($perPage);
+            });
+        });
+
+        return $query->paginate($perPage);
     }
 
     /**

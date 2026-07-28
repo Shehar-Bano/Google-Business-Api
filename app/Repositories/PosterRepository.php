@@ -26,13 +26,13 @@ class PosterRepository
     /**
      * Paginated list of posters for admin.
      */
-    public function paginate(int $perPage = 10, ?string $search = null): LengthAwarePaginator
+    public function paginate(int $perPage = 10, ?string $search = null, string $sort = 'created_at', string $direction = 'desc'): LengthAwarePaginator
     {
         return Poster::query()
             ->when($search, function ($query) use ($search) {
                 $query->where('title', 'like', "%{$search}%");
             })
-            ->latest()
+            ->orderBy($sort, $direction)
             ->paginate($perPage);
     }
 

@@ -20,9 +20,18 @@ class AiGeneratedPosterController extends Controller
         $perPage = in_array((int) $request->integer('per_page', 10), [10, 25, 50, 100], true)
             ? (int) $request->integer('per_page', 10) : 10;
 
-        $posters = $this->aiPosterService->paginateGenerated($perPage, $search);
+        $sort = in_array(
+            $request->string('sort', 'created_at')->toString(),
+            ['status', 'created_at'],
+            true
+        ) ? $request->string('sort', 'created_at')->toString() : 'created_at';
 
-        return view('content.admin.ai-generated-posters.index', compact('posters', 'search', 'perPage'));
+        $direction = in_array($request->string('direction', 'desc')->toString(), ['asc', 'desc'], true)
+            ? $request->string('direction', 'desc')->toString() : 'desc';
+
+        $posters = $this->aiPosterService->paginateGenerated($perPage, $search, $sort, $direction);
+
+        return view('content.admin.ai-generated-posters.index', compact('posters', 'search', 'perPage', 'sort', 'direction'));
     }
 
     /**

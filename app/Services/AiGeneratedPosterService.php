@@ -20,12 +20,9 @@ class AiGeneratedPosterService
         protected NanoBananaService $nanoBananaService
     ) {}
 
-    /**
-     * Get paginated generated posters.
-     */
-    public function paginateGenerated(int $perPage = 10, ?string $search = null)
+    public function paginateGenerated(int $perPage = 10, ?string $search = null, string $sort = 'created_at', string $direction = 'desc')
     {
-        return $this->aiPosterRepo->paginate($perPage, $search);
+        return $this->aiPosterRepo->paginate($perPage, $search, $sort, $direction);
     }
 
     /**

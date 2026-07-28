@@ -37,12 +37,14 @@
         'createUrl' => null,
         'search'    => $search,
         'perPage'   => $perPage,
+        'sort'      => $sort,
+        'direction' => $direction,
         'columns'   => [
             ['label' => '#',               'field' => 'id',         'sortable' => false],
             ['label' => 'Business Name',   'sortable' => false],
-            ['label' => 'Score Field Name','field' => 'name',       'sortable' => false],
-            ['label' => 'Points Awarded',  'field' => 'points',     'sortable' => false],
-            ['label' => 'Calculated At',   'field' => 'updated_at', 'sortable' => false],
+            ['label' => 'Score Field Name','field' => 'name',       'sortable' => true],
+            ['label' => 'Points Awarded',  'field' => 'points',     'sortable' => true],
+            ['label' => 'Calculated At',   'field' => 'updated_at', 'sortable' => true],
         ],
     ])
         @forelse($scores as $score)

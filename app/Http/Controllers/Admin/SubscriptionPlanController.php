@@ -19,15 +19,24 @@ class SubscriptionPlanController extends Controller
         $perPage = (int) $request->integer('per_page', 10);
         $perPage = in_array($perPage, [10, 25, 50, 100], true) ? $perPage : 10;
 
+        $sort = in_array(
+            $request->string('sort', 'id')->toString(),
+            ['id', 'title', 'price', 'billing_period', 'status', 'created_at'],
+            true
+        ) ? $request->string('sort', 'id')->toString() : 'id';
+
+        $direction = in_array($request->string('direction', 'desc')->toString(), ['asc', 'desc'], true)
+            ? $request->string('direction', 'desc')->toString() : 'desc';
+
         $plans = SubscriptionPlan::query()
             ->when($search !== '', function ($query) use ($search) {
                 $query->where('title', 'like', "%{$search}%");
             })
-            ->orderBy('id', 'desc')
+            ->orderBy($sort, $direction)
             ->paginate($perPage)
             ->withQueryString();
 
-        return view('content.admin.subscription-plans.index', compact('plans', 'search', 'perPage'));
+        return view('content.admin.subscription-plans.index', compact('plans', 'search', 'perPage', 'sort', 'direction'));
     }
 
     /**
