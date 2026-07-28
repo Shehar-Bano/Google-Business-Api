@@ -103,6 +103,8 @@ Route::prefix('v1')->group(function () {
         // AI Poster Generation Routes
         Route::post('business/generate-poster', [App\Http\Controllers\Api\PosterController::class, 'generateWithTemplate']);
         Route::post('business/generate-poster-direct', [App\Http\Controllers\Api\PosterController::class, 'generateDirect']);
+        Route::post('business/generated-posters/{id}/approve', [App\Http\Controllers\Api\PosterController::class, 'approve']);
+        Route::post('business/generated-posters/{id}/reject', [App\Http\Controllers\Api\PosterController::class, 'reject']);
 
         // WhatsApp Review Request Routes
         Route::post('whatsapp/review-request', [App\Http\Controllers\Api\ReviewRequestController::class, 'sendWhatsAppRequest']);

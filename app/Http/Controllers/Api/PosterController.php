@@ -118,4 +118,77 @@ class PosterController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Approve AI generated poster.
+     * POST /api/v1/business/generated-posters/{id}/approve
+     */
+    public function approve(Request $request, $id): JsonResponse
+    {
+        $user = $request->user();
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized.',
+            ], 401);
+        }
+
+        $generated = \App\Models\AiGeneratedPoster::find($id);
+        if (!$generated) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Generated poster not found.',
+            ], 404);
+        }
+
+        $generated->update([
+            'status' => 'approved',
+            'approved_by' => $user->id,
+            'approved_at' => now(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Poster approved successfully.',
+            'data' => $generated
+        ]);
+    }
+
+    /**
+     * Reject AI generated poster.
+     * POST /api/v1/business/generated-posters/{id}/reject
+     */
+    public function reject(Request $request, $id): JsonResponse
+    {
+        $user = $request->user();
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized.',
+            ], 401);
+        }
+
+        $generated = \App\Models\AiGeneratedPoster::find($id);
+        if (!$generated) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Generated poster not found.',
+            ], 404);
+        }
+
+        $request->validate([
+            'rejection_reason' => 'nullable|string|max:1000',
+        ]);
+
+        $generated->update([
+            'status' => 'rejected',
+            'rejection_reason' => $request->input('rejection_reason'),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Poster rejected successfully.',
+            'data' => $generated
+        ]);
+    }
 }
