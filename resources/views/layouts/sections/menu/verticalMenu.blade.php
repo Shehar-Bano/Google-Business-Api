@@ -60,7 +60,7 @@
         </li> --}}
 
         <li
-            class="menu-item {{ request()->routeIs('admin.roles.*') || request()->routeIs('admin.permissions.*') || request()->routeIs('admin.users.*') ? 'open' : '' }}">
+            class="menu-item {{ request()->routeIs('admin.roles.*') || request()->routeIs('admin.permissions.*') || request()->routeIs('admin.users.*') || request()->routeIs('admin.audit-logs.*') ? 'open' : '' }}">
             <a href="#" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons mdi mdi-shield-account-outline"></i>
                 <div>Access Control</div>
@@ -79,6 +79,11 @@
                 <li class="menu-item {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
                     <a href="{{ route('admin.users.index') }}" class="menu-link">
                         <div>Users</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->routeIs('admin.audit-logs.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.audit-logs.index') }}" class="menu-link">
+                        <div>Audit Logs</div>
                     </a>
                 </li>
             </ul>

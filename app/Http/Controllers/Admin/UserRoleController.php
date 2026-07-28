@@ -56,7 +56,16 @@ class UserRoleController extends Controller
 
     public function update(UpdateUserRolesRequest $request, User $user): RedirectResponse
     {
-        $user->syncRoles($request->input('roles', []));
+        $roles = $request->input('roles', []);
+        $user->syncRoles($roles);
+
+        \App\Models\AdminAuditLog::log(
+            'role_assign',
+            'User',
+            (string) $user->id,
+            "Assigned roles to user {$user->name}: " . implode(', ', $roles),
+            ['user_id' => $user->id, 'roles' => $roles]
+        );
 
         return redirect()->route('admin.users.index')->with('success', 'User roles updated successfully.');
     }

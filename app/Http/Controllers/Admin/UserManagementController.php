@@ -30,7 +30,18 @@ class UserManagementController extends Controller
 
     public function updateStatus(UpdateUserStatusRequest $request, User $user): RedirectResponse
     {
-        $this->userManagementService->updateStatus($user, $request->string('status')->toString());
+        $oldStatus = $user->status;
+        $newStatus = $request->string('status')->toString();
+        
+        $this->userManagementService->updateStatus($user, $newStatus);
+
+        \App\Models\AdminAuditLog::log(
+            'user_status_update',
+            'User',
+            (string) $user->id,
+            "Updated user {$user->name} status from '{$oldStatus}' to '{$newStatus}'.",
+            ['user_id' => $user->id, 'old_status' => $oldStatus, 'new_status' => $newStatus]
+        );
 
         return redirect()->route('admin.user-management.index')->with('success', 'User status updated successfully.');
     }

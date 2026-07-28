@@ -51,10 +51,18 @@ class PermissionController extends Controller
 
     public function store(StorePermissionRequest $request): RedirectResponse
     {
-        Permission::create([
+        $permission = Permission::create([
             'name' => $request->string('name')->toString(),
             'guard_name' => 'web',
         ]);
+
+        \App\Models\AdminAuditLog::log(
+            'permission_create',
+            'Permission',
+            (string) $permission->id,
+            "Created permission '{$permission->name}'.",
+            ['permission_name' => $permission->name]
+        );
 
         return redirect()->route('admin.permissions.index')->with('success', 'Permission created successfully.');
     }
@@ -66,9 +74,20 @@ class PermissionController extends Controller
 
     public function update(UpdatePermissionRequest $request, Permission $permission): RedirectResponse
     {
+        $oldName = $permission->name;
+        $newName = $request->string('name')->toString();
+
         $permission->update([
-            'name' => $request->string('name')->toString(),
+            'name' => $newName,
         ]);
+
+        \App\Models\AdminAuditLog::log(
+            'permission_update',
+            'Permission',
+            (string) $permission->id,
+            "Updated permission '{$oldName}' to '{$newName}'.",
+            ['old_name' => $oldName, 'new_name' => $newName]
+        );
 
         return redirect()->route('admin.permissions.index')->with('success', 'Permission updated successfully.');
     }
@@ -81,10 +100,21 @@ class PermissionController extends Controller
             return back()->withErrors(['permission' => 'Cannot delete a permission assigned to super_admin.']);
         }
 
+        $permissionName = $permission->name;
+        $permissionId = $permission->id;
+
         DB::transaction(function () use ($permission): void {
             $permission->roles()->detach();
             $permission->delete();
         });
+
+        \App\Models\AdminAuditLog::log(
+            'permission_delete',
+            'Permission',
+            (string) $permissionId,
+            "Deleted permission '{$permissionName}'.",
+            ['permission_name' => $permissionName]
+        );
 
         return redirect()->route('admin.permissions.index')->with('success', 'Permission deleted successfully.');
     }

@@ -43,6 +43,9 @@ Route::middleware(['auth', 'verified', 'role:super_admin|admin'])
         Route::get('users/{user}/roles', [UserRoleController::class, 'edit'])->name('users.roles.edit');
         Route::put('users/{user}/roles', [UserRoleController::class, 'update'])->name('users.roles.update');
 
+        // Audit Logs Route
+        Route::get('audit-logs', [App\Http\Controllers\Admin\AuditLogController::class, 'index'])->name('audit-logs.index');
+
         // User Management
         Route::get('user-management', [UserManagementController::class, 'index'])->name('user-management.index');
         Route::get('user-management/{user}', [UserManagementController::class, 'show'])->name('user-management.show');

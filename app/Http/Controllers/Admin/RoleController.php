@@ -59,7 +59,16 @@ class RoleController extends Controller
             'guard_name' => 'web',
         ]);
 
-        $role->syncPermissions($request->input('permissions', []));
+        $permissions = $request->input('permissions', []);
+        $role->syncPermissions($permissions);
+
+        \App\Models\AdminAuditLog::log(
+            'role_create',
+            'Role',
+            (string) $role->id,
+            "Created role '{$role->name}' with permissions: " . implode(', ', $permissions),
+            ['role_name' => $role->name, 'permissions' => $permissions]
+        );
 
         return redirect()->route('admin.roles.index')->with('success', 'Role created successfully.');
     }
@@ -82,11 +91,23 @@ class RoleController extends Controller
             return back()->withErrors(['name' => 'Protected roles cannot be renamed.'])->withInput();
         }
 
+        $oldName = $role->name;
+        $newName = $request->string('name')->toString();
+
         $role->update([
-            'name' => $request->string('name')->toString(),
+            'name' => $newName,
         ]);
 
-        $role->syncPermissions($request->input('permissions', []));
+        $permissions = $request->input('permissions', []);
+        $role->syncPermissions($permissions);
+
+        \App\Models\AdminAuditLog::log(
+            'role_update',
+            'Role',
+            (string) $role->id,
+            "Updated role '{$oldName}' to '{$newName}' with permissions: " . implode(', ', $permissions),
+            ['old_name' => $oldName, 'new_name' => $newName, 'permissions' => $permissions]
+        );
 
         return redirect()->route('admin.roles.index')->with('success', 'Role updated successfully.');
     }
@@ -97,7 +118,16 @@ class RoleController extends Controller
             return back()->withErrors(['role' => 'This role is protected and cannot be deleted.']);
         }
 
+        $roleName = $role->name;
         $role->delete();
+
+        \App\Models\AdminAuditLog::log(
+            'role_delete',
+            'Role',
+            (string) $role->id,
+            "Deleted role '{$roleName}'.",
+            ['role_name' => $roleName]
+        );
 
         return redirect()->route('admin.roles.index')->with('success', 'Role deleted successfully.');
     }

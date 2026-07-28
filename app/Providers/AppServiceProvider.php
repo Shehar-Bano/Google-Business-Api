@@ -27,5 +27,33 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Paginator::useBootstrap();
+
+        // Listen for Login
+        \Illuminate\Support\Facades\Event::listen(
+            \Illuminate\Auth\Events\Login::class,
+            function ($event) {
+                \App\Models\AdminAuditLog::create([
+                    'user_id' => $event->user->id,
+                    'action' => 'login',
+                    'description' => "User {$event->user->name} logged in.",
+                    'ip_address' => request()->ip(),
+                ]);
+            }
+        );
+
+        // Listen for Logout
+        \Illuminate\Support\Facades\Event::listen(
+            \Illuminate\Auth\Events\Logout::class,
+            function ($event) {
+                if ($event->user) {
+                    \App\Models\AdminAuditLog::create([
+                        'user_id' => $event->user->id,
+                        'action' => 'logout',
+                        'description' => "User {$event->user->name} logged out.",
+                        'ip_address' => request()->ip(),
+                    ]);
+                }
+            }
+        );
     }
 }
