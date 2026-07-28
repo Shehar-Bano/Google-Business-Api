@@ -33,6 +33,48 @@ class DashboardController extends Controller
             ->limit(10)
             ->get();
 
-        return view('content.admin.dashboard.index', compact('userStats', 'businessStats', 'latestBusinesses'));
+        // 1. Daily: Last 7 days
+        $dailyData = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = now()->subDays($i);
+            $start = $date->copy()->startOfDay();
+            $end = $date->copy()->endOfDay();
+            $dailyData[$date->format('M d')] = User::whereBetween('created_at', [$start, $end])->count();
+        }
+
+        // 2. Weekly: Last 4 weeks
+        $weeklyData = [];
+        for ($i = 3; $i >= 0; $i--) {
+            $start = now()->subWeeks($i)->startOfWeek();
+            $end = now()->subWeeks($i)->endOfWeek();
+            $weeklyData[$start->format('M d') . ' - ' . $end->format('M d')] = User::whereBetween('created_at', [$start, $end])->count();
+        }
+
+        // 3. Monthly: Last 6 months
+        $monthlyData = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $monthDate = now()->subMonths($i);
+            $start = $monthDate->copy()->startOfMonth();
+            $end = $monthDate->copy()->endOfMonth();
+            $monthlyData[$monthDate->format('M Y')] = User::whereBetween('created_at', [$start, $end])->count();
+        }
+
+        // 4. Yearly: Last 5 years
+        $yearlyData = [];
+        for ($i = 4; $i >= 0; $i--) {
+            $yearDate = now()->subYears($i);
+            $start = $yearDate->copy()->startOfYear();
+            $end = $yearDate->copy()->endOfYear();
+            $yearlyData[$yearDate->format('Y')] = User::whereBetween('created_at', [$start, $end])->count();
+        }
+
+        $chartData = [
+            'daily' => $dailyData,
+            'weekly' => $weeklyData,
+            'monthly' => $monthlyData,
+            'yearly' => $yearlyData,
+        ];
+
+        return view('content.admin.dashboard.index', compact('userStats', 'businessStats', 'latestBusinesses', 'chartData'));
     }
 }
