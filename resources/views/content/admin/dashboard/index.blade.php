@@ -4,6 +4,34 @@
 
 @section('content')
 
+    {{-- ===== Top Header with Time-Range Filter ===== --}}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-0">Dashboard Overview</h4>
+            <p class="text-muted mb-0 small">Overview of users, businesses, and AI activity.</p>
+        </div>
+        <div>
+            <div class="dropdown">
+                <button class="btn btn-primary dropdown-toggle d-flex align-items-center gap-1" type="button" id="dashboardRangeSelector" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="mdi mdi-calendar-range me-1"></i>
+                    @if($range === 'today') Today's Stats
+                    @elseif($range === 'week') This Week's Stats
+                    @elseif($range === 'month') This Month's Stats
+                    @elseif($range === 'year') This Year's Stats
+                    @else All Time Stats
+                    @endif
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dashboardRangeSelector">
+                    <li><a class="dropdown-item @if($range === 'all') active @endif" href="{{ route('admin.dashboard.index', ['range' => 'all']) }}">All Time Stats</a></li>
+                    <li><a class="dropdown-item @if($range === 'today') active @endif" href="{{ route('admin.dashboard.index', ['range' => 'today']) }}">Today's Stats</a></li>
+                    <li><a class="dropdown-item @if($range === 'week') active @endif" href="{{ route('admin.dashboard.index', ['range' => 'week']) }}">This Week's Stats</a></li>
+                    <li><a class="dropdown-item @if($range === 'month') active @endif" href="{{ route('admin.dashboard.index', ['range' => 'month']) }}">This Month's Stats</a></li>
+                    <li><a class="dropdown-item @if($range === 'year') active @endif" href="{{ route('admin.dashboard.index', ['range' => 'year']) }}">This Year's Stats</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
     {{-- ===== Row 1: User Statistics ===== --}}
     <div class="mb-2">
         <h5 class="dash-section-title"><i class="mdi mdi-account-group-outline me-2 text-primary"></i>User Statistics</h5>
@@ -27,40 +55,69 @@
         @endforeach
     </div>
 
-    {{-- ===== Row 2: Business Statistics ===== --}}
-    {{-- <div class="mb-2">
-        <h5 class="dash-section-title"><i class="mdi mdi-briefcase-outline me-2 text-primary"></i>Business Statistics</h5>
-    </div>
-    <div class="dash-stats-grid mb-4">
-        <div class="dash-stat-card dash-stat-card--primary">
-            <div class="dash-stat-card__icon"><i class="mdi mdi-briefcase"></i></div>
-            <div>
-                <div class="dash-stat-card__label">Total Businesses</div>
-                <div class="dash-stat-card__value">{{ number_format($businessStats['total']) }}</div>
+    {{-- ===== Row 2: Business & AI Statistics ===== --}}
+    <div class="row g-4 mb-4">
+        {{-- Business Statistics --}}
+        <div class="col-md-12">
+            <div class="mb-2">
+                <h5 class="dash-section-title"><i class="mdi mdi-briefcase-outline me-2 text-primary"></i>Business
+                    Statistics</h5>
+            </div>
+            <div class="dash-stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));">
+                <div class="dash-stat-card dash-stat-card--primary">
+                    <div class="dash-stat-card__icon"><i class="mdi mdi-briefcase"></i></div>
+                    <div>
+                        <div class="dash-stat-card__label">Total Businesses</div>
+                        <div class="dash-stat-card__value">{{ number_format($businessStats['total']) }}</div>
+                    </div>
+                </div>
+                <div class="dash-stat-card dash-stat-card--user-active">
+                    <div class="dash-stat-card__icon"><i class="mdi mdi-check-circle-outline"></i></div>
+                    <div>
+                        <div class="dash-stat-card__label">Approved</div>
+                        <div class="dash-stat-card__value">{{ number_format($businessStats['approved']) }}</div>
+                    </div>
+                </div>
+                <div class="dash-stat-card dash-stat-card--user-rejected">
+                    <div class="dash-stat-card__icon"><i class="mdi mdi-lock-outline"></i></div>
+                    <div>
+                        <div class="dash-stat-card__label">Suspended</div>
+                        <div class="dash-stat-card__value">{{ number_format($businessStats['suspended']) }}</div>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="dash-stat-card dash-stat-card--business-with">
-            <div class="dash-stat-card__icon"><i class="mdi mdi-check-decagram"></i></div>
-            <div>
-            <div class="dash-stat-card__label">With Offerings</div>
-            <div class="dash-stat-card__value">{{ number_format($businessStats['with_offerings']) }}</div>
-        </div>
-        </div>
-        <div class="dash-stat-card dash-stat-card--business-without">
-        <div class="dash-stat-card__icon"><i class="mdi mdi-alert-circle-outline"></i></div>
-        <div>
-            <div class="dash-stat-card__label">Without Offerings</div>
-            <div class="dash-stat-card__value">{{ number_format($businessStats['without_offerings']) }}</div>
-        </div>
+
+
     </div>
-        <div class="dash-stat-card dash-stat-card--business-locations">
-            <div class="dash-stat-card__icon"><i class="mdi mdi-map-marker-radius"></i></div>
-            <div>
-                <div class="dash-stat-card__label">Unique Locations</div>
-                <div class="dash-stat-card__value">{{ number_format($businessStats['unique_locations']) }}</div>
+    {{-- AI Statistics --}}
+    <div class="row g-4 mb-4">
+        <div class="mb-2">
+            <h5 class="dash-section-title"><i class="mdi mdi-robot-outline me-2 text-primary"></i>AI Integration Stats</h5>
+        </div>
+        <div class="dash-stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));">
+            <div class="dash-stat-card"
+                style="background: linear-gradient(180deg, #ffffff 0%, #f5f3ff 100%); border-color: #ddd6fe;">
+                <div class="dash-stat-card__icon" style="background: #f3e8ff; color: #7c3aed;"><i
+                        class="mdi mdi-image-multiple"></i></div>
+                <div>
+                    <div class="dash-stat-card__label" style="color: #6d28d9;">Generated Banners</div>
+                    <div class="dash-stat-card__value" style="color: #4c1d95;">
+                        {{ number_format($aiStats['total_generated_posters']) }}</div>
+                </div>
+            </div>
+            <div class="dash-stat-card"
+                style="background: linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%); border-color: #bbf7d0;">
+                <div class="dash-stat-card__icon" style="background: #d1fae5; color: #059669;"><i
+                        class="mdi mdi-google-ads"></i></div>
+                <div>
+                    <div class="dash-stat-card__label" style="color: #047857;">Stored Keywords</div>
+                    <div class="dash-stat-card__value" style="color: #064e3b;">
+                        {{ number_format($aiStats['total_keywords']) }}</div>
+                </div>
             </div>
         </div>
-    </div> --}}
+    </div>
 
     {{-- ===== Row 3: Latest Businesses & User Registrations ===== --}}
     <div class="row g-4 mb-4">
@@ -106,7 +163,8 @@
                                     <td class="cell-muted">{{ $business->created_at?->format('Y-m-d') }}</td>
                                     <td class="text-end">
                                         <a href="{{ route('admin.business-management.show', $business) }}"
-                                            class="action-icon-btn action-icon-view" data-bs-toggle="tooltip" title="View Business">
+                                            class="action-icon-btn action-icon-view" data-bs-toggle="tooltip"
+                                            title="View Business">
                                             <i class="mdi mdi-eye-outline"></i>
                                         </a>
                                     </td>
@@ -131,14 +189,19 @@
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Registration Stats</h5>
                     <div class="dropdown">
-                        <button class="btn btn-xs btn-outline-primary dropdown-toggle" type="button" id="chartFilterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <button class="btn btn-xs btn-outline-primary dropdown-toggle" type="button"
+                            id="chartFilterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                             Daily
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="chartFilterDropdown">
-                            <li><a class="dropdown-item active" href="javascript:void(0);" onclick="switchChartFilter('daily', this)">Daily</a></li>
-                            <li><a class="dropdown-item" href="javascript:void(0);" onclick="switchChartFilter('weekly', this)">Weekly</a></li>
-                            <li><a class="dropdown-item" href="javascript:void(0);" onclick="switchChartFilter('monthly', this)">Monthly</a></li>
-                            <li><a class="dropdown-item" href="javascript:void(0);" onclick="switchChartFilter('yearly', this)">Yearly</a></li>
+                            <li><a class="dropdown-item active" href="javascript:void(0);"
+                                    onclick="switchChartFilter('daily', this)">Daily</a></li>
+                            <li><a class="dropdown-item" href="javascript:void(0);"
+                                    onclick="switchChartFilter('weekly', this)">Weekly</a></li>
+                            <li><a class="dropdown-item" href="javascript:void(0);"
+                                    onclick="switchChartFilter('monthly', this)">Monthly</a></li>
+                            <li><a class="dropdown-item" href="javascript:void(0);"
+                                    onclick="switchChartFilter('yearly', this)">Yearly</a></li>
                         </ul>
                     </div>
                 </div>
@@ -305,12 +368,14 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { display: false }
+                        legend: {
+                            display: false
+                        }
                     },
                     scales: {
                         y: {
                             beginAtZero: true,
-                            ticks: { 
+                            ticks: {
                                 stepSize: 1,
                                 color: '#64748b'
                             },
