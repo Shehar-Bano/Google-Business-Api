@@ -135,6 +135,9 @@ Route::prefix('v1')->group(function () {
     // AI Suggestion Routes
     Route::post('ai/suggestions', [App\Http\Controllers\Api\AiSuggestionController::class, 'getSuggestions']);
 
+    // Subscriptions Plans API
+    Route::get('subscription-plans', [App\Http\Controllers\Api\SubscriptionPlanController::class, 'index']);
+
     Route::post('businesses/{businessId}/preferences', [App\Http\Controllers\Api\PreferenceController::class, 'storeOrUpdate']);
     // TODO: Add future API modules here.
 });

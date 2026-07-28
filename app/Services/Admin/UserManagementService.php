@@ -15,7 +15,7 @@ class UserManagementService
 
         $sort = in_array(
             $request->string('sort', 'created_at')->toString(),
-            ['name', 'email', 'role', 'status', 'created_at'],
+            ['name', 'email', 'phone_number', 'role', 'status', 'created_at'],
             true
         ) ? $request->string('sort', 'created_at')->toString() : 'created_at';
 
@@ -31,7 +31,8 @@ class UserManagementService
             ->when($search !== '', function (Builder $query) use ($search): void {
                 $query->where(function (Builder $sub) use ($search): void {
                     $sub->where('name', 'like', "%{$search}%")
-                        ->orWhere('email', 'like', "%{$search}%");
+                        ->orWhere('email', 'like', "%{$search}%")
+                        ->orWhere('phone_number', 'like', "%{$search}%");
                 });
             })
             ->when($status !== '', fn (Builder $q) => $q->where('status', $status))

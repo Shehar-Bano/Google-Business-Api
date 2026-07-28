@@ -65,6 +65,13 @@
             </a>
         </li> --}}
 
+        <li class="menu-item {{ request()->routeIs('admin.subscription-plans.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.subscription-plans.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons mdi mdi-credit-card-outline"></i>
+                <div>Subscriptions</div>
+            </a>
+        </li>
+
         <li
             class="menu-item {{ request()->routeIs('admin.roles.*') || request()->routeIs('admin.permissions.*') || request()->routeIs('admin.users.*') || request()->routeIs('admin.audit-logs.*') ? 'open' : '' }}">
             <a href="#" class="menu-link menu-toggle">
