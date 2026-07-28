@@ -22,7 +22,7 @@ class AiGeneratedPosterController extends Controller
 
         $sort = in_array(
             $request->string('sort', 'created_at')->toString(),
-            ['status', 'created_at'],
+            ['id', 'user', 'business', 'prompt', 'status', 'created_at'],
             true
         ) ? $request->string('sort', 'created_at')->toString() : 'created_at';
 

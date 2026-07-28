@@ -82,8 +82,6 @@
                         <th>ID</th>
                         <th>Business Name</th>
                         <th>Location</th>
-                        <th>Top Selling Items</th>
-                        <th>Offerings Count</th>
                         <th>Created Date</th>
                         <th class="text-end admin-actions-col">Action</th>
                     </tr>
@@ -102,21 +100,6 @@
                                 </div>
                             </td>
                             <td class="cell-primary">{{ $business->location }}</td>
-                            <td>
-                                @if (is_array($business->top_selling_items))
-                                    <div class="d-flex flex-wrap gap-1">
-                                        @foreach ($business->top_selling_items as $item)
-                                            <span class="badge bg-label-info btn-xs"
-                                                style="font-size: 0.72rem;">{{ $item }}</span>
-                                        @endforeach
-                                    </div>
-                                @else
-                                    <span class="text-muted">—</span>
-                                @endif
-                            </td>
-                            <td>
-                                <span class="badge bg-label-primary">{{ $business->offerings_count }} Offerings</span>
-                            </td>
                             <td class="cell-muted">{{ $business->created_at?->format('Y-m-d') }}</td>
                             <td class="text-end">
                                 <a href="{{ route('admin.business-management.show', $business) }}"
@@ -127,7 +110,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="text-center text-muted py-4">No businesses yet.</td>
+                            <td colspan="5" class="text-center text-muted py-4">No businesses yet.</td>
                         </tr>
                     @endforelse
                 </tbody>
