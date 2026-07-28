@@ -52,6 +52,7 @@
                 ['label' => 'Business Name', 'field' => 'name', 'sortable' => true],
                 ['label' => 'Location', 'field' => 'location', 'sortable' => true],
                 ['label' => 'Status', 'field' => 'status', 'sortable' => true],
+                ['label' => 'Preferences', 'sortable' => false],
                 ['label' => 'Created At', 'field' => 'created_at', 'sortable' => true],
                 ['label' => 'Actions', 'actions' => true],
             ],
@@ -70,19 +71,20 @@
                         </div>
                     </td>
                     <td class="cell-primary">{{ $business->location }}</td>
-                    {{-- <td>
-                        @forelse($business->topSellingItems as $item)
-                            <span class="badge bg-label-info mb-1">{{ $item->item_name }}</span>
-                        @empty
-                            <span class="text-muted">—</span>
-                        @endforelse
-                    </td> --}}
+
                     <td>
                         @if (($business->status ?? 'approved') === 'suspended')
                             <span class="badge bg-label-danger">Suspended</span>
                         @else
                             <span class="badge bg-label-success">Approved</span>
                         @endif
+                    </td>
+                    <td>
+                        <a href="{{ route('admin.business-management.preferences', $business) }}"
+                            class="btn btn-outline-primary btn-xs d-inline-flex align-items-center gap-1"
+                            title="View Preferences">
+                            <i class="mdi mdi-cog-outline"></i> Preferences
+                        </a>
                     </td>
                     <td class="cell-muted">{{ $business->created_at?->format('Y-m-d') }}</td>
                     <td class="text-end">

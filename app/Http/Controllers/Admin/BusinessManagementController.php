@@ -197,4 +197,14 @@ class BusinessManagementController extends Controller
                 ->with('error', 'Error deleting business: '.$e->getMessage());
         }
     }
+
+    /**
+     * Display preferences of the business.
+     */
+    public function showPreferences(Business $business)
+    {
+        $business->load('preferences.images');
+
+        return view('content.admin.business-management.preferences', compact('business'));
+    }
 }

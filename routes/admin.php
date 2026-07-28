@@ -52,6 +52,7 @@ Route::middleware(['auth', 'verified', 'role:super_admin|admin'])
         Route::patch('user-management/{user}/status', [UserManagementController::class, 'updateStatus'])->name('user-management.update-status');
 
         // Business Management
+        Route::get('business-management/{business}/preferences', [App\Http\Controllers\Admin\BusinessManagementController::class, 'showPreferences'])->name('business-management.preferences');
         Route::resource('business-management', App\Http\Controllers\Admin\BusinessManagementController::class)->parameters(['business-management' => 'business']);
 
         // Estimated Scores Management
