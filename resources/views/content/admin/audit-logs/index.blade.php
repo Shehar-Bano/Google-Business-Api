@@ -19,14 +19,16 @@
         'createUrl' => null,
         'search'    => $search,
         'perPage'   => $perPage,
+        'sort'      => $sort,
+        'direction' => $direction,
         'columns'   => [
-            ['label' => '#',          'field' => 'id',         'sortable' => false],
-            ['label' => 'Admin User', 'sortable' => false],
-            ['label' => 'Action Type','field' => 'action',     'sortable' => false],
-            ['label' => 'Target',     'sortable' => false],
-            ['label' => 'Description','sortable' => false],
-            ['label' => 'IP Address', 'sortable' => false],
-            ['label' => 'Timestamp',  'field' => 'created_at', 'sortable' => false],
+            ['label' => '#',          'field' => 'id',         'sortable' => true],
+            ['label' => 'Admin User', 'field' => 'user',       'sortable' => true],
+            ['label' => 'Action Type','field' => 'action',     'sortable' => true],
+            ['label' => 'Target',     'field' => 'target_type', 'sortable' => true],
+            ['label' => 'Description','field' => 'description', 'sortable' => true],
+            ['label' => 'IP Address', 'field' => 'ip_address', 'sortable' => true],
+            ['label' => 'Timestamp',  'field' => 'created_at', 'sortable' => true],
         ],
     ])
         @forelse($logs as $log)

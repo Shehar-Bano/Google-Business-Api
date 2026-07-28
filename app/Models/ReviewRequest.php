@@ -47,4 +47,12 @@ class ReviewRequest extends Model
     {
         return $this->belongsTo(User::class, 'sent_to');
     }
+
+    /**
+     * Get the sender user who initiated the request.
+     */
+    public function sender()
+    {
+        return $this->belongsTo(User::class, 'sender_id');
+    }
 }
