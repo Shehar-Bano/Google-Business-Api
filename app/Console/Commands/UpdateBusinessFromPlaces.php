@@ -57,7 +57,7 @@ class UpdateBusinessFromPlaces extends Command
                 $response = Http::get('https://maps.googleapis.com/maps/api/place/details/json', [
                     'place_id' => $placeId,
                     'key' => $apiKey,
-                    'fields' => 'name,formatted_address,formatted_phone_number,rating,user_ratings_total,geometry,address_components'
+                    'fields' => 'name,formatted_address,formatted_phone_number,rating,user_ratings_total,geometry,address_components,photos'
                 ]);
 
                 if ($response->failed()) {
@@ -126,11 +126,32 @@ class UpdateBusinessFromPlaces extends Command
 
                 if (!empty($updateData)) {
                     $business->update($updateData);
-                    $this->info("Successfully updated Business ID {$business->id} ('{$business->name}').");
-                    $updatedCount++;
-                } else {
-                    $this->comment("No new attributes to update for Business ID {$business->id}.");
                 }
+
+                // Sync Google Places Photos to preferences_images
+                if (isset($result['photos']) && is_array($result['photos'])) {
+                    $preference = $business->preferences()->firstOrCreate([]);
+                    
+                    // Delete previous Google sync photos to prevent duplicate inserts
+                    $preference->images()->where('type', 'google_places')->delete();
+
+                    foreach ($result['photos'] as $photo) {
+                        if (isset($photo['photo_reference'])) {
+                            $photoRef = $photo['photo_reference'];
+                            $photoUrl = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photo_reference={$photoRef}&key={$apiKey}";
+                            
+                            $preference->images()->create([
+                                'type' => 'google_places',
+                                'label' => 'Google Places Sync',
+                                'image' => $photoUrl,
+                            ]);
+                        }
+                    }
+                    $this->info("Successfully synced " . count($result['photos']) . " photos for Business ID {$business->id}.");
+                }
+
+                $this->info("Successfully updated Business ID {$business->id} ('{$business->name}').");
+                $updatedCount++;
 
             } catch (\Exception $e) {
                 Log::error("Error syncing business {$business->id} via Cron: " . $e->getMessage());
