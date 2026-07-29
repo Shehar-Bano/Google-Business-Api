@@ -14,6 +14,7 @@ class SubscriptionPlan extends Model
     protected $fillable = [
         'title',
         'status',
+        'is_popular',
         'features',
         'price',
         'billing_period',
@@ -22,5 +23,6 @@ class SubscriptionPlan extends Model
     protected $casts = [
         'features' => 'array',
         'price' => 'decimal:2',
+        'is_popular' => 'boolean',
     ];
 }

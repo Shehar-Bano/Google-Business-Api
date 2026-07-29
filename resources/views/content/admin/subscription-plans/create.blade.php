@@ -56,6 +56,14 @@
                     </div>
 
                     <div class="col-12 mb-3">
+                        <div class="form-check form-switch mt-1">
+                            <input type="hidden" name="is_popular" value="0">
+                            <input class="form-check-input" type="checkbox" name="is_popular" value="1" id="is_popular" @checked(old('is_popular') == 1)>
+                            <label class="form-check-label fw-semibold" for="is_popular">Mark as Most Popular Plan</label>
+                        </div>
+                    </div>
+
+                    <div class="col-12 mb-3">
                         <label class="form-label fw-semibold">Included Features (One feature per line)</label>
                         <textarea name="features" class="form-control" rows="6" placeholder="Feature 1&#10;Feature 2&#10;Feature 3">{{ old('features') }}</textarea>
                         <small class="text-muted">Enter features separated by pressing Enter (New Line). They will be stored as JSON in the database.</small>

@@ -31,6 +31,7 @@
             ['label' => 'Plan Title',       'field' => 'title',      'sortable' => true],
             ['label' => 'Price',            'field' => 'price',      'sortable' => true],
             ['label' => 'Billing Period',   'field' => 'billing_period', 'sortable' => true],
+            ['label' => 'Popularity',       'field' => 'is_popular', 'sortable' => true],
             ['label' => 'Included Features','sortable' => false],
             ['label' => 'Status',           'field' => 'status',     'sortable' => true],
             ['label' => 'Actions',          'actions' => true],
@@ -44,6 +45,13 @@
                     <span class="fw-bold text-success">Rs. {{ number_format($plan->price, 2) }}</span>
                 </td>
                 <td class="cell-primary text-capitalize">{{ $plan->billing_period }}</td>
+                <td>
+                    @if($plan->is_popular)
+                        <span class="badge bg-label-primary fw-semibold d-inline-flex align-items-center gap-1"><i class="mdi mdi-star"></i> Popular</span>
+                    @else
+                        <span class="text-muted small">— Standard —</span>
+                    @endif
+                </td>
                 <td>
                     @if(is_array($plan->features) && count($plan->features) > 0)
                         <ul class="list-unstyled mb-0 text-start">

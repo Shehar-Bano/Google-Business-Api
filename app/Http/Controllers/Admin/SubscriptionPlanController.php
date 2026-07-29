@@ -21,7 +21,7 @@ class SubscriptionPlanController extends Controller
 
         $sort = in_array(
             $request->string('sort', 'id')->toString(),
-            ['id', 'title', 'price', 'billing_period', 'status', 'created_at'],
+            ['id', 'title', 'price', 'billing_period', 'status', 'is_popular', 'created_at'],
             true
         ) ? $request->string('sort', 'id')->toString() : 'id';
 
@@ -55,6 +55,7 @@ class SubscriptionPlanController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'status' => 'required|in:active,inactive',
+            'is_popular' => 'nullable|boolean',
             'features' => 'nullable|string',
             'price' => 'required|numeric|min:0',
             'billing_period' => 'required|string|max:100',
@@ -69,6 +70,7 @@ class SubscriptionPlanController extends Controller
         $plan = SubscriptionPlan::create([
             'title' => $request->input('title'),
             'status' => $request->input('status'),
+            'is_popular' => $request->boolean('is_popular'),
             'features' => array_values($featuresArray),
             'price' => $request->input('price'),
             'billing_period' => $request->input('billing_period'),
@@ -106,6 +108,7 @@ class SubscriptionPlanController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'status' => 'required|in:active,inactive',
+            'is_popular' => 'nullable|boolean',
             'features' => 'nullable|string',
             'price' => 'required|numeric|min:0',
             'billing_period' => 'required|string|max:100',
@@ -120,6 +123,7 @@ class SubscriptionPlanController extends Controller
         $subscriptionPlan->update([
             'title' => $request->input('title'),
             'status' => $request->input('status'),
+            'is_popular' => $request->boolean('is_popular'),
             'features' => array_values($featuresArray),
             'price' => $request->input('price'),
             'billing_period' => $request->input('billing_period'),
