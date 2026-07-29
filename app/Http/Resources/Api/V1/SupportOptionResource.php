@@ -15,7 +15,7 @@ class SupportOptionResource extends JsonResource
             'title' => $this->title,
             'type' => $this->type,
             'value' => $this->value,
-            'image' => $this->imageUrl($this->image),
+            'image' => 'storage/'.($this->image),
             'is_active' => (bool) $this->is_active,
         ];
     }

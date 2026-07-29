@@ -45,6 +45,12 @@
                 <div>Google Business Integration</div>
             </a>
         </li>
+        <li class="menu-item {{ request()->routeIs('admin.whatsapp-review-requests.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.whatsapp-review-requests.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons mdi mdi-whatsapp"></i>
+                <div>WhatsApp Review Requests</div>
+            </a>
+        </li>
         <li class="menu-item {{ request()->routeIs('admin.posters.*') ? 'active' : '' }}">
             <a href="{{ route('admin.posters.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons mdi mdi-image-multiple-outline"></i>

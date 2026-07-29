@@ -64,6 +64,7 @@ Route::middleware(['auth', 'verified', 'role:super_admin|admin'])
 
         // Google Business Connections
         Route::get('google-business-connections', [App\Http\Controllers\Admin\GoogleBusinessConnectionController::class, 'index'])->name('google-business-connections.index');
+        Route::get('whatsapp-review-requests', [App\Http\Controllers\Admin\WhatsAppReviewRequestController::class, 'index'])->name('whatsapp-review-requests.index');
 
         // Order Management
         // Route::get('order-management', [OrderManagementController::class, 'index'])->name('order-management.index');
