@@ -109,7 +109,7 @@
         </li>
 
         <li
-            class="menu-item {{ request()->routeIs('admin.support-options.*') || request()->routeIs('admin.privacy-policy.*') || request()->routeIs('admin.notifications.*') ? 'open' : '' }}">
+            class="menu-item {{ request()->routeIs('admin.support-options.*') || request()->routeIs('admin.privacy-policy.*') || request()->routeIs('admin.terms-conditions.*') || request()->routeIs('admin.notifications.*') ? 'open' : '' }}">
             <a href="#" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons mdi mdi-lifebuoy"></i>
                 <div>Support & Content</div>
@@ -123,6 +123,11 @@
                 <li class="menu-item {{ request()->routeIs('admin.privacy-policy.*') ? 'active' : '' }}">
                     <a href="{{ route('admin.privacy-policy.edit') }}" class="menu-link">
                         <div>Privacy Policy</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->routeIs('admin.terms-conditions.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.terms-conditions.index') }}" class="menu-link">
+                        <div>Terms & Conditions</div>
                     </a>
                 </li>
                 <li class="menu-item {{ request()->routeIs('admin.notifications.*') ? 'active' : '' }}">

@@ -138,6 +138,9 @@ Route::prefix('v1')->group(function () {
     // Subscriptions Plans API
     Route::get('subscription-plans', [App\Http\Controllers\Api\SubscriptionPlanController::class, 'index']);
 
+    // Terms & Conditions API
+    Route::get('terms-conditions', [App\Http\Controllers\Api\V1\TermsConditionController::class, 'index']);
+
     Route::post('businesses/{businessId}/preferences', [App\Http\Controllers\Api\PreferenceController::class, 'storeOrUpdate']);
     // TODO: Add future API modules here.
 });

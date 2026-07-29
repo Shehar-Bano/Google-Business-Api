@@ -38,6 +38,7 @@ Route::middleware(['auth', 'verified', 'role:super_admin|admin'])
         Route::resource('support-options', SupportOptionController::class)->except(['show']);
         Route::get('privacy-policy', [PrivacyPolicyController::class, 'edit'])->name('privacy-policy.edit');
         Route::put('privacy-policy', [PrivacyPolicyController::class, 'update'])->name('privacy-policy.update');
+        Route::resource('terms-conditions', App\Http\Controllers\Admin\TermsConditionController::class);
 
         Route::get('users', [UserRoleController::class, 'index'])->name('users.index');
         Route::get('users/{user}/roles', [UserRoleController::class, 'edit'])->name('users.roles.edit');
