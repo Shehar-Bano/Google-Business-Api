@@ -1,0 +1,145 @@
+<?php
+
+namespace App\Console\Commands;
+
+use App\Models\Business;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+
+class UpdateBusinessFromPlaces extends Command
+{
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = 'business:update-places';
+
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'Sync and update all businesses details using their Google Place ID';
+
+    /**
+     * Execute the console command.
+     */
+    public function handle()
+    {
+        $apiKey = env('PLACES');
+
+        if (empty($apiKey)) {
+            $this->error('Google Places API key is not configured (PLACES in .env).');
+            return Command::FAILURE;
+        }
+
+        $businesses = Business::whereNotNull('google_place_id')
+            ->where('google_place_id', '!=', '')
+            ->get();
+
+        if ($businesses->isEmpty()) {
+            $this->info('No businesses found with a valid Google Place ID.');
+            return Command::SUCCESS;
+        }
+
+        $this->info('Starting update for ' . $businesses->count() . ' businesses...');
+
+        $updatedCount = 0;
+        $failedCount = 0;
+
+        foreach ($businesses as $business) {
+            $placeId = $business->google_place_id;
+            $this->comment("Fetching details for Business ID {$business->id} (Place ID: {$placeId})...");
+
+            try {
+                $response = Http::get('https://maps.googleapis.com/maps/api/place/details/json', [
+                    'place_id' => $placeId,
+                    'key' => $apiKey,
+                    'fields' => 'name,formatted_address,formatted_phone_number,rating,user_ratings_total,geometry,address_components'
+                ]);
+
+                if ($response->failed()) {
+                    $this->error("HTTP request failed for Business ID {$business->id}.");
+                    $failedCount++;
+                    continue;
+                }
+
+                $data = $response->json();
+
+                if (isset($data['status']) && $data['status'] !== 'OK') {
+                    $this->error("Google Places API returned status '{$data['status']}' for Business ID {$business->id}.");
+                    $failedCount++;
+                    continue;
+                }
+
+                $result = $data['result'] ?? [];
+
+                if (empty($result)) {
+                    $this->error("No result content found for Business ID {$business->id}.");
+                    $failedCount++;
+                    continue;
+                }
+
+                // Prepare update array
+                $updateData = [];
+
+                if (isset($result['name'])) {
+                    $updateData['name'] = $result['name'];
+                }
+                if (isset($result['formatted_phone_number'])) {
+                    $updateData['phone_number'] = $result['formatted_phone_number'];
+                }
+                if (isset($result['formatted_address'])) {
+                    $updateData['address'] = $result['formatted_address'];
+                }
+                if (isset($result['rating'])) {
+                    $updateData['rating'] = $result['rating'];
+                }
+                if (isset($result['user_ratings_total'])) {
+                    $updateData['reviews'] = $result['user_ratings_total'];
+                }
+
+                // Parse address components for country, state, city, and pincode
+                if (isset($result['address_components']) && is_array($result['address_components'])) {
+                    foreach ($result['address_components'] as $component) {
+                        $types = $component['types'] ?? [];
+                        if (in_array('country', $types, true)) {
+                            $updateData['country'] = $component['long_name'];
+                        } elseif (in_array('administrative_area_level_1', $types, true)) {
+                            $updateData['state'] = $component['long_name'];
+                        } elseif (in_array('locality', $types, true) || in_array('postal_town', $types, true)) {
+                            $updateData['city'] = $component['long_name'];
+                        } elseif (in_array('postal_code', $types, true)) {
+                            $updateData['pincode'] = $component['long_name'];
+                        }
+                    }
+                }
+
+                // If geometry location is found, set location coordinates
+                if (isset($result['geometry']['location']['lat']) && isset($result['geometry']['location']['lng'])) {
+                    $lat = $result['geometry']['location']['lat'];
+                    $lng = $result['geometry']['location']['lng'];
+                    $updateData['location'] = "{$lat},{$lng}";
+                }
+
+                if (!empty($updateData)) {
+                    $business->update($updateData);
+                    $this->info("Successfully updated Business ID {$business->id} ('{$business->name}').");
+                    $updatedCount++;
+                } else {
+                    $this->comment("No new attributes to update for Business ID {$business->id}.");
+                }
+
+            } catch (\Exception $e) {
+                Log::error("Error syncing business {$business->id} via Cron: " . $e->getMessage());
+                $this->error("Exception occurred for Business ID {$business->id}: " . $e->getMessage());
+                $failedCount++;
+            }
+        }
+
+        $this->info("Sync completed: {$updatedCount} updated, {$failedCount} failed.");
+        return Command::SUCCESS;
+    }
+}
