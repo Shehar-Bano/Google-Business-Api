@@ -38,178 +38,206 @@
             </div>
         </div>
 
-    <div class="card mt-4">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <div>
-                <h5 class="mb-0 fw-bold">Businesses</h5>
-                <small class="text-muted">Manage registered businesses, catalog items, and preferences.</small>
+        <div class="card mt-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="mb-0 fw-bold">Businesses</h5>
+                    <small class="text-muted">Manage registered businesses, catalog items, and preferences.</small>
+                </div>
+                <div>
+                    <span class="badge bg-label-primary"><strong>{{ number_format($businesses->total()) }}</strong>
+                        records</span>
+                </div>
             </div>
-            <div>
-                <span class="badge bg-label-primary"><strong>{{ number_format($businesses->total()) }}</strong> records</span>
+            <div class="card-body">
+                <!-- Filter & Search Form -->
+                <form method="GET" id="filter-form" action="{{ route('admin.business-management.index') }}">
+                    <input type="hidden" name="sort" value="{{ $sort }}">
+                    <input type="hidden" name="direction" value="{{ $direction }}">
+                    <input type="hidden" name="per_page" value="{{ $perPage }}">
+
+                    <!-- Global Search Box (No Button, Auto Filters on Keystroke) -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Global Search</label>
+                        <div class="input-group input-group-merge border-primary">
+                            <span class="input-group-text"><i class="mdi mdi-magnify text-primary"></i></span>
+                            <input type="text" name="search" id="global-search-input" value="{{ $search }}"
+                                class="form-control"
+                                placeholder="Type anything to search globally (Name, Location, Phone, Email, Category)..."
+                                autocomplete="off">
+                        </div>
+                        <small class="form-text text-muted">Type to search. Filtering happens automatically as you
+                            type.</small>
+                    </div>
+
+                    <!-- Separate Filters Panel (With Apply Button) -->
+                    <div class="border p-3 rounded mb-4 bg-light">
+                        <h6 class="mb-3 fw-bold"><i class="mdi mdi-filter-variant me-1"></i> Filter Options</h6>
+                        <div class="row g-3 align-items-end">
+                            <div class="col-12 col-md-3">
+                                <label class="form-label fw-medium">Business Name</label>
+                                <input type="text" name="business_name" value="{{ $businessName ?? '' }}"
+                                    class="form-control" placeholder="Filter by name...">
+                            </div>
+                            <div class="col-12 col-md-2">
+                                <label class="form-label fw-medium">Location</label>
+                                <input type="text" name="location" value="{{ $location ?? '' }}" class="form-control"
+                                    placeholder="Filter by location...">
+                            </div>
+                            <div class="col-12 col-md-2">
+                                <label class="form-label fw-medium">Status</label>
+                                <select name="status" class="form-select">
+                                    <option value="">All Statuses</option>
+                                    <option value="approved" @selected($status === 'approved')>Approved</option>
+                                    <option value="suspended" @selected($status === 'suspended')>Suspended</option>
+                                </select>
+                            </div>
+                            <div class="col-12 col-md-2">
+                                <label class="form-label fw-medium">Date From</label>
+                                <input type="date" name="date_from" value="{{ $dateFrom }}" class="form-control">
+                            </div>
+                            <div class="col-12 col-md-2">
+                                <label class="form-label fw-medium">Date To</label>
+                                <input type="date" name="date_to" value="{{ $dateTo }}" class="form-control">
+                            </div>
+                            <div class="col-12 col-md-1 d-grid gap-2">
+                                <button type="submit" class="btn btn-dark" title="Apply Filters">
+                                    Apply
+                                </button>
+                            </div>
+                        </div>
+                        @if (filled($businessName) || filled($status) || filled($location) || filled($dateFrom) || filled($dateTo))
+                            <div class="mt-2 text-end">
+                                <a href="{{ route('admin.business-management.index') }}"
+                                    class="btn btn-sm btn-outline-secondary">
+                                    <i class="mdi mdi-refresh"></i> Reset Filters
+                                </a>
+                            </div>
+                        @endif
+                    </div>
+                </form>
+
+                <!-- Table -->
+                <div class="table-responsive text-nowrap">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <!-- Custom Sort Headers -->
+                                @php
+                                    $getSortUrl = function ($col) use ($sort, $direction) {
+                                        $newDir = $sort === $col && $direction === 'asc' ? 'desc' : 'asc';
+                                        return route(
+                                            'admin.business-management.index',
+                                            array_merge(request()->query(), ['sort' => $col, 'direction' => $newDir]),
+                                        );
+                                    };
+                                    $getSortIcon = function ($col) use ($sort, $direction) {
+                                        if ($sort !== $col) {
+                                            return 'mdi-minus text-muted';
+                                        }
+                                        return $direction === 'asc'
+                                            ? 'mdi-arrow-up text-primary'
+                                            : 'mdi-arrow-down text-primary';
+                                    };
+                                @endphp
+                                <th><a href="{{ $getSortUrl('id') }}" class="text-dark fw-bold"># <i
+                                            class="mdi {{ $getSortIcon('id') }} ml-1"></i></a></th>
+                                <th><a href="{{ $getSortUrl('name') }}" class="text-dark fw-bold">Business Name <i
+                                            class="mdi {{ $getSortIcon('name') }} ml-1"></i></a></th>
+                                <th><a href="{{ $getSortUrl('location') }}" class="text-dark fw-bold">Location <i
+                                            class="mdi {{ $getSortIcon('location') }} ml-1"></i></a></th>
+                                <th><a href="{{ $getSortUrl('status') }}" class="text-dark fw-bold">Status <i
+                                            class="mdi {{ $getSortIcon('status') }} ml-1"></i></a></th>
+                                <th>Preferences</th>
+                                <th><a href="{{ $getSortUrl('created_at') }}" class="text-dark fw-bold">Created At <i
+                                            class="mdi {{ $getSortIcon('created_at') }} ml-1"></i></a></th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="table-border-bottom-0">
+                            @forelse($businesses as $business)
+                                <tr>
+                                    <td class="cell-muted">{{ $business->id }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="um-user-avatar bg-label-primary">
+                                                {{ strtoupper(substr($business->name, 0, 1)) }}
+                                            </div>
+                                            <div>
+                                                <div class="cell-primary fw-semibold">{{ $business->name }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="cell-primary">
+                                        {!! implode(
+                                            '<br>',
+                                            array_map(fn($chunk) => implode(' ', $chunk), array_chunk(explode(' ', $business->location), 4)),
+                                        ) !!}
+                                    </td>
+                                    <td>
+                                        @if (($business->status ?? 'approved') === 'suspended')
+                                            <span class="badge bg-label-danger">Suspended</span>
+                                        @else
+                                            <span class="badge bg-label-success">Approved</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        <a href="{{ route('admin.business-management.preferences', $business) }}"
+                                            class="btn btn-outline-primary btn-xs d-inline-flex align-items-center gap-1"
+                                            title="View Preferences">
+                                            <i class="mdi mdi-cog-outline"></i> Preferences
+                                        </a>
+                                    </td>
+                                    <td class="cell-muted">{{ $business->created_at?->format('Y-m-d') }}</td>
+                                    <td class="text-end">
+                                        <div class="d-inline-flex align-items-center gap-1">
+                                            @include('admin.components.action-buttons', [
+                                                'type' => 'view',
+                                                'href' => route('admin.business-management.show', $business),
+                                                'title' => 'View Business Details',
+                                            ])
+                                            @include('admin.components.action-buttons', [
+                                                'type' => 'edit',
+                                                'href' => route('admin.business-management.edit', $business),
+                                                'title' => 'Edit Business Status',
+                                            ])
+                                            <form action="{{ route('admin.business-management.destroy', $business) }}"
+                                                method="POST" class="d-inline"
+                                                onsubmit="return confirm('Are you sure you want to delete this business?');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit"
+                                                    class="action-icon-btn action-icon-delete border-0 bg-transparent"
+                                                    title="Delete Business">
+                                                    <i class="mdi mdi-trash-can-outline text-danger"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="7" class="text-center py-4 text-muted">No businesses found.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                @if ($businesses->hasPages())
+                    <div class="d-flex justify-content-between align-items-center mt-4">
+                        <div>
+                            <span class="text-muted small">Showing {{ $businesses->firstItem() ?? 0 }} to
+                                {{ $businesses->lastItem() ?? 0 }} of {{ $businesses->total() }} records</span>
+                        </div>
+                        <div>
+                            {{ $businesses->links() }}
+                        </div>
+                    </div>
+                @endif
             </div>
         </div>
-        <div class="card-body">
-            <!-- Filter & Search Form -->
-            <form method="GET" id="filter-form" action="{{ route('admin.business-management.index') }}">
-                <input type="hidden" name="sort" value="{{ $sort }}">
-                <input type="hidden" name="direction" value="{{ $direction }}">
-                <input type="hidden" name="per_page" value="{{ $perPage }}">
-
-                <!-- Global Search Box (No Button, Auto Filters on Keystroke) -->
-                <div class="mb-4">
-                    <label class="form-label fw-semibold">Global Search</label>
-                    <div class="input-group input-group-merge border-primary">
-                        <span class="input-group-text"><i class="mdi mdi-magnify text-primary"></i></span>
-                        <input type="text" name="search" id="global-search-input" value="{{ $search }}" class="form-control" placeholder="Type anything to search globally (Name, Location, Phone, Email, Category)..." autocomplete="off">
-                    </div>
-                    <small class="form-text text-muted">Type to search. Filtering happens automatically as you type.</small>
-                </div>
-
-                <!-- Separate Filters Panel (With Apply Button) -->
-                <div class="border p-3 rounded mb-4 bg-light">
-                    <h6 class="mb-3 fw-bold"><i class="mdi mdi-filter-variant me-1"></i> Filter Options</h6>
-                    <div class="row g-3 align-items-end">
-                        <div class="col-12 col-md-3">
-                            <label class="form-label fw-medium">Business Name</label>
-                            <input type="text" name="business_name" value="{{ $businessName ?? '' }}" class="form-control" placeholder="Filter by name...">
-                        </div>
-                        <div class="col-12 col-md-2">
-                            <label class="form-label fw-medium">Location</label>
-                            <input type="text" name="location" value="{{ $location ?? '' }}" class="form-control" placeholder="Filter by location...">
-                        </div>
-                        <div class="col-12 col-md-2">
-                            <label class="form-label fw-medium">Status</label>
-                            <select name="status" class="form-select">
-                                <option value="">All Statuses</option>
-                                <option value="approved" @selected($status === 'approved')>Approved</option>
-                                <option value="suspended" @selected($status === 'suspended')>Suspended</option>
-                            </select>
-                        </div>
-                        <div class="col-12 col-md-2">
-                            <label class="form-label fw-medium">Date From</label>
-                            <input type="date" name="date_from" value="{{ $dateFrom }}" class="form-control">
-                        </div>
-                        <div class="col-12 col-md-2">
-                            <label class="form-label fw-medium">Date To</label>
-                            <input type="date" name="date_to" value="{{ $dateTo }}" class="form-control">
-                        </div>
-                        <div class="col-12 col-md-1 d-grid gap-2">
-                            <button type="submit" class="btn btn-dark" title="Apply Filters">
-                                <i class="mdi mdi-check"></i> Apply
-                            </button>
-                        </div>
-                    </div>
-                    @if(filled($businessName) || filled($status) || filled($location) || filled($dateFrom) || filled($dateTo))
-                        <div class="mt-2 text-end">
-                            <a href="{{ route('admin.business-management.index') }}" class="btn btn-sm btn-outline-secondary">
-                                <i class="mdi mdi-refresh"></i> Reset Filters
-                            </a>
-                        </div>
-                    @endif
-                </div>
-            </form>
-
-            <!-- Table -->
-            <div class="table-responsive text-nowrap">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <!-- Custom Sort Headers -->
-                            @php
-                                $getSortUrl = function($col) use ($sort, $direction) {
-                                    $newDir = ($sort === $col && $direction === 'asc') ? 'desc' : 'asc';
-                                    return route('admin.business-management.index', array_merge(request()->query(), ['sort' => $col, 'direction' => $newDir]));
-                                };
-                                $getSortIcon = function($col) use ($sort, $direction) {
-                                    if ($sort !== $col) return 'mdi-minus text-muted';
-                                    return $direction === 'asc' ? 'mdi-arrow-up text-primary' : 'mdi-arrow-down text-primary';
-                                };
-                            @endphp
-                            <th><a href="{{ $getSortUrl('id') }}" class="text-dark fw-bold"># <i class="mdi {{ $getSortIcon('id') }} ml-1"></i></a></th>
-                            <th><a href="{{ $getSortUrl('name') }}" class="text-dark fw-bold">Business Name <i class="mdi {{ $getSortIcon('name') }} ml-1"></i></a></th>
-                            <th><a href="{{ $getSortUrl('location') }}" class="text-dark fw-bold">Location <i class="mdi {{ $getSortIcon('location') }} ml-1"></i></a></th>
-                            <th><a href="{{ $getSortUrl('status') }}" class="text-dark fw-bold">Status <i class="mdi {{ $getSortIcon('status') }} ml-1"></i></a></th>
-                            <th>Preferences</th>
-                            <th><a href="{{ $getSortUrl('created_at') }}" class="text-dark fw-bold">Created At <i class="mdi {{ $getSortIcon('created_at') }} ml-1"></i></a></th>
-                            <th class="text-end">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="table-border-bottom-0">
-                        @forelse($businesses as $business)
-                            <tr>
-                                <td class="cell-muted">{{ $business->id }}</td>
-                                <td>
-                                    <div class="d-flex align-items-center gap-2">
-                                        <div class="um-user-avatar bg-label-primary">
-                                            {{ strtoupper(substr($business->name, 0, 1)) }}
-                                        </div>
-                                        <div>
-                                            <div class="cell-primary fw-semibold">{{ $business->name }}</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="cell-primary">{{ $business->location }}</td>
-                                <td>
-                                    @if (($business->status ?? 'approved') === 'suspended')
-                                        <span class="badge bg-label-danger">Suspended</span>
-                                    @else
-                                        <span class="badge bg-label-success">Approved</span>
-                                    @endif
-                                </td>
-                                <td>
-                                    <a href="{{ route('admin.business-management.preferences', $business) }}"
-                                        class="btn btn-outline-primary btn-xs d-inline-flex align-items-center gap-1"
-                                        title="View Preferences">
-                                        <i class="mdi mdi-cog-outline"></i> Preferences
-                                    </a>
-                                </td>
-                                <td class="cell-muted">{{ $business->created_at?->format('Y-m-d') }}</td>
-                                <td class="text-end">
-                                    <div class="d-inline-flex align-items-center gap-1">
-                                        @include('admin.components.action-buttons', [
-                                            'type' => 'view',
-                                            'href' => route('admin.business-management.show', $business),
-                                            'title' => 'View Business Details',
-                                        ])
-                                        @include('admin.components.action-buttons', [
-                                            'type' => 'edit',
-                                            'href' => route('admin.business-management.edit', $business),
-                                            'title' => 'Edit Business Status',
-                                        ])
-                                        <form action="{{ route('admin.business-management.destroy', $business) }}" method="POST"
-                                            class="d-inline" onsubmit="return confirm('Are you sure you want to delete this business?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="action-icon-btn action-icon-delete border-0 bg-transparent"
-                                                title="Delete Business">
-                                                <i class="mdi mdi-trash-can-outline text-danger"></i>
-                                            </button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="7" class="text-center py-4 text-muted">No businesses found.</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Pagination -->
-            @if($businesses->hasPages())
-                <div class="d-flex justify-content-between align-items-center mt-4">
-                    <div>
-                        <span class="text-muted small">Showing {{ $businesses->firstItem() ?? 0 }} to {{ $businesses->lastItem() ?? 0 }} of {{ $businesses->total() }} records</span>
-                    </div>
-                    <div>
-                        {{ $businesses->links() }}
-                    </div>
-                </div>
-            @endif
-        </div>
-    </div>
 
     </div>
 @endsection
@@ -309,27 +337,27 @@
 @endpush
 
 @push('my-script')
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const searchInput = document.getElementById('global-search-input');
-        const filterForm = document.getElementById('filter-form');
-        let searchTimeout;
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('global-search-input');
+            const filterForm = document.getElementById('filter-form');
+            let searchTimeout;
 
-        if (searchInput && filterForm) {
-            searchInput.addEventListener('input', function() {
-                clearTimeout(searchTimeout);
-                searchTimeout = setTimeout(() => {
-                    filterForm.submit();
-                }, 400); // 400ms delay
-            });
+            if (searchInput && filterForm) {
+                searchInput.addEventListener('input', function() {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(() => {
+                        filterForm.submit();
+                    }, 400); // 400ms delay
+                });
 
-            // Focus and put cursor at the end of input
-            const length = searchInput.value.length;
-            if (length > 0) {
-                searchInput.focus();
-                searchInput.setSelectionRange(length, length);
+                // Focus and put cursor at the end of input
+                const length = searchInput.value.length;
+                if (length > 0) {
+                    searchInput.focus();
+                    searchInput.setSelectionRange(length, length);
+                }
             }
-        }
-    });
-</script>
+        });
+    </script>
 @endpush
