@@ -18,31 +18,41 @@ class EstimatedScoreController extends Controller
             ? (int) $request->integer('per_page', 25) : 25;
 
         $sort = in_array(
-            $request->string('sort', 'updated_at')->toString(),
-            ['name', 'points', 'updated_at'],
+            $request->string('sort', 'total_score')->toString(),
+            ['name', 'total_score', 'updated_at'],
             true
-        ) ? $request->string('sort', 'updated_at')->toString() : 'updated_at';
+        ) ? $request->string('sort', 'total_score')->toString() : 'total_score';
 
         $direction = in_array($request->string('direction', 'desc')->toString(), ['asc', 'desc'], true)
             ? $request->string('direction', 'desc')->toString() : 'desc';
 
-        $scores = BusinessEstimatedScore::with('business')
+        $businesses = \App\Models\Business::query()
+            ->with(['estimatedScores' => function ($q) {
+                $q->orderBy('name', 'asc');
+            }])
+            ->withSum('estimatedScores as total_score', 'points')
             ->when($search !== '', function ($query) use ($search) {
-                $query->whereHas('business', function ($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%");
-                })->orWhere('name', 'like', "%{$search}%");
+                $query->where('name', 'like', "%{$search}%");
             })
-            ->orderBy($sort, $direction)
+            ->when($sort === 'name', function ($query) use ($direction) {
+                $query->orderBy('name', $direction);
+            })
+            ->when($sort === 'total_score', function ($query) use ($direction) {
+                $query->orderBy('total_score', $direction);
+            })
+            ->when($sort === 'updated_at', function ($query) use ($direction) {
+                $query->orderBy('updated_at', $direction);
+            })
             ->paginate($perPage)
             ->withQueryString();
 
         $stats = [
-            'total_records' => BusinessEstimatedScore::count(),
-            'total_points' => BusinessEstimatedScore::sum('points'),
+            'total_businesses' => \App\Models\Business::count(),
+            'total_points' => (int) BusinessEstimatedScore::sum('points'),
         ];
 
         return view('content.admin.estimated-scores.index', compact(
-            'scores', 'stats', 'search', 'perPage', 'sort', 'direction'
+            'businesses', 'stats', 'search', 'perPage', 'sort', 'direction'
         ));
     }
 }
