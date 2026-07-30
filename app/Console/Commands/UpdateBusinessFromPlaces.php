@@ -93,6 +93,7 @@ class UpdateBusinessFromPlaces extends Command
                 }
                 if (isset($result['formatted_address'])) {
                     $updateData['address'] = $result['formatted_address'];
+                    $updateData['location'] = $result['formatted_address']; // Store formatted_address in location field
                 }
                 if (isset($result['rating'])) {
                     $updateData['rating'] = $result['rating'];
@@ -115,13 +116,6 @@ class UpdateBusinessFromPlaces extends Command
                             $updateData['pincode'] = $component['long_name'];
                         }
                     }
-                }
-
-                // If geometry location is found, set location coordinates
-                if (isset($result['geometry']['location']['lat']) && isset($result['geometry']['location']['lng'])) {
-                    $lat = $result['geometry']['location']['lat'];
-                    $lng = $result['geometry']['location']['lng'];
-                    $updateData['location'] = "{$lat},{$lng}";
                 }
 
                 if (!empty($updateData)) {
