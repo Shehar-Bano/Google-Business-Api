@@ -150,6 +150,9 @@ class UpdateBusinessFromPlaces extends Command
                     $this->info("Successfully synced " . count($result['photos']) . " photos for Business ID {$business->id}.");
                 }
 
+                // Force score recalculation after all fields and photos are updated
+                \App\Services\BusinessScoreCalculator::recalculate($business);
+
                 $this->info("Successfully updated Business ID {$business->id} ('{$business->name}').");
                 $updatedCount++;
 
