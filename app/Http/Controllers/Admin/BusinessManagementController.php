@@ -16,12 +16,18 @@ class BusinessManagementController extends Controller
     public function index(Request $request)
     {
         $search = trim($request->string('search')->toString());
+        $businessName = trim($request->string('business_name')->toString());
+        $status = trim($request->string('status')->toString());
+        $location = trim($request->string('location')->toString());
+        $dateFrom = trim($request->string('date_from')->toString());
+        $dateTo = trim($request->string('date_to')->toString());
+
         $perPage = in_array((int) $request->integer('per_page', 10), [10, 25, 50, 100], true)
             ? (int) $request->integer('per_page', 10) : 10;
 
         $sort = in_array(
             $request->string('sort', 'created_at')->toString(),
-            ['name', 'location', 'created_at'],
+            ['name', 'location', 'status', 'created_at'],
             true
         ) ? $request->string('sort', 'created_at')->toString() : 'created_at';
 
@@ -31,8 +37,29 @@ class BusinessManagementController extends Controller
         $businesses = Business::query()
             ->with('topSellingItems')
             ->when($search !== '', function ($query) use ($search) {
-                $query->where('name', 'like', "%{$search}%")
-                    ->orWhere('location', 'like', "%{$search}%");
+                $query->where(function($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('location', 'like', "%{$search}%")
+                      ->orWhere('phone_number', 'like', "%{$search}%")
+                      ->orWhere('address', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%")
+                      ->orWhere('category', 'like', "%{$search}%");
+                });
+            })
+            ->when($businessName !== '', function ($query) use ($businessName) {
+                $query->where('name', 'like', "%{$businessName}%");
+            })
+            ->when($status !== '', function ($query) use ($status) {
+                $query->where('status', $status);
+            })
+            ->when($location !== '', function ($query) use ($location) {
+                $query->where('location', 'like', "%{$location}%");
+            })
+            ->when($dateFrom !== '', function ($query) use ($dateFrom) {
+                $query->whereDate('created_at', '>=', $dateFrom);
+            })
+            ->when($dateTo !== '', function ($query) use ($dateTo) {
+                $query->whereDate('created_at', '<=', $dateTo);
             })
             ->orderBy($sort, $direction)
             ->paginate($perPage)
@@ -45,7 +72,7 @@ class BusinessManagementController extends Controller
         ];
 
         return view('content.admin.business-management.index', compact(
-            'businesses', 'stats', 'search', 'sort', 'direction', 'perPage'
+            'businesses', 'stats', 'search', 'businessName', 'status', 'location', 'dateFrom', 'dateTo', 'sort', 'direction', 'perPage'
         ));
     }
 
