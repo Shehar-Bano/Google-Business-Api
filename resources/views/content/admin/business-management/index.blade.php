@@ -196,11 +196,14 @@
                                                 'href' => route('admin.business-management.show', $business),
                                                 'title' => 'View Business Details',
                                             ])
-                                            @include('admin.components.action-buttons', [
-                                                'type' => 'edit',
-                                                'href' => route('admin.business-management.edit', $business),
-                                                'title' => 'Edit Business Status',
-                                            ])
+                                            <form action="{{ route('admin.business-management.update', $business) }}" method="POST" class="d-inline">
+                                                @csrf
+                                                @method('PUT')
+                                                <select name="status" class="form-select form-select-sm um-status-select" onchange="this.form.submit()" title="Update Status">
+                                                    <option value="approved" @selected(($business->status ?? 'approved') === 'approved')>Approved</option>
+                                                    <option value="suspended" @selected(($business->status ?? 'approved') === 'suspended')>Suspended</option>
+                                                </select>
+                                            </form>
                                             <form action="{{ route('admin.business-management.destroy', $business) }}"
                                                 method="POST" class="d-inline"
                                                 onsubmit="return confirm('Are you sure you want to delete this business?');">
@@ -326,6 +329,14 @@
 
         .action-icon-btn:hover {
             background: #f1f5f9;
+        }
+
+        .um-status-select {
+            width: auto;
+            min-width: 110px;
+            font-size: 0.75rem;
+            padding: 0.25rem 1.5rem 0.25rem 0.5rem;
+            border-radius: 6px;
         }
 
         @media (max-width: 767px) {
