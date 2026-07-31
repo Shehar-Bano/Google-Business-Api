@@ -38,7 +38,6 @@ class User extends Authenticatable
 
     // Only statuses shown/updatable in admin panel
     public const ADMIN_STATUSES = [
-        self::STATUS_OTP_PENDING,
         self::STATUS_SUSPENDED,
     ];
 
@@ -53,7 +52,6 @@ class User extends Authenticatable
 
     // Labels for admin panel only
     public const ADMIN_STATUS_LABELS = [
-        self::STATUS_OTP_PENDING => 'OTP Pending',
         self::STATUS_SUSPENDED => 'Suspended',
     ];
 
@@ -68,7 +66,6 @@ class User extends Authenticatable
 
     // Icons for admin panel stats
     public const ADMIN_STATUS_ICONS = [
-        self::STATUS_OTP_PENDING => 'mdi-email-outline',
         self::STATUS_SUSPENDED => 'mdi-account-lock-outline',
     ];
 

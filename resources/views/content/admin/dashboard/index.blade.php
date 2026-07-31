@@ -146,7 +146,7 @@
                         <i class="mdi mdi-arrow-right me-1"></i> View All
                     </a>
                 </div>
-                <div class="table-responsive">
+                <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
                     <table class="table admin-datatable mb-0">
                         <thead>
                             <tr>
