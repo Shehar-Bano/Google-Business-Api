@@ -41,25 +41,55 @@
             </div>
         </div>
         <div class="card-body">
-            <!-- Search Form -->
-            <form method="GET" action="{{ route('admin.estimated-scores.index') }}" class="mb-4">
+            <!-- Filter & Search Form -->
+            <form method="GET" id="filter-form" action="{{ route('admin.estimated-scores.index') }}" class="mb-4">
                 <input type="hidden" name="sort" value="{{ $sort }}">
                 <input type="hidden" name="direction" value="{{ $direction }}">
                 <input type="hidden" name="per_page" value="{{ $perPage }}">
 
-                <div class="row g-3 align-items-end">
-                    <div class="col-12 col-md-9">
-                        <label class="form-label fw-semibold">Search Business</label>
-                        <div class="input-group input-group-merge">
-                            <span class="input-group-text"><i class="mdi mdi-magnify text-primary"></i></span>
-                            <input type="text" name="search" value="{{ $search }}" class="form-control" placeholder="Search by business name...">
+                <!-- Global Search Box (No Button, Auto Filters on Keystroke) -->
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Global Search</label>
+                    <div class="input-group input-group-merge border-primary">
+                        <span class="input-group-text"><i class="mdi mdi-magnify text-primary"></i></span>
+                        <input type="text" name="search" id="global-search-input" value="{{ $search }}" class="form-control" placeholder="Type anything to search globally (Name, Location)..." autocomplete="off">
+                    </div>
+                    <small class="form-text text-muted">Type to search. Filtering happens automatically as you type.</small>
+                </div>
+
+                <!-- Separate Filters Panel (With Apply Button) -->
+                <div class="border p-3 rounded mb-4 bg-light">
+                    <h6 class="mb-3 fw-bold"><i class="mdi mdi-filter-variant me-1"></i> Filter Options</h6>
+                    <div class="row g-3 align-items-end">
+                        <div class="col-12 col-md-3">
+                            <label class="form-label fw-medium">Business Name</label>
+                            <input type="text" name="business_name" value="{{ $businessName ?? '' }}" class="form-control" placeholder="Filter by name...">
+                        </div>
+                        <div class="col-12 col-md-2">
+                            <label class="form-label fw-medium">Location</label>
+                            <input type="text" name="location" value="{{ $location ?? '' }}" class="form-control" placeholder="Filter by location...">
+                        </div>
+                        <div class="col-12 col-md-2">
+                            <label class="form-label fw-medium">Date From</label>
+                            <input type="date" name="date_from" value="{{ $dateFrom }}" class="form-control">
+                        </div>
+                        <div class="col-12 col-md-2">
+                            <label class="form-label fw-medium">Date To</label>
+                            <input type="date" name="date_to" value="{{ $dateTo }}" class="form-control">
+                        </div>
+                        <div class="col-12 col-md-1.5 d-grid gap-2">
+                            <button type="submit" class="btn btn-dark" title="Apply Filters">
+                                <i class="mdi mdi-check"></i> Apply
+                            </button>
                         </div>
                     </div>
-                    <div class="col-12 col-md-3 d-grid">
-                        <button type="submit" class="btn btn-dark">
-                            <i class="mdi mdi-magnify me-1"></i> Search
-                        </button>
-                    </div>
+                    @if(filled($businessName) || filled($location) || filled($dateFrom) || filled($dateTo))
+                        <div class="mt-2 text-end">
+                            <a href="{{ route('admin.estimated-scores.index') }}" class="btn btn-sm btn-outline-secondary">
+                                <i class="mdi mdi-refresh"></i> Reset Filters
+                            </a>
+                        </div>
+                    @endif
                 </div>
             </form>
 
@@ -281,5 +311,27 @@
             }
         }
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('global-search-input');
+        const filterForm = document.getElementById('filter-form');
+        let searchTimeout;
+
+        if (searchInput && filterForm) {
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    filterForm.submit();
+                }, 400); // 400ms delay
+            });
+
+            // Focus and put cursor at the end of input
+            const length = searchInput.value.length;
+            if (length > 0) {
+                searchInput.focus();
+                searchInput.setSelectionRange(length, length);
+            }
+        }
+    });
 </script>
 @endpush

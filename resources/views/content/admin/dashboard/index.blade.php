@@ -12,21 +12,32 @@
         </div>
         <div>
             <div class="dropdown">
-                <button class="btn btn-primary dropdown-toggle d-flex align-items-center gap-1" type="button" id="dashboardRangeSelector" data-bs-toggle="dropdown" aria-expanded="false">
+                <button class="btn btn-primary dropdown-toggle d-flex align-items-center gap-1" type="button"
+                    id="dashboardRangeSelector" data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="mdi mdi-calendar-range me-1"></i>
-                    @if($range === 'today') Today's Stats
-                    @elseif($range === 'week') This Week's Stats
-                    @elseif($range === 'month') This Month's Stats
-                    @elseif($range === 'year') This Year's Stats
-                    @else All Time Stats
+                    @if ($range === 'today')
+                        Today's Stats
+                    @elseif($range === 'week')
+                        This Week's Stats
+                    @elseif($range === 'month')
+                        This Month's Stats
+                    @elseif($range === 'year')
+                        This Year's Stats
+                    @else
+                        All Time Stats
                     @endif
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dashboardRangeSelector">
-                    <li><a class="dropdown-item @if($range === 'all') active @endif" href="{{ route('admin.dashboard.index', ['range' => 'all']) }}">All Time Stats</a></li>
-                    <li><a class="dropdown-item @if($range === 'today') active @endif" href="{{ route('admin.dashboard.index', ['range' => 'today']) }}">Today's Stats</a></li>
-                    <li><a class="dropdown-item @if($range === 'week') active @endif" href="{{ route('admin.dashboard.index', ['range' => 'week']) }}">This Week's Stats</a></li>
-                    <li><a class="dropdown-item @if($range === 'month') active @endif" href="{{ route('admin.dashboard.index', ['range' => 'month']) }}">This Month's Stats</a></li>
-                    <li><a class="dropdown-item @if($range === 'year') active @endif" href="{{ route('admin.dashboard.index', ['range' => 'year']) }}">This Year's Stats</a></li>
+                    <li><a class="dropdown-item @if ($range === 'all') active @endif"
+                            href="{{ route('admin.dashboard.index', ['range' => 'all']) }}">All Time Stats</a></li>
+                    <li><a class="dropdown-item @if ($range === 'today') active @endif"
+                            href="{{ route('admin.dashboard.index', ['range' => 'today']) }}">Today's Stats</a></li>
+                    <li><a class="dropdown-item @if ($range === 'week') active @endif"
+                            href="{{ route('admin.dashboard.index', ['range' => 'week']) }}">This Week's Stats</a></li>
+                    <li><a class="dropdown-item @if ($range === 'month') active @endif"
+                            href="{{ route('admin.dashboard.index', ['range' => 'month']) }}">This Month's Stats</a></li>
+                    <li><a class="dropdown-item @if ($range === 'year') active @endif"
+                            href="{{ route('admin.dashboard.index', ['range' => 'year']) }}">This Year's Stats</a></li>
                 </ul>
             </div>
         </div>
@@ -183,7 +194,8 @@
         {{-- Right Column: User Registrations Chart --}}
         <div class="col-lg-4">
             <div class="mb-2">
-                <h5 class="dash-section-title"><i class="mdi mdi-trending-up me-2 text-primary"></i>User Registrations</h5>
+                <h5 class="dash-section-title"><i class="mdi mdi-trending-up me-2 text-primary"></i>User Registrations
+                </h5>
             </div>
             <div class="card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">

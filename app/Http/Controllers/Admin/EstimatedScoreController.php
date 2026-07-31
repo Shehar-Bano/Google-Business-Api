@@ -14,6 +14,11 @@ class EstimatedScoreController extends Controller
     public function index(Request $request)
     {
         $search = trim($request->string('search')->toString());
+        $businessName = trim($request->string('business_name')->toString());
+        $location = trim($request->string('location')->toString());
+        $dateFrom = trim($request->string('date_from')->toString());
+        $dateTo = trim($request->string('date_to')->toString());
+
         $perPage = in_array((int) $request->integer('per_page', 25), [10, 25, 50, 100], true)
             ? (int) $request->integer('per_page', 25) : 25;
 
@@ -32,7 +37,22 @@ class EstimatedScoreController extends Controller
             }])
             ->withSum('estimatedScores as total_score', 'points')
             ->when($search !== '', function ($query) use ($search) {
-                $query->where('name', 'like', "%{$search}%");
+                $query->where(function($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('location', 'like', "%{$search}%");
+                });
+            })
+            ->when($businessName !== '', function ($query) use ($businessName) {
+                $query->where('name', 'like', "%{$businessName}%");
+            })
+            ->when($location !== '', function ($query) use ($location) {
+                $query->where('location', 'like', "%{$location}%");
+            })
+            ->when($dateFrom !== '', function ($query) use ($dateFrom) {
+                $query->whereDate('created_at', '>=', $dateFrom);
+            })
+            ->when($dateTo !== '', function ($query) use ($dateTo) {
+                $query->whereDate('created_at', '<=', $dateTo);
             })
             ->when($sort === 'name', function ($query) use ($direction) {
                 $query->orderBy('name', $direction);
@@ -52,7 +72,7 @@ class EstimatedScoreController extends Controller
         ];
 
         return view('content.admin.estimated-scores.index', compact(
-            'businesses', 'stats', 'search', 'perPage', 'sort', 'direction'
+            'businesses', 'stats', 'search', 'businessName', 'location', 'dateFrom', 'dateTo', 'perPage', 'sort', 'direction'
         ));
     }
 }
