@@ -77,9 +77,9 @@
                             <label class="form-label fw-medium">Date To</label>
                             <input type="date" name="date_to" value="{{ $dateTo }}" class="form-control">
                         </div>
-                        <div class="col-12 col-md-1.5 d-grid gap-2">
-                            <button type="submit" class="btn btn-dark" title="Apply Filters">
-                                <i class="mdi mdi-check"></i> Apply
+                        <div class="col-12 col-md-2">
+                            <button type="submit" class="btn btn-sm btn-dark w-100" title="Apply Filters">
+                                <i class="mdi mdi-check me-1"></i> Apply
                             </button>
                         </div>
                     </div>
