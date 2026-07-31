@@ -292,27 +292,73 @@
 @endpush
 
 @push('my-script')
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const searchInput = document.getElementById('global-search-input');
-        const filterForm = document.getElementById('filter-form');
-        let searchTimeout;
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('global-search-input');
+            const filterForm = document.getElementById('filter-form');
+            
+            let searchTimeout;
 
-        if (searchInput && filterForm) {
-            searchInput.addEventListener('input', function() {
-                clearTimeout(searchTimeout);
-                searchTimeout = setTimeout(() => {
-                    filterForm.submit();
-                }, 400); // 400ms delay
-            });
+            if (searchInput && filterForm) {
+                const performSearch = () => {
+                    const formData = new FormData(filterForm);
+                    const params = new URLSearchParams(formData);
+                    const url = `${filterForm.action}?${params.toString()}`;
 
-            // Focus and put cursor at the end of input
-            const length = searchInput.value.length;
-            if (length > 0) {
-                searchInput.focus();
-                searchInput.setSelectionRange(length, length);
+                    fetch(url, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => response.text())
+                    .then(html => {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+                        
+                        const tbody = document.querySelector('table tbody');
+                        const newTbody = doc.querySelector('table tbody');
+                        if (newTbody && tbody) {
+                            tbody.innerHTML = newTbody.innerHTML;
+                        }
+                        
+                        const paginationSelector = '.d-flex.justify-content-between.align-items-center.mt-4, .card-body > .d-flex.justify-content-between';
+                        const currentPagination = document.querySelector(paginationSelector);
+                        const newPagination = doc.querySelector(paginationSelector);
+                        
+                        if (currentPagination) {
+                            if (newPagination) {
+                                currentPagination.outerHTML = newPagination.outerHTML;
+                            } else {
+                                currentPagination.remove();
+                            }
+                        } else if (newPagination) {
+                            const cardBody = document.querySelector('.card-body');
+                            if (cardBody) {
+                                cardBody.appendChild(newPagination);
+                            }
+                        }
+                        
+                        window.history.pushState({}, '', url);
+                    })
+                    .catch(err => console.error('Error filtering:', err));
+                };
+
+                searchInput.addEventListener('input', function() {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(performSearch, 300);
+                });
+
+                filterForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    performSearch();
+                });
+
+                filterForm.querySelectorAll('select, input[type="date"]').forEach(el => {
+                    el.addEventListener('change', performSearch);
+                });
             }
-        }
-    });
-</script>
+        });
+    </script>
 @endpush
+
+

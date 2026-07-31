@@ -27,6 +27,8 @@ class WhatsAppReviewRequestController extends Controller
             ? $request->string('direction', 'desc')->toString() : 'desc';
 
         $search = trim($request->string('search')->toString());
+        $status = trim($request->string('status')->toString());
+        $channel = trim($request->string('channel')->toString());
 
         $query = ReviewRequest::query()
             ->select('review_requests.*')
@@ -64,8 +66,18 @@ class WhatsAppReviewRequestController extends Controller
             });
         });
 
+        // Apply status filter
+        $query->when($status !== '', function ($q) use ($status) {
+            $q->where('review_requests.status', $status);
+        });
+
+        // Apply channel filter
+        $query->when($channel !== '', function ($q) use ($channel) {
+            $q->where('review_requests.channel', 'like', "%{$channel}%");
+        });
+
         $requests = $query->paginate($perPage)->withQueryString();
 
-        return view('content.admin.google-business.review-requests', compact('requests', 'search', 'perPage', 'sort', 'direction'));
+        return view('content.admin.google-business.review-requests', compact('requests', 'search', 'perPage', 'sort', 'direction', 'status', 'channel'));
     }
 }

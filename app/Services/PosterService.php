@@ -14,9 +14,9 @@ class PosterService
     /**
      * Get paginated poster list.
      */
-    public function paginatePosters(int $perPage = 10, ?string $search = null, string $sort = 'created_at', string $direction = 'desc')
+    public function paginatePosters(int $perPage = 10, ?string $search = null, string $sort = 'created_at', string $direction = 'desc', ?string $status = null)
     {
-        return $this->posterRepo->paginate($perPage, $search, $sort, $direction);
+        return $this->posterRepo->paginate($perPage, $search, $sort, $direction, $status);
     }
 
     /**

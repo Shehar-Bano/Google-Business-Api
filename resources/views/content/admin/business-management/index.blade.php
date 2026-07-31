@@ -66,8 +66,7 @@
                                 placeholder="Type anything to search globally (Name, Location, Phone, Email, Category)..."
                                 autocomplete="off">
                         </div>
-                        <small class="form-text text-muted">Type to search. Filtering happens automatically as you
-                            type.</small>
+                        <small class="form-text text-muted">Type to search. Filtering happens automatically as you type.</small>
                     </div>
 
                     <!-- Separate Filters Panel (With Apply Button) -->
@@ -352,23 +351,69 @@
         document.addEventListener('DOMContentLoaded', function() {
             const searchInput = document.getElementById('global-search-input');
             const filterForm = document.getElementById('filter-form');
+            
             let searchTimeout;
 
             if (searchInput && filterForm) {
+                const performSearch = () => {
+                    const formData = new FormData(filterForm);
+                    const params = new URLSearchParams(formData);
+                    const url = `${filterForm.action}?${params.toString()}`;
+
+                    fetch(url, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => response.text())
+                    .then(html => {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+                        
+                        const tbody = document.querySelector('table tbody');
+                        const newTbody = doc.querySelector('table tbody');
+                        if (newTbody && tbody) {
+                            tbody.innerHTML = newTbody.innerHTML;
+                        }
+                        
+                        const paginationSelector = '.d-flex.justify-content-between.align-items-center.mt-4, .card-body > .d-flex.justify-content-between';
+                        const currentPagination = document.querySelector(paginationSelector);
+                        const newPagination = doc.querySelector(paginationSelector);
+                        
+                        if (currentPagination) {
+                            if (newPagination) {
+                                currentPagination.outerHTML = newPagination.outerHTML;
+                            } else {
+                                currentPagination.remove();
+                            }
+                        } else if (newPagination) {
+                            const cardBody = document.querySelector('.card-body');
+                            if (cardBody) {
+                                cardBody.appendChild(newPagination);
+                            }
+                        }
+                        
+                        window.history.pushState({}, '', url);
+                    })
+                    .catch(err => console.error('Error filtering:', err));
+                };
+
                 searchInput.addEventListener('input', function() {
                     clearTimeout(searchTimeout);
-                    searchTimeout = setTimeout(() => {
-                        filterForm.submit();
-                    }, 400); // 400ms delay
+                    searchTimeout = setTimeout(performSearch, 300);
                 });
 
-                // Focus and put cursor at the end of input
-                const length = searchInput.value.length;
-                if (length > 0) {
-                    searchInput.focus();
-                    searchInput.setSelectionRange(length, length);
-                }
+                filterForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    performSearch();
+                });
+
+                filterForm.querySelectorAll('select, input[type="date"]').forEach(el => {
+                    el.addEventListener('change', performSearch);
+                });
             }
         });
     </script>
 @endpush
+
+

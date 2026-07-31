@@ -17,6 +17,7 @@ class PosterController extends Controller
     public function index(Request $request)
     {
         $search = trim($request->string('search')->toString());
+        $status = trim($request->string('status')->toString());
         $perPage = in_array((int) $request->integer('per_page', 10), [10, 25, 50, 100], true)
             ? (int) $request->integer('per_page', 10) : 10;
 
@@ -29,9 +30,9 @@ class PosterController extends Controller
         $direction = in_array($request->string('direction', 'desc')->toString(), ['asc', 'desc'], true)
             ? $request->string('direction', 'desc')->toString() : 'desc';
 
-        $posters = $this->posterService->paginatePosters($perPage, $search, $sort, $direction);
+        $posters = $this->posterService->paginatePosters($perPage, $search, $sort, $direction, $status);
 
-        return view('content.admin.posters.index', compact('posters', 'search', 'perPage', 'sort', 'direction'));
+        return view('content.admin.posters.index', compact('posters', 'search', 'perPage', 'sort', 'direction', 'status'));
     }
 
     /**
