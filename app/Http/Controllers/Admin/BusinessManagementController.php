@@ -42,8 +42,11 @@ class BusinessManagementController extends Controller
                       ->orWhere('location', 'like', "%{$search}%")
                       ->orWhere('phone_number', 'like', "%{$search}%")
                       ->orWhere('address', 'like', "%{$search}%")
-                      ->orWhere('email', 'like', "%{$search}%")
-                      ->orWhere('category', 'like', "%{$search}%");
+                      ->orWhere('category', 'like', "%{$search}%")
+                      ->orWhereHas('user', function($uq) use ($search) {
+                          $uq->where('email', 'like', "%{$search}%")
+                            ->orWhere('name', 'like', "%{$search}%");
+                      });
                 });
             })
             ->when($businessName !== '', function ($query) use ($businessName) {

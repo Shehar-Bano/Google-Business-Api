@@ -18,7 +18,7 @@ class AiGeneratedPosterRepository
     /**
      * Paginate AI Generated Posters for admin.
      */
-    public function paginate(int $perPage = 10, ?string $search = null, string $sort = 'created_at', string $direction = 'desc'): LengthAwarePaginator
+    public function paginate(int $perPage = 10, ?string $search = null, string $sort = 'created_at', string $direction = 'desc', ?string $status = null): LengthAwarePaginator
     {
         $query = AiGeneratedPoster::query()
             ->select('ai_generated_posters.*')
@@ -47,6 +47,10 @@ class AiGeneratedPosterRepository
                         $bq->where('name', 'like', "%{$search}%");
                     });
             });
+        });
+
+        $query->when($status !== null && $status !== '', function ($q) use ($status) {
+            $q->where('ai_generated_posters.status', $status);
         });
 
         return $query->paginate($perPage);
