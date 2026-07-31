@@ -153,45 +153,6 @@
                         </table>
                     </div>
                 </div>
-
-                {{-- Google Scores breakdown --}}
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0 fw-bold">Google Performance Scores</h5>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Scoring Category</th>
-                                    <th>Score Code</th>
-                                    <th>Awarded Points</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($business->googleScores as $score)
-                                    <tr>
-                                        <td>
-                                            <strong
-                                                class="cell-primary text-capitalize">{{ str_replace('_', ' ', $score->name) }}</strong>
-                                        </td>
-                                        <td class="font-monospace text-muted">{{ $score->name }}</td>
-                                        <td>
-                                            <span class="badge bg-label-primary fw-bold">{{ $score->points }}
-                                                Points</span>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="3" class="text-center text-muted py-4">No Google scores
-                                            calculated
-                                            yet.</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
             </div>
         </div>
     @endsection
