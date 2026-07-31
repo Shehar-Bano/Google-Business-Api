@@ -28,6 +28,10 @@ class PermissionController extends Controller
         $sort = in_array($sort, $allowedSorts, true) ? $sort : 'name';
 
         $search = trim($request->string('search')->toString());
+        $permissionNameFilter = trim($request->string('permission_name')->toString());
+        $roleFilter = trim($request->string('role')->toString());
+        $dateFrom = trim($request->string('date_from')->toString());
+        $dateTo = trim($request->string('date_to')->toString());
 
         $permissions = Permission::query()
             ->when($search !== '', function (Builder $query) use ($search): void {
@@ -37,11 +41,25 @@ class PermissionController extends Controller
                         ->orWhere('guard_name', 'like', "%{$search}%");
                 });
             })
+            ->when($permissionNameFilter !== '', function (Builder $query) use ($permissionNameFilter): void {
+                $query->where('name', 'like', "%{$permissionNameFilter}%");
+            })
+            ->when($roleFilter !== '', function (Builder $query) use ($roleFilter): void {
+                $query->whereHas('roles', function (Builder $q) use ($roleFilter): void {
+                    $q->where('name', $roleFilter);
+                });
+            })
+            ->when($dateFrom !== '', fn (Builder $q) => $q->whereDate('created_at', '>=', $dateFrom))
+            ->when($dateTo !== '', fn (Builder $q) => $q->whereDate('created_at', '<=', $dateTo))
             ->orderBy($sort, $direction)
             ->paginate($perPage)
             ->withQueryString();
 
-        return view('content.admin.permissions.index', compact('permissions', 'search', 'sort', 'direction', 'perPage'));
+        $roles = Role::query()->orderBy('name')->get();
+
+        return view('content.admin.permissions.index', compact(
+            'permissions', 'roles', 'search', 'permissionNameFilter', 'roleFilter', 'dateFrom', 'dateTo', 'sort', 'direction', 'perPage'
+        ));
     }
 
     public function create(): View

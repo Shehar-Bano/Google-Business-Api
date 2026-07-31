@@ -92,7 +92,7 @@
                 @endif
             </div>
 
-            <form method="GET" class="row g-3 align-items-end">
+            <form method="GET" class="row g-3 align-items-end admin-datatable-filter-form">
                 <input type="hidden" name="sort" value="{{ $sort }}">
                 <input type="hidden" name="direction" value="{{ $direction }}">
                 <input type="hidden" name="per_page" value="{{ $perPage }}">
@@ -101,7 +101,7 @@
                     <label class="form-label">Search</label>
                     <div class="input-group admin-search-group">
                         <span class="input-group-text"><i class="mdi mdi-magnify"></i></span>
-                        <input type="text" name="search" value="{{ $search }}" class="form-control" placeholder="Search records...">
+                        <input type="text" name="search" value="{{ $search }}" class="form-control admin-global-search-input" placeholder="Search records...">
                     </div>
                 </div>
 
@@ -170,3 +170,131 @@
         @endif
     </div>
 </div>
+
+@push('my-script')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.admin-table-card').forEach(function(card) {
+                const filterForm = card.querySelector('.admin-datatable-filter-form');
+                const lengthForm = card.querySelector('.admin-length-form');
+                const searchInput = card.querySelector('.admin-global-search-input');
+                const tbody = card.querySelector('.admin-datatable tbody');
+                const tableHeader = card.querySelector('.admin-datatable thead');
+                
+                if (!filterForm) return;
+
+                let searchTimeout;
+
+                const performSearch = () => {
+                    const formData = new FormData(filterForm);
+                    if (lengthForm) {
+                        const lengthData = new FormData(lengthForm);
+                        for (let [key, val] of lengthData.entries()) {
+                            if (!formData.has(key)) {
+                                formData.append(key, val);
+                            } else if (key === 'per_page') {
+                                formData.set(key, val);
+                            }
+                        }
+                    }
+                    
+                    const params = new URLSearchParams(formData);
+                    const actionUrl = filterForm.getAttribute('action') || window.location.pathname;
+                    const url = `${actionUrl}?${params.toString()}`;
+
+                    fetch(url, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => response.text())
+                    .then(html => {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+                        
+                        const newTbody = doc.querySelector('.admin-datatable tbody');
+                        if (newTbody && tbody) {
+                            tbody.innerHTML = newTbody.innerHTML;
+                        }
+                        
+                        const footerSelector = '.admin-table-footer';
+                        const currentFooter = card.querySelector(footerSelector);
+                        const newFooter = doc.querySelector(footerSelector);
+                        if (currentFooter) {
+                            if (newFooter) {
+                                currentFooter.outerHTML = newFooter.outerHTML;
+                            } else {
+                                currentFooter.remove();
+                            }
+                        } else if (newFooter) {
+                            const body = card.querySelector('.card-body');
+                            if (body) body.appendChild(newFooter);
+                        }
+
+                        const chipsSelector = '.admin-filter-card__top';
+                        const currentChips = card.querySelector(chipsSelector);
+                        const newChips = doc.querySelector(chipsSelector);
+                        if (currentChips && newChips) {
+                            currentChips.innerHTML = newChips.innerHTML;
+                        }
+
+                        const badgeSelector = '.admin-card-header__meta';
+                        const currentBadge = card.querySelector(badgeSelector);
+                        const newBadge = doc.querySelector(badgeSelector);
+                        if (currentBadge && newBadge) {
+                            currentBadge.innerHTML = newBadge.innerHTML;
+                        }
+
+                        const metaSelector = '.admin-toolbar-shell__block--meta';
+                        const currentMeta = card.querySelector(metaSelector);
+                        const newMeta = doc.querySelector(metaSelector);
+                        if (currentMeta && newMeta) {
+                            currentMeta.innerHTML = newMeta.innerHTML;
+                        }
+
+                        const newHeader = doc.querySelector('.admin-datatable thead');
+                        if (newHeader && tableHeader) {
+                            tableHeader.innerHTML = newHeader.innerHTML;
+                        }
+
+                        const newLengthSelect = doc.querySelector('.admin-per-page');
+                        const currentLengthSelect = card.querySelector('.admin-per-page');
+                        if (newLengthSelect && currentLengthSelect) {
+                            currentLengthSelect.value = newLengthSelect.value;
+                        }
+                        
+                        window.history.pushState({}, '', url);
+                    })
+                    .catch(err => console.error('Error filtering datatable:', err));
+                };
+
+                if (searchInput) {
+                    searchInput.addEventListener('input', function() {
+                        clearTimeout(searchTimeout);
+                        searchTimeout = setTimeout(performSearch, 300);
+                    });
+                }
+
+                filterForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    performSearch();
+                });
+
+                filterForm.querySelectorAll('select, input[type="date"], input[type="text"]:not(.admin-global-search-input)').forEach(el => {
+                    el.addEventListener('change', performSearch);
+                });
+
+                if (lengthForm) {
+                    lengthForm.addEventListener('submit', function(e) {
+                        e.preventDefault();
+                    });
+                    const lengthSelect = lengthForm.querySelector('.admin-per-page');
+                    if (lengthSelect) {
+                        lengthSelect.removeAttribute('onchange');
+                        lengthSelect.addEventListener('change', performSearch);
+                    }
+                }
+            });
+        });
+    </script>
+@endpush

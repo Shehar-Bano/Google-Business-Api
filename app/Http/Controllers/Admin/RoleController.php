@@ -29,17 +29,21 @@ class RoleController extends Controller
         $sort = in_array($sort, $allowedSorts, true) ? $sort : 'name';
 
         $search = trim($request->string('search')->toString());
+        $dateFrom = trim($request->string('date_from')->toString());
+        $dateTo = trim($request->string('date_to')->toString());
 
         $roles = Role::query()
             ->withCount('permissions')
             ->when($search !== '', function (Builder $query) use ($search): void {
                 $query->where('name', 'like', "%{$search}%");
             })
+            ->when($dateFrom !== '', fn (Builder $q) => $q->whereDate('created_at', '>=', $dateFrom))
+            ->when($dateTo !== '', fn (Builder $q) => $q->whereDate('created_at', '<=', $dateTo))
             ->orderBy($sort, $direction)
             ->paginate($perPage)
             ->withQueryString();
 
-        return view('content.admin.roles.index', compact('roles', 'search', 'sort', 'direction', 'perPage'));
+        return view('content.admin.roles.index', compact('roles', 'search', 'dateFrom', 'dateTo', 'sort', 'direction', 'perPage'));
     }
 
     public function create(): View

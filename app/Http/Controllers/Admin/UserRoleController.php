@@ -26,6 +26,10 @@ class UserRoleController extends Controller
         $sort = in_array($sort, $allowedSorts, true) ? $sort : 'name';
 
         $search = trim($request->string('search')->toString());
+        $roleFilter = trim($request->string('role')->toString());
+        $status = trim($request->string('status')->toString());
+        $dateFrom = trim($request->string('date_from')->toString());
+        $dateTo = trim($request->string('date_to')->toString());
 
         $users = User::query()
             ->with('roles')
@@ -36,11 +40,27 @@ class UserRoleController extends Controller
                         ->orWhere('email', 'like', "%{$search}%");
                 });
             })
+            ->when($roleFilter !== '', function (Builder $query) use ($roleFilter): void {
+                $query->role($roleFilter);
+            })
+            ->when($status !== '', function (Builder $query) use ($status): void {
+                if ($status === 'active') {
+                    $query->whereNotNull('email_verified_at');
+                } elseif ($status === 'pending') {
+                    $query->whereNull('email_verified_at');
+                }
+            })
+            ->when($dateFrom !== '', fn (Builder $q) => $q->whereDate('created_at', '>=', $dateFrom))
+            ->when($dateTo !== '', fn (Builder $q) => $q->whereDate('created_at', '<=', $dateTo))
             ->orderBy($sort, $direction)
             ->paginate($perPage)
             ->withQueryString();
 
-        return view('content.admin.users.index', compact('users', 'search', 'sort', 'direction', 'perPage'));
+        $roles = Role::query()->orderBy('name')->get();
+
+        return view('content.admin.users.index', compact(
+            'users', 'roles', 'search', 'roleFilter', 'status', 'dateFrom', 'dateTo', 'sort', 'direction', 'perPage'
+        ));
     }
 
     public function edit(User $user): View
