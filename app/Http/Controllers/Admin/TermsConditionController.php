@@ -16,6 +16,10 @@ class TermsConditionController extends Controller
     public function index(Request $request): View
     {
         $search = trim($request->string('search')->toString());
+        $status = trim($request->string('status')->toString());
+        $dateFrom = trim($request->string('date_from')->toString());
+        $dateTo = trim($request->string('date_to')->toString());
+
         $perPage = (int) $request->integer('per_page', 10);
         $perPage = in_array($perPage, [10, 25, 50, 100], true) ? $perPage : 10;
 
@@ -34,11 +38,14 @@ class TermsConditionController extends Controller
                       ->orWhere('slug', 'like', "%{$search}%")
                       ->orWhere('content', 'like', "%{$search}%");
             })
+            ->when($status !== '', fn ($query) => $query->where('status', $status))
+            ->when($dateFrom !== '', fn ($query) => $query->whereDate('created_at', '>=', $dateFrom))
+            ->when($dateTo !== '', fn ($query) => $query->whereDate('created_at', '<=', $dateTo))
             ->orderBy($sort, $direction)
             ->paginate($perPage)
             ->withQueryString();
 
-        return view('content.admin.terms-conditions.index', compact('terms', 'search', 'perPage', 'sort', 'direction'));
+        return view('content.admin.terms-conditions.index', compact('terms', 'search', 'status', 'dateFrom', 'dateTo', 'perPage', 'sort', 'direction'));
     }
 
     /**

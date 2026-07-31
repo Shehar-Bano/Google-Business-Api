@@ -67,16 +67,16 @@ class BusinessController extends Controller
         }
 
         // Check if user already owns a business
-        $userId = $request->user()?->id;
-        if ($userId) {
-            $existingBusiness = Business::where('user_id', $userId)->first();
-            if ($existingBusiness) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'User business already exist.',
-                ], 422);
-            }
-        }
+        // $userId = $request->user()?->id;
+        // if ($userId) {
+        //     $existingBusiness = Business::where('user_id', $userId)->first();
+        //     if ($existingBusiness) {
+        //         return response()->json([
+        //             'success' => false,
+        //             'message' => 'User business already exist.',
+        //         ], 422);
+        //     }
+        // }
 
         DB::beginTransaction();
 
@@ -415,10 +415,10 @@ class BusinessController extends Controller
     public function getEstimatedScores($businessId)
     {
         $business = Business::find($businessId);
-        if (!$business) {
+        if (! $business) {
             return response()->json([
                 'success' => false,
-                'message' => 'Business not found.'
+                'message' => 'Business not found.',
             ], 404);
         }
 
@@ -426,7 +426,7 @@ class BusinessController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $scores
+            'data' => $scores,
         ], 200);
     }
 }

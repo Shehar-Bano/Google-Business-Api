@@ -5,14 +5,14 @@
 @section('content')
 <div class="admin-page support-options-page">
 
-    <div class="admin-page-header">
+    <div class="admin-page-header mb-4">
         <div class="admin-page-header__left">
             <h4 class="admin-page-header__title">Help & Support</h4>
             <p class="admin-page-header__subtitle">Manage support options shown in the app.</p>
         </div>
     </div>
 
-    <div class="support-stats-grid">
+    <div class="support-stats-grid mb-4">
         <div class="support-stat-card">
             <div class="support-stat-card__icon support-stat-card__icon--primary"><i class="mdi mdi-lifebuoy"></i></div>
             <div>
@@ -36,94 +36,161 @@
         </div>
     </div>
 
-    @component('admin.components.datatable', [
-        'title' => 'Support Options',
-        'subtitle' => 'Search by title, type, or support value.',
-        'paginator' => $supportOptions,
-        'createUrl' => route('admin.support-options.create'),
-        'createLabel' => 'Add Option',
-        'search' => $search,
-        'perPage' => $perPage,
-        'sort' => $sort,
-        'direction' => $direction,
-        'filters' => [
-            [
-                'name' => 'type',
-                'label' => 'Type',
-                'value' => $type,
-                'options' => [
-                    '' => 'All Types',
-                    'whatsapp' => 'WhatsApp',
-                    'call' => 'Call',
-                    'email' => 'Email',
-                    'chat' => 'Chat',
-                    'website' => 'Website',
-                ],
-            ],
-            [
-                'name' => 'status',
-                'label' => 'Status',
-                'value' => $status,
-                'options' => [
-                    '' => 'All Statuses',
-                    'active' => 'Active',
-                    'inactive' => 'Inactive',
-                ],
-            ],
-        ],
-        'columns' => [
-            ['label' => 'Option', 'field' => 'title', 'sortable' => true],
-            ['label' => 'Type', 'field' => 'type', 'sortable' => true],
-            ['label' => 'Value', 'sortable' => false],
-            ['label' => 'Order', 'field' => 'sort_order', 'sortable' => true],
-            ['label' => 'Status', 'field' => 'is_active', 'sortable' => true],
-            ['label' => 'Created', 'field' => 'created_at', 'sortable' => true],
-            ['label' => 'Actions', 'actions' => true],
-        ],
-    ])
-        @forelse($supportOptions as $option)
-            <tr>
-                <td>
-                    <div class="d-flex align-items-center gap-2">
-                        @if($option->image)
-                            <img src="{{ str_starts_with($option->image, 'http') ? $option->image : asset('storage/' . $option->image) }}" alt="{{ $option->title }}" class="support-option-icon">
-                        @else
-                            <div class="support-option-avatar"><i class="mdi mdi-lifebuoy"></i></div>
-                        @endif
-                        <div>
-                            <div class="cell-primary">{{ $option->title }}</div>
-                            <div class="cell-muted">Option #{{ $option->id }}</div>
+    <div class="card mt-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="mb-0 fw-bold">Support Options</h5>
+                <small class="text-muted">Search by title, type, or support value.</small>
+            </div>
+            <div>
+                <span class="badge bg-label-primary"><strong>{{ number_format($supportOptions->total()) }}</strong> records</span>
+                <a href="{{ route('admin.support-options.create') }}" class="btn btn-sm btn-primary ms-2">
+                    <i class="mdi mdi-plus me-1"></i> Add Option
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            <!-- Filter & Search Form -->
+            <form method="GET" id="filter-form" action="{{ route('admin.support-options.index') }}">
+                <input type="hidden" name="sort" value="{{ $sort }}">
+                <input type="hidden" name="direction" value="{{ $direction }}">
+                <input type="hidden" name="per_page" value="{{ $perPage }}">
+
+                <!-- Global Search Box (No Button, Auto Filters on Keystroke) -->
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Global Search</label>
+                    <div class="input-group input-group-merge border-primary">
+                        <span class="input-group-text"><i class="mdi mdi-magnify text-primary"></i></span>
+                        <input type="text" name="search" id="global-search-input" value="{{ $search }}" class="form-control" placeholder="Type anything to search (Title, Type, or Value)..." autocomplete="off">
+                    </div>
+                    <small class="form-text text-muted">Type to search. Filtering happens automatically as you type.</small>
+                </div>
+
+                <!-- Separate Filters Panel (With Apply Button) -->
+                <div class="border p-3 rounded mb-4 bg-light">
+                    <h6 class="mb-3 fw-bold"><i class="mdi mdi-filter-variant me-1"></i> Filter Options</h6>
+                    <div class="row g-3 align-items-end">
+                        <div class="col-12 col-md-5">
+                            <label class="form-label fw-medium">Type</label>
+                            <select name="type" class="form-select">
+                                <option value="">All Types</option>
+                                <option value="whatsapp" @selected(($type ?? '') === 'whatsapp')>WhatsApp</option>
+                                <option value="call" @selected(($type ?? '') === 'call')>Call</option>
+                                <option value="email" @selected(($type ?? '') === 'email')>Email</option>
+                                <option value="chat" @selected(($type ?? '') === 'chat')>Chat</option>
+                                <option value="website" @selected(($type ?? '') === 'website')>Website</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-5">
+                            <label class="form-label fw-medium">Status</label>
+                            <select name="status" class="form-select">
+                                <option value="">All Statuses</option>
+                                <option value="active" @selected(($status ?? '') === 'active')>Active</option>
+                                <option value="inactive" @selected(($status ?? '') === 'inactive')>Inactive</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-2 d-grid gap-2">
+                            <button type="submit" class="btn btn-dark">
+                                <i class="mdi mdi-check me-1"></i> Apply Filters
+                            </button>
                         </div>
                     </div>
-                </td>
-                <td>{{ \Illuminate\Support\Str::headline($option->type) }}</td>
-                <td class="cell-muted">{{ $option->value }}</td>
-                <td>{{ $option->sort_order }}</td>
-                <td>
-                    <span class="badge {{ $option->is_active ? 'bg-label-success' : 'bg-label-secondary' }}">
-                        {{ $option->is_active ? 'Active' : 'Inactive' }}
-                    </span>
-                </td>
-                <td class="cell-muted">{{ $option->created_at?->format('Y-m-d') }}</td>
-                <td class="text-end">
-                    @include('admin.components.action-buttons', [
-                        'type' => 'edit',
-                        'href' => route('admin.support-options.edit', $option),
-                        'title' => 'Edit Support Option',
-                    ])
-                    @include('admin.components.action-buttons', [
-                        'type' => 'delete',
-                        'formAction' => route('admin.support-options.destroy', $option),
-                        'confirm' => "Delete support option \"{$option->title}\"?",
-                    ])
-                </td>
-            </tr>
-        @empty
-            <tr>
-                <td colspan="7" class="admin-empty-state">No support options found.</td>
-            </tr>
-        @endforelse
-    @endcomponent
+                    @if(filled($type ?? '') || filled($status ?? ''))
+                        <div class="mt-2 text-end">
+                            <a href="{{ route('admin.support-options.index') }}" class="btn btn-sm btn-outline-secondary">
+                                <i class="mdi mdi-refresh"></i> Reset Filters
+                            </a>
+                        </div>
+                    @endif
+                </div>
+            </form>
+
+            <!-- Table -->
+            <div class="table-responsive text-nowrap">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            @php
+                                $getSortUrl = function($col) use ($sort, $direction) {
+                                    $newDir = ($sort === $col && $direction === 'asc') ? 'desc' : 'asc';
+                                    return route('admin.support-options.index', array_merge(request()->query(), ['sort' => $col, 'direction' => $newDir]));
+                                };
+                                $getSortIcon = function($col) use ($sort, $direction) {
+                                    if ($sort !== $col) return 'mdi-minus text-muted';
+                                    return $direction === 'asc' ? 'mdi-arrow-up text-primary' : 'mdi-arrow-down text-primary';
+                                };
+                            @endphp
+                            <th><a href="{{ $getSortUrl('title') }}" class="text-dark fw-bold">Option <i class="mdi {{ $getSortIcon('title') }} ml-1"></i></a></th>
+                            <th><a href="{{ $getSortUrl('type') }}" class="text-dark fw-bold">Type <i class="mdi {{ $getSortIcon('type') }} ml-1"></i></a></th>
+                            <th>Value</th>
+                            <th><a href="{{ $getSortUrl('sort_order') }}" class="text-dark fw-bold">Order <i class="mdi {{ $getSortIcon('sort_order') }} ml-1"></i></a></th>
+                            <th><a href="{{ $getSortUrl('is_active') }}" class="text-dark fw-bold">Status <i class="mdi {{ $getSortIcon('is_active') }} ml-1"></i></a></th>
+                            <th><a href="{{ $getSortUrl('created_at') }}" class="text-dark fw-bold">Created <i class="mdi {{ $getSortIcon('created_at') }} ml-1"></i></a></th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-border-bottom-0">
+                        @forelse($supportOptions as $option)
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        @if($option->image)
+                                            <img src="{{ str_starts_with($option->image, 'http') ? $option->image : asset('storage/' . $option->image) }}" alt="{{ $option->title }}" class="support-option-icon">
+                                        @else
+                                            <div class="support-option-avatar"><i class="mdi mdi-lifebuoy"></i></div>
+                                        @endif
+                                        <div>
+                                            <div class="cell-primary fw-semibold">{{ $option->title }}</div>
+                                            <div class="cell-muted">Option #{{ $option->id }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ \Illuminate\Support\Str::headline($option->type) }}</td>
+                                <td class="cell-muted">{{ $option->value }}</td>
+                                <td>{{ $option->sort_order }}</td>
+                                <td>
+                                    <span class="badge {{ $option->is_active ? 'bg-label-success' : 'bg-label-secondary' }}">
+                                        {{ $option->is_active ? 'Active' : 'Inactive' }}
+                                    </span>
+                                </td>
+                                <td class="cell-muted">{{ $option->created_at?->format('Y-m-d') }}</td>
+                                <td class="text-end">
+                                    <div class="d-inline-flex align-items-center gap-1">
+                                        @include('admin.components.action-buttons', [
+                                            'type' => 'edit',
+                                            'href' => route('admin.support-options.edit', $option),
+                                            'title' => 'Edit Support Option',
+                                        ])
+                                        @include('admin.components.action-buttons', [
+                                            'type' => 'delete',
+                                            'formAction' => route('admin.support-options.destroy', $option),
+                                            'confirm' => "Delete support option \"{$option->title}\"?",
+                                        ])
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="7" class="text-center py-4 text-muted">No support options found.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            @if($supportOptions->hasPages())
+                <div class="d-flex justify-content-between align-items-center mt-4">
+                    <div>
+                        <span class="text-muted small">Showing {{ $supportOptions->firstItem() ?? 0 }} to {{ $supportOptions->lastItem() ?? 0 }} of {{ $supportOptions->total() }} records</span>
+                    </div>
+                    <div>
+                        {{ $supportOptions->links() }}
+                    </div>
+                </div>
+            @endif
+        </div>
+    </div>
 
 </div>
 @endsection
@@ -204,4 +271,87 @@
         }
     }
 </style>
+@endpush
+
+@push('my-script')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('global-search-input');
+            const filterForm = document.getElementById('filter-form');
+            
+            let searchTimeout;
+
+            if (searchInput && filterForm) {
+                const performSearch = () => {
+                    const formData = new FormData(filterForm);
+                    const params = new URLSearchParams(formData);
+                    const url = `${filterForm.action}?${params.toString()}`;
+
+                    fetch(url, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => response.text())
+                    .then(html => {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+                        
+                        const tbody = document.querySelector('table tbody');
+                        const newTbody = doc.querySelector('table tbody');
+                        if (newTbody && tbody) {
+                            tbody.innerHTML = newTbody.innerHTML;
+                        }
+
+                        const thead = document.querySelector('table thead');
+                        const newThead = doc.querySelector('table thead');
+                        if (newThead && thead) {
+                            thead.innerHTML = newThead.innerHTML;
+                        }
+                        
+                        const paginationSelector = '.d-flex.justify-content-between.align-items-center.mt-4, .card-body > .d-flex.justify-content-between';
+                        const currentPagination = document.querySelector(paginationSelector);
+                        const newPagination = doc.querySelector(paginationSelector);
+                        
+                        if (currentPagination) {
+                            if (newPagination) {
+                                currentPagination.outerHTML = newPagination.outerHTML;
+                            } else {
+                                currentPagination.remove();
+                            }
+                        } else if (newPagination) {
+                            const cardBody = document.querySelector('.card-body');
+                            if (cardBody) {
+                                cardBody.appendChild(newPagination);
+                            }
+                        }
+
+                        const badgeSelector = '.badge.bg-label-primary';
+                        const currentBadge = document.querySelector(badgeSelector);
+                        const newBadge = doc.querySelector(badgeSelector);
+                        if (currentBadge && newBadge) {
+                            currentBadge.innerHTML = newBadge.innerHTML;
+                        }
+                        
+                        window.history.pushState({}, '', url);
+                    })
+                    .catch(err => console.error('Error filtering:', err));
+                };
+
+                searchInput.addEventListener('input', function() {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(performSearch, 300);
+                });
+
+                filterForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    performSearch();
+                });
+
+                filterForm.querySelectorAll('select, input[type="date"]').forEach(el => {
+                    el.addEventListener('change', performSearch);
+                });
+            }
+        });
+    </script>
 @endpush
