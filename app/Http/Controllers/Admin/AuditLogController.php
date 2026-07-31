@@ -27,6 +27,9 @@ class AuditLogController extends Controller
             ? $request->string('direction', 'desc')->toString() : 'desc';
 
         $search = trim($request->string('search')->toString());
+        $userFilter = $request->input('user_filter');
+        $dateFrom = trim($request->string('date_from')->toString());
+        $dateTo = trim($request->string('date_to')->toString());
 
         $query = AdminAuditLog::query()
             ->select('admin_audit_logs.*')
@@ -39,19 +42,33 @@ class AuditLogController extends Controller
             $query->orderBy('admin_audit_logs.' . $sort, $direction);
         }
 
-        $logs = $query->when($search !== '', function ($q) use ($search) {
-                $q->where(function ($sub) use ($search) {
-                    $sub->where('admin_audit_logs.action', 'like', "%{$search}%")
-                        ->orWhere('admin_audit_logs.target_type', 'like', "%{$search}%")
-                        ->orWhere('admin_audit_logs.description', 'like', "%{$search}%")
-                        ->orWhereHas('user', function ($uq) use ($search) {
-                            $uq->where('name', 'like', "%{$search}%");
-                        });
-                });
-            })
-            ->paginate($perPage)
-            ->withQueryString();
+        $query->when($search !== '', function ($q) use ($search) {
+            $q->where(function ($sub) use ($search) {
+                $sub->where('admin_audit_logs.action', 'like', "%{$search}%")
+                    ->orWhere('admin_audit_logs.target_type', 'like', "%{$search}%")
+                    ->orWhere('admin_audit_logs.description', 'like', "%{$search}%")
+                    ->orWhereHas('user', function ($uq) use ($search) {
+                        $uq->where('name', 'like', "%{$search}%");
+                    });
+            });
+        });
 
-        return view('content.admin.audit-logs.index', compact('logs', 'search', 'perPage', 'sort', 'direction'));
+        $query->when($userFilter !== null && $userFilter !== '', function ($q) use ($userFilter) {
+            $q->where('admin_audit_logs.user_id', $userFilter);
+        });
+
+        $query->when($dateFrom !== '', function ($q) use ($dateFrom) {
+            $q->whereDate('admin_audit_logs.created_at', '>=', $dateFrom);
+        });
+
+        $query->when($dateTo !== '', function ($q) use ($dateTo) {
+            $q->whereDate('admin_audit_logs.created_at', '<=', $dateTo);
+        });
+
+        $logs = $query->paginate($perPage)->withQueryString();
+
+        $logUsers = \App\Models\User::whereIn('id', AdminAuditLog::distinct()->pluck('user_id'))->get();
+
+        return view('content.admin.audit-logs.index', compact('logs', 'search', 'perPage', 'sort', 'direction', 'userFilter', 'dateFrom', 'dateTo', 'logUsers'));
     }
 }

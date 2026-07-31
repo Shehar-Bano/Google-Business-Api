@@ -16,6 +16,7 @@ class SubscriptionPlanController extends Controller
     public function index(Request $request): View
     {
         $search = trim($request->string('search')->toString());
+        $status = trim($request->string('status')->toString());
         $perPage = (int) $request->integer('per_page', 10);
         $perPage = in_array($perPage, [10, 25, 50, 100], true) ? $perPage : 10;
 
@@ -32,11 +33,14 @@ class SubscriptionPlanController extends Controller
             ->when($search !== '', function ($query) use ($search) {
                 $query->where('title', 'like', "%{$search}%");
             })
+            ->when($status !== '', function ($query) use ($status) {
+                $query->where('status', $status);
+            })
             ->orderBy($sort, $direction)
             ->paginate($perPage)
             ->withQueryString();
 
-        return view('content.admin.subscription-plans.index', compact('plans', 'search', 'perPage', 'sort', 'direction'));
+        return view('content.admin.subscription-plans.index', compact('plans', 'search', 'perPage', 'sort', 'direction', 'status'));
     }
 
     /**
