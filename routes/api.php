@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\V1\ContentController;
 use App\Http\Controllers\Api\V1\NotificationController;
 use App\Http\Controllers\Api\V1\OrderController;
 use App\Http\Controllers\Api\V1\OtpController;
+use App\Models\Poster;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -115,6 +116,7 @@ Route::prefix('v1')->group(function () {
         Route::get('google-business/locations/{locationId}/details', [App\Http\Controllers\Api\GoogleBusinessController::class, 'getLocationDetails']);
 
     });
+
     // AI Suggestion Routes
     Route::post('ai/suggestions', [App\Http\Controllers\Api\AiSuggestionController::class, 'getSuggestions']);
 

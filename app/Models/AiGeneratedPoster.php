@@ -63,4 +63,26 @@ class AiGeneratedPoster extends Model
     {
         return $this->belongsTo(User::class, 'approved_by');
     }
+
+    /**
+     * Get the generated image URL dynamically.
+     */
+    public function getGeneratedImageAttribute($value): ?string
+    {
+        if (blank($value)) {
+            return null;
+        }
+
+        // If the URL is saved as absolute but contains localhost (due to .env APP_URL config),
+        // we resolve it dynamically using the current request's asset helper.
+        if (str_starts_with($value, 'http://localhost/storage/')) {
+            return asset(str_replace('http://localhost/', '', $value));
+        }
+
+        if (str_starts_with($value, 'http://') || str_starts_with($value, 'https://')) {
+            return $value;
+        }
+
+        return asset($value);
+    }
 }
