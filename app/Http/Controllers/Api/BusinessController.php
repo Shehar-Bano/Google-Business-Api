@@ -67,7 +67,7 @@ class BusinessController extends Controller
         }
 
         // Check if user already owns a business
-        // $userId = $request->user()?->id;
+        $userId = $request->user()?->id;
         // if ($userId) {
         //     $existingBusiness = Business::where('user_id', $userId)->first();
         //     if ($existingBusiness) {

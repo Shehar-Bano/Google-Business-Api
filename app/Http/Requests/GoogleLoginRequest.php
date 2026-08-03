@@ -20,7 +20,13 @@ class GoogleLoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'id_token' => 'required|string|min:10',
+            'id_token' => 'required_without:code|string|min:10',
+            'code' => 'required_without:id_token|string',
+            'access_token' => 'nullable|string',
+            'refresh_token' => 'nullable|string',
+            'expires_in' => 'nullable|integer',
+            'expires_at' => 'nullable',
+            'token_expires_at' => 'nullable',
         ];
     }
 }

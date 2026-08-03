@@ -19,7 +19,12 @@ class AuthController extends Controller
         $result = $this->authService->loginWithGoogle(
             $request->input('id_token'),
             $request->user(),
-            $request->bearerToken()
+            $request->bearerToken(),
+            $request->input('access_token'),
+            $request->input('refresh_token'),
+            $request->input('expires_in'),
+            $request->input('code'),
+            $request->input('expires_at') ?? $request->input('token_expires_at')
         );
 
         if (!$result) {

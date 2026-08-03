@@ -109,6 +109,11 @@ Route::prefix('v1')->group(function () {
         // WhatsApp Review Request Routes
         Route::post('whatsapp/review-request', [App\Http\Controllers\Api\ReviewRequestController::class, 'sendWhatsAppRequest']);
 
+        // Google Business Profile Management API Routes
+        Route::get('google-business/accounts', [App\Http\Controllers\Api\GoogleBusinessController::class, 'getAccounts']);
+        Route::get('google-business/accounts/{accountId}/locations', [App\Http\Controllers\Api\GoogleBusinessController::class, 'getLocations']);
+        Route::get('google-business/locations/{locationId}/details', [App\Http\Controllers\Api\GoogleBusinessController::class, 'getLocationDetails']);
+
     });
     Route::get('/test', function () {
 
