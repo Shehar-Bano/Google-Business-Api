@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Services\FacebookService;
 use App\Services\InstagramService;
+use App\Http\Requests\Api\ConnectFacebookPageRequest;
+use App\Http\Resources\Api\V1\SocialPageResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
@@ -256,6 +258,83 @@ class SocialConnectionController extends Controller
         return response()->json([
             'success' => true,
             'redirect_url' => $url,
+        ]);
+    }
+
+    /**
+     * Fetch Facebook Pages associated with the user's connected social account.
+     * GET /api/social/facebook/pages
+     */
+    public function listPages(Request $request): JsonResponse
+    {
+        $userId = $request->user()->id;
+        $pages = $this->facebookService->getPages($userId);
+
+        return response()->json([
+            'success' => true,
+            'data' => SocialPageResource::collection($pages),
+        ]);
+    }
+
+    /**
+     * Connect selected Facebook Page.
+     * POST /api/social/facebook/pages/connect
+     */
+    public function connectPage(ConnectFacebookPageRequest $request): JsonResponse
+    {
+        $userId = $request->user()->id;
+        $pageId = $request->input('page_id');
+
+        $page = $this->facebookService->connectPage($userId, $pageId);
+
+        if (!$page) {
+            return response()->json([
+                'success' => false,
+                'message' => 'The selected Facebook Page was not found under your connected account.',
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Facebook Page connected successfully.',
+            'data' => new SocialPageResource($page),
+        ]);
+    }
+
+    /**
+     * Get the currently connected Facebook Page.
+     * GET /api/social/facebook/pages/connected
+     */
+    public function getConnectedPage(Request $request): JsonResponse
+    {
+        $userId = $request->user()->id;
+        $page = $this->facebookService->getConnectedPage($userId);
+
+        return response()->json([
+            'success' => true,
+            'data' => $page ? new SocialPageResource($page) : null,
+        ]);
+    }
+
+    /**
+     * Disconnect the currently connected page.
+     * POST /api/social/facebook/pages/disconnect
+     */
+    public function disconnectPage(Request $request): JsonResponse
+    {
+        $userId = $request->user()->id;
+        $disconnected = $this->facebookService->disconnectPage($userId);
+
+        if (!$disconnected) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No Facebook Page is currently connected.',
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Facebook Page disconnected successfully.',
         ]);
     }
 }

@@ -55,4 +55,36 @@ class FacebookService
         // Spatie cascade rules or SocialAccount model delete cascades pages and instagram_accounts
         return $this->socialAccountRepo->disconnectAccount($userId, 'facebook');
     }
+
+    /**
+     * Get all pages for a user.
+     */
+    public function getPages(int $userId)
+    {
+        return $this->socialAccountRepo->getPages($userId);
+    }
+
+    /**
+     * Connect a selected page.
+     */
+    public function connectPage(int $userId, string $pageId): ?SocialPage
+    {
+        return $this->socialAccountRepo->connectPage($userId, $pageId);
+    }
+
+    /**
+     * Get currently connected page.
+     */
+    public function getConnectedPage(int $userId): ?SocialPage
+    {
+        return $this->socialAccountRepo->getConnectedPage($userId);
+    }
+
+    /**
+     * Disconnect the page.
+     */
+    public function disconnectPage(int $userId): bool
+    {
+        return $this->socialAccountRepo->disconnectPage($userId);
+    }
 }

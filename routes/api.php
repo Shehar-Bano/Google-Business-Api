@@ -74,13 +74,19 @@ Route::prefix('v1')->group(function () {
     // Google Ads Route
     Route::post('google/keyword-ideas', [App\Http\Controllers\Api\GoogleAdsController::class, 'getKeywordIdeas']);
 
-    Route::middleware('api.token')->group(function () {
+        Route::middleware('api.token')->group(function () {
         Route::post('auth/google/login', [App\Http\Controllers\Api\AuthController::class, 'googleLogin']);
         Route::get('social/facebook/connect', [App\Http\Controllers\Api\SocialConnectionController::class, 'facebookConnect']);
         // Route::post('social/facebook/connect-token', [App\Http\Controllers\Api\SocialConnectionController::class, 'facebookConnectToken']);
         Route::get('social/accounts', [App\Http\Controllers\Api\SocialConnectionController::class, 'status']);
         Route::delete('social/facebook/disconnect', [App\Http\Controllers\Api\SocialConnectionController::class, 'disconnectFacebook']);
         Route::delete('social/instagram/disconnect', [App\Http\Controllers\Api\SocialConnectionController::class, 'disconnectInstagram']);
+
+        // Facebook Page Connection Routes
+        Route::get('social/facebook/pages', [App\Http\Controllers\Api\SocialConnectionController::class, 'listPages']);
+        Route::post('social/facebook/pages/connect', [App\Http\Controllers\Api\SocialConnectionController::class, 'connectPage']);
+        Route::get('social/facebook/pages/connected', [App\Http\Controllers\Api\SocialConnectionController::class, 'getConnectedPage']);
+        Route::post('social/facebook/pages/disconnect', [App\Http\Controllers\Api\SocialConnectionController::class, 'disconnectPage']);
 
         // Authenticated Business Write Routes
         Route::post('businesses', [App\Http\Controllers\Api\BusinessController::class, 'store']);

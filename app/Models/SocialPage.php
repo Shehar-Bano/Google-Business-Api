@@ -18,10 +18,12 @@ class SocialPage extends Model
         'page_name',
         'page_access_token',
         'category',
+        'connected_at',
     ];
 
     protected $casts = [
         'page_access_token' => 'encrypted',
+        'connected_at' => 'datetime',
     ];
 
     /**
