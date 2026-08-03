@@ -101,6 +101,9 @@ Route::prefix('v1')->group(function () {
         Route::delete('top-selling-items/{id}', [App\Http\Controllers\Api\TopSellingItemController::class, 'destroy']);
 
         // AI Poster Generation Routes
+        Route::get('business/posters', [App\Http\Controllers\Api\PosterController::class, 'indexTemplates']);
+        // Note: Place list route before status route to prevent route matching collision
+        Route::get('business/generated-posters', [App\Http\Controllers\Api\PosterController::class, 'indexGenerated']);
         Route::post('business/generate-poster', [App\Http\Controllers\Api\PosterController::class, 'generateWithTemplate']);
         Route::post('business/generate-poster-direct', [App\Http\Controllers\Api\PosterController::class, 'generateDirect']);
         Route::get('business/generated-posters/{id}', [App\Http\Controllers\Api\PosterController::class, 'generationStatus']);

@@ -226,4 +226,52 @@ class PosterController extends Controller
             ],
         ]);
     }
+
+    /**
+     * Get active poster templates.
+     * GET /api/v1/business/posters
+     */
+    public function indexTemplates(Request $request): JsonResponse
+    {
+        $templates = \App\Models\Poster::where('status', 'Active')
+            ->select('id', 'title', 'image')
+            ->get()
+            ->map(function ($template) {
+                return [
+                    'id' => $template->id,
+                    'title' => $template->title,
+                    'image' => asset($template->image),
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'data' => $templates,
+        ]);
+    }
+
+    /**
+     * Get user's AI generated posters.
+     * GET /api/v1/business/generated-posters
+     */
+    public function indexGenerated(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized.',
+            ], 401);
+        }
+
+        $posters = \App\Models\AiGeneratedPoster::where('user_id', $user->id)
+            ->with(['poster'])
+            ->orderBy('id', 'desc')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $posters,
+        ]);
+    }
 }
