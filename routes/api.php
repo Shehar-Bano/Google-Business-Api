@@ -8,7 +8,6 @@ use App\Http\Controllers\Api\V1\ContentController;
 use App\Http\Controllers\Api\V1\NotificationController;
 use App\Http\Controllers\Api\V1\OrderController;
 use App\Http\Controllers\Api\V1\OtpController;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -103,6 +102,7 @@ Route::prefix('v1')->group(function () {
         // AI Poster Generation Routes
         Route::post('business/generate-poster', [App\Http\Controllers\Api\PosterController::class, 'generateWithTemplate']);
         Route::post('business/generate-poster-direct', [App\Http\Controllers\Api\PosterController::class, 'generateDirect']);
+        Route::get('business/generated-posters/{id}', [App\Http\Controllers\Api\PosterController::class, 'generationStatus']);
         Route::post('business/generated-posters/{id}/approve', [App\Http\Controllers\Api\PosterController::class, 'approve']);
         Route::post('business/generated-posters/{id}/reject', [App\Http\Controllers\Api\PosterController::class, 'reject']);
 
@@ -113,28 +113,6 @@ Route::prefix('v1')->group(function () {
         Route::get('google-business/accounts', [App\Http\Controllers\Api\GoogleBusinessController::class, 'getAccounts']);
         Route::get('google-business/accounts/{accountId}/locations', [App\Http\Controllers\Api\GoogleBusinessController::class, 'getLocations']);
         Route::get('google-business/locations/{locationId}/details', [App\Http\Controllers\Api\GoogleBusinessController::class, 'getLocationDetails']);
-
-    });
-    Route::get('/test', function () {
-
-        $apiKey = config('services.gemini.api_key');
-
-        $response = Http::post(
-            "https://generativelanguage.googleapis.com/v1beta/models/nano-banana-pro-preview:generateContent?key={$apiKey}",
-            [
-                'contents' => [
-                    [
-                        'parts' => [
-                            [
-                                'text' => 'Create a simple marketing poster for a coffee shop.',
-                            ],
-                        ],
-                    ],
-                ],
-            ]
-        );
-
-        dd($response->json());
 
     });
     // AI Suggestion Routes

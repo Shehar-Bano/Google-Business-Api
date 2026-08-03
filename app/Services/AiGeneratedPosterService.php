@@ -5,10 +5,9 @@ namespace App\Services;
 use App\Models\AiGeneratedPoster;
 use App\Models\User;
 use App\Models\Poster;
-use App\Models\Business;
+use App\Jobs\GenerateAiPoster;
 use App\Repositories\AiGeneratedPosterRepository;
 use App\Repositories\PosterRepository;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class AiGeneratedPosterService
@@ -16,8 +15,7 @@ class AiGeneratedPosterService
     public function __construct(
         protected AiGeneratedPosterRepository $aiPosterRepo,
         protected PosterRepository $posterRepo,
-        protected GeminiService $geminiService,
-        protected NanoBananaService $nanoBananaService
+        protected OpenAiPosterService $openAiPosterService
     ) {}
 
     public function paginateGenerated(int $perPage = 10, ?string $search = null, string $sort = 'created_at', string $direction = 'desc', ?string $status = null)
@@ -36,7 +34,7 @@ class AiGeneratedPosterService
     /**
      * Generate Poster using a Poster template.
      */
-    public function generatePosterWithTemplate(User $user, int $posterId, string $prompt): ?AiGeneratedPoster
+    public function generatePosterWithTemplate(User $user, int $posterId, string $prompt, ?int $businessId = null): ?AiGeneratedPoster
     {
         // 1. Fetch Poster
         $poster = $this->posterRepo->find($posterId);
@@ -46,61 +44,31 @@ class AiGeneratedPosterService
         }
 
         // 2. Build Business Context
-        $businessInfo = $this->getBusinessContext($user);
+        [$business] = $this->getBusinessContext($user, $businessId);
 
-        // 3. Convert template image to base64 if it exists locally
-        $imageBase64 = null;
-        if (!empty($poster->image)) {
-            $imagePath = public_path($poster->image);
-            if (file_exists($imagePath)) {
-                $imageBase64 = base64_encode(file_get_contents($imagePath));
-            }
-        }
+        return $this->queueGeneration($user, $business->id, $poster, $prompt);
+    }
 
-        // 4. Call Gemini for marketing content text
-        $result = $this->geminiService->generatePosterContent($businessInfo, $prompt, $imageBase64);
-
-        if (!$result) {
-            return null;
-        }
-
-        // 5. Use Nano Banana to edit the original template image
-        $instructions = $result['marketing_instructions'] ?? $prompt;
-        if (is_array($instructions)) {
-            $instructions = json_encode($instructions, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-        }
-
-        $editedImagePath = $this->nanoBananaService->editPosterTemplate(
-            $poster->image,
-            $instructions,
-            $businessInfo
-        );
-
-        if (!$editedImagePath) {
-            Log::error("Nano Banana editing failed for poster template {$posterId}");
-            return null;
-        }
-
-        // 6. Link matching Business from businesses table if found
-        $business = Business::where('name', $businessInfo['name'])->first();
-
-        // 7. Save in database
-        return $this->aiPosterRepo->create([
+    protected function queueGeneration(User $user, int $businessId, Poster $poster, string $prompt): AiGeneratedPoster
+    {
+        $generated = $this->aiPosterRepo->create([
             'user_id' => $user->id,
-            'business_id' => $business?->id,
+            'business_id' => $businessId,
             'poster_id' => $poster->id,
             'prompt' => $prompt,
-            'generated_title' => $result['title'],
-            'generated_caption' => $result['caption'],
-            'generated_image' => asset($editedImagePath),
             'status' => 'pending',
+            'generation_status' => 'queued',
         ]);
+
+        GenerateAiPoster::dispatch($generated->id);
+
+        return $generated;
     }
 
     /**
      * Generate Poster directly using Prompt only.
      */
-    public function generatePosterDirect(User $user, string $prompt): ?AiGeneratedPoster
+    public function generatePosterDirect(User $user, string $prompt, ?int $businessId = null): ?AiGeneratedPoster
     {
         // 1. Fetch first active poster template as the base design
         $poster = Poster::where('status', 'Active')->first();
@@ -110,55 +78,57 @@ class AiGeneratedPosterService
         }
 
         // 2. Build Business Context
-        $businessInfo = $this->getBusinessContext($user);
+        [$business] = $this->getBusinessContext($user, $businessId);
 
-        // 3. Convert template image to base64
-        $imageBase64 = null;
-        if (!empty($poster->image)) {
-            $imagePath = public_path($poster->image);
-            if (file_exists($imagePath)) {
-                $imageBase64 = base64_encode(file_get_contents($imagePath));
+        return $this->queueGeneration($user, $business->id, $poster, $prompt);
+    }
+
+    /** Process the long-running OpenAI calls outside the HTTP request. */
+    public function processGeneration(int $aiGeneratedPosterId): void
+    {
+        $generated = AiGeneratedPoster::with(['user', 'poster'])->find($aiGeneratedPosterId);
+        if (! $generated || $generated->generation_status === 'completed') {
+            return;
+        }
+
+        if (! $generated->user || ! $generated->poster) {
+            $this->markGenerationFailed($generated, 'Required user or poster data is unavailable.');
+            return;
+        }
+
+        $generated->update(['generation_status' => 'processing', 'generation_error' => null]);
+
+        try {
+            [, $businessInfo] = $this->getBusinessContext($generated->user, $generated->business_id);
+            $result = $this->openAiPosterService->generatePosterContent($businessInfo, $generated->prompt, $generated->poster->title);
+
+            if (! $result) {
+                $this->markGenerationFailed($generated, 'OpenAI could not generate the poster content.');
+                return;
             }
+
+            $imagePath = $this->openAiPosterService->editPosterTemplate($generated->poster->image, $businessInfo, $result);
+            if (! $imagePath) {
+                $this->markGenerationFailed($generated, 'OpenAI could not generate the poster image.');
+                return;
+            }
+
+            $generated->update([
+                'generated_title' => $result['title'],
+                'generated_caption' => $result['caption'],
+                'generated_image' => asset($imagePath),
+                'generation_status' => 'completed',
+                'generation_error' => null,
+            ]);
+        } catch (\Throwable $exception) {
+            Log::error('AI poster background generation failed.', ['poster_id' => $aiGeneratedPosterId, 'message' => $exception->getMessage()]);
+            $this->markGenerationFailed($generated, 'Poster generation could not be completed. Please try again.');
         }
+    }
 
-        // 4. Call Gemini (without template image context)
-        $result = $this->geminiService->generatePosterContent($businessInfo, $prompt, $imageBase64);
-
-        if (!$result) {
-            return null;
-        }
-
-        // 5. Use Nano Banana to edit the original template image
-        $instructions = $result['marketing_instructions'] ?? $prompt;
-        if (is_array($instructions)) {
-            $instructions = json_encode($instructions, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-        }
-
-        $editedImagePath = $this->nanoBananaService->editPosterTemplate(
-            $poster->image,
-            $instructions,
-            $businessInfo
-        );
-
-        if (!$editedImagePath) {
-            Log::error("Nano Banana editing failed for direct generation using template {$poster->id}");
-            return null;
-        }
-
-        // 6. Link matching Business if found
-        $business = Business::where('name', $businessInfo['name'])->first();
-
-        // 7. Save in database
-        return $this->aiPosterRepo->create([
-            'user_id' => $user->id,
-            'business_id' => $business?->id,
-            'poster_id' => $poster->id,
-            'prompt' => $prompt,
-            'generated_title' => $result['title'],
-            'generated_caption' => $result['caption'],
-            'generated_image' => asset($editedImagePath),
-            'status' => 'pending',
-        ]);
+    protected function markGenerationFailed(AiGeneratedPoster $generated, string $message): void
+    {
+        $generated->update(['generation_status' => 'failed', 'generation_error' => $message]);
     }
 
     /**
@@ -185,42 +155,45 @@ class AiGeneratedPosterService
     }
 
     /**
-     * Build rich Business Context from User profile fields & matching Business profile catalog.
+     * Build business and preference context, restricted to the authenticated user's business.
      */
-    protected function getBusinessContext(User $user): array
+    protected function getBusinessContext(User $user, ?int $businessId = null): array
     {
-        $context = [
-            'name' => $user->club_name ?? $user->name,
-            'email' => $user->email,
-            'phone' => $user->phone ?? '',
-            'address' => $user->address ?? '',
-            'city' => $user->city ?? '',
-            'description' => $user->bio ?? '',
-            'business_timing' => $user->working_hours ?? '',
-            'facilities' => $user->facilities ?? [],
-            'logo' => $user->club_logo ? asset('storage/' . $user->club_logo) : null,
-            'cover_image' => $user->profile_image ? asset('storage/' . $user->profile_image) : null,
-            'products' => [],
-            'services' => [],
-            'top_selling_items' => []
-        ];
+        $query = $user->businesses()->with(['preferences', 'offerings', 'topSellingItems']);
+        $business = $businessId ? $query->whereKey($businessId)->first() : $query->first();
 
-        // Fetch registered business matches to retrieve products, services, and top-selling items
-        $business = Business::where('name', $context['name'])->first();
-        if ($business) {
-            $context['top_selling_items'] = $business->top_selling_items ?? [];
-            
-            // Load offerings
-            $offerings = $business->offerings()->get();
-            foreach ($offerings as $offering) {
-                if ($offering->type === 'product') {
-                    $context['products'][] = $offering->name;
-                } else {
-                    $context['services'][] = $offering->name;
-                }
-            }
+        if (! $business) {
+            throw new \InvalidArgumentException('No business belonging to this user was found.');
         }
 
-        return $context;
+        $preferences = $business->preferences;
+        $context = [
+            'business' => [
+                'name' => $business->name,
+                'category' => $business->category,
+                'location' => $business->location,
+                'address' => $business->address,
+                'city' => $business->city,
+                'state' => $business->state,
+                'country' => $business->country,
+                'phone' => $business->phone_number,
+                'offerings' => $business->offerings->map(fn ($offering) => [
+                    'name' => $offering->name,
+                    'type' => $offering->type,
+                ])->values()->all(),
+                'top_selling_items' => $business->topSellingItems->map(fn ($item) => [
+                    'name' => $item->item_name,
+                    'description' => $item->description,
+                    'price' => $item->price,
+                ])->values()->all(),
+            ],
+            'preferences' => $preferences ? $preferences->only([
+                'business_tagline', 'business_description', 'different_than_competition', 'why_visit_us',
+                'target_gender', 'target_age_group', 'region', 'model_ethnicity', 'audience', 'cta',
+                'nearest_landmark', 'guidelines_to_customer',
+            ]) : [],
+        ];
+
+        return [$business, $context];
     }
 }

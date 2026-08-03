@@ -21,6 +21,8 @@ class AiGeneratedPoster extends Model
         'generated_caption',
         'generated_image',
         'status',
+        'generation_status',
+        'generation_error',
         'rejection_reason',
         'approved_by',
         'approved_at',

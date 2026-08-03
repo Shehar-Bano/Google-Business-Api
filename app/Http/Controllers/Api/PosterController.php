@@ -21,6 +21,7 @@ class PosterController extends Controller
         $request->validate([
             'poster_id' => 'required|integer|exists:posters,id',
             'prompt' => 'nullable|string|max:2000',
+            'business_id' => 'nullable|integer',
         ]);
 
         $user = $request->user();
@@ -36,13 +37,14 @@ class PosterController extends Controller
             $generated = $this->aiPosterService->generatePosterWithTemplate(
                 $user,
                 (int) $request->input('poster_id'),
-                $prompt
+                $prompt,
+                $request->integer('business_id') ?: null
             );
 
             if (!$generated) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Failed to generate poster. Template may be inactive or Gemini error occurred.',
+                    'message' => 'Could not queue poster generation.',
                 ], 500);
             }
 
@@ -51,13 +53,16 @@ class PosterController extends Controller
                 'message' => 'Poster generated successfully.',
                 'data' => [
                     'id' => $generated->id,
-                    'status' => $generated->status,
-                    'title' => $generated->generated_title,
-                    'caption' => $generated->generated_caption,
-                    'image' => $generated->generated_image,
+                    'generation_status' => $generated->generation_status,
+                    'status_url' => url("/api/v1/business/generated-posters/{$generated->id}"),
                 ]
-            ]);
+            ], 202);
 
+        } catch (\InvalidArgumentException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
         } catch (\Exception $e) {
             Log::error('API generateWithTemplate Error: ' . $e->getMessage());
             return response()->json([
@@ -75,6 +80,7 @@ class PosterController extends Controller
     {
         $request->validate([
             'prompt' => 'required|string|min:5|max:2000',
+            'business_id' => 'nullable|integer',
         ]);
 
         $user = $request->user();
@@ -88,13 +94,14 @@ class PosterController extends Controller
         try {
             $generated = $this->aiPosterService->generatePosterDirect(
                 $user,
-                $request->input('prompt')
+                $request->input('prompt'),
+                $request->integer('business_id') ?: null
             );
 
             if (!$generated) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Failed to generate poster. Gemini error occurred.',
+                    'message' => 'Could not queue poster generation.',
                 ], 500);
             }
 
@@ -103,13 +110,16 @@ class PosterController extends Controller
                 'message' => 'Poster generated successfully.',
                 'data' => [
                     'id' => $generated->id,
-                    'status' => $generated->status,
-                    'title' => $generated->generated_title,
-                    'caption' => $generated->generated_caption,
-                    'image' => $generated->generated_image,
+                    'generation_status' => $generated->generation_status,
+                    'status_url' => url("/api/v1/business/generated-posters/{$generated->id}"),
                 ]
-            ]);
+            ], 202);
 
+        } catch (\InvalidArgumentException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
         } catch (\Exception $e) {
             Log::error('API generateDirect Error: ' . $e->getMessage());
             return response()->json([
@@ -189,6 +199,31 @@ class PosterController extends Controller
             'success' => true,
             'message' => 'Poster rejected successfully.',
             'data' => $generated
+        ]);
+    }
+
+    /** GET /api/v1/business/generated-posters/{id} */
+    public function generationStatus(Request $request, int $id): JsonResponse
+    {
+        $generated = \App\Models\AiGeneratedPoster::whereKey($id)
+            ->where('user_id', $request->user()->id)
+            ->first();
+
+        if (! $generated) {
+            return response()->json(['success' => false, 'message' => 'Generated poster not found.'], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id' => $generated->id,
+                'generation_status' => $generated->generation_status,
+                'status' => $generated->status,
+                'error' => $generated->generation_status === 'failed' ? $generated->generation_error : null,
+                'title' => $generated->generation_status === 'completed' ? $generated->generated_title : null,
+                'caption' => $generated->generation_status === 'completed' ? $generated->generated_caption : null,
+                'image' => $generated->generation_status === 'completed' ? $generated->generated_image : null,
+            ],
         ]);
     }
 }

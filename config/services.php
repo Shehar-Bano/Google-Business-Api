@@ -59,6 +59,13 @@ return [
         'model' => env('GEMINI_MODEL', 'gemini-2.0-flash-lite'),
     ],
 
+    'openai' => [
+        // Supports the project's legacy OPENAI/OpenAI name; prefer OPENAI_API_KEY for new setups.
+        'api_key' => env('OPENAI_API_KEY') ?: (env('OPENAI') ?: env('OpenAI')),
+        'model' => env('OPENAI_MODEL', 'gpt-5.6-sol'),
+        'image_model' => env('OPENAI_IMAGE_MODEL', 'gpt-image-2'),
+    ],
+
     'google_ads' => [
         'developer_token' => env('DEVELOPER_API_TOKEN'),
         'client_id' => env('Google_Client_ID'),
