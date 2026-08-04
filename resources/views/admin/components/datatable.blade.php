@@ -58,7 +58,7 @@
                         @endif
                     @endforeach
                     <select name="per_page" class="form-select form-select-sm admin-per-page" onchange="this.form.submit()">
-                        @foreach([10, 25, 50, 100] as $size)
+                        @foreach([10, 15, 20, 25, 50, 100] as $size)
                             <option value="{{ $size }}" @selected((int) $perPage === $size)>{{ $size }}</option>
                         @endforeach
                     </select>

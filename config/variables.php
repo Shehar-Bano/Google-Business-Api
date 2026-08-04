@@ -1,7 +1,7 @@
 <?php
 
 return [
-    "templateName" => "Laravel Starter",
+    "templateName" => "Google Business",
     "templateDescription" => "Reusable Laravel starter foundation",
     "templateKeyword" => "laravel, starter, admin dashboard, foundation",
     "creatorName" => "Starter Template",

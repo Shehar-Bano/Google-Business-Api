@@ -19,7 +19,7 @@ class EstimatedScoreController extends Controller
         $dateFrom = trim($request->string('date_from')->toString());
         $dateTo = trim($request->string('date_to')->toString());
 
-        $perPage = in_array((int) $request->integer('per_page', 25), [10, 25, 50, 100], true)
+        $perPage = in_array((int) $request->integer('per_page', 25), [10, 15, 20, 25, 50, 100], true)
             ? (int) $request->integer('per_page', 25) : 25;
 
         $sort = in_array(

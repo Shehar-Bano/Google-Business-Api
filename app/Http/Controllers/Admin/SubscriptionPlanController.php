@@ -18,7 +18,7 @@ class SubscriptionPlanController extends Controller
         $search = trim($request->string('search')->toString());
         $status = trim($request->string('status')->toString());
         $perPage = (int) $request->integer('per_page', 10);
-        $perPage = in_array($perPage, [10, 25, 50, 100], true) ? $perPage : 10;
+        $perPage = in_array($perPage, [10, 15, 20, 25, 50, 100], true) ? $perPage : 10;
 
         $sort = in_array(
             $request->string('sort', 'id')->toString(),

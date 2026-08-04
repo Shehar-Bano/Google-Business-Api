@@ -13,7 +13,7 @@ class SupportOptionService
 {
     public function indexData(Request $request): array
     {
-        $perPage = in_array((int) $request->integer('per_page', 10), [10, 25, 50, 100], true)
+        $perPage = in_array((int) $request->integer('per_page', 10), [10, 15, 20, 25, 50, 100], true)
             ? (int) $request->integer('per_page', 10) : 10;
 
         $sort = in_array($request->string('sort', 'sort_order')->toString(), ['title', 'type', 'is_active', 'sort_order', 'created_at'], true)

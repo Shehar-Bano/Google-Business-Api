@@ -15,7 +15,7 @@ class AuditLogController extends Controller
     public function index(Request $request): View
     {
         $perPage = (int) $request->integer('per_page', 25);
-        $perPage = in_array($perPage, [10, 25, 50, 100], true) ? $perPage : 25;
+        $perPage = in_array($perPage, [10, 15, 20, 25, 50, 100], true) ? $perPage : 25;
 
         $sort = in_array(
             $request->string('sort', 'id')->toString(),

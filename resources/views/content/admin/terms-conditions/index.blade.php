@@ -142,10 +142,22 @@
             </div>
 
             <!-- Pagination -->
-            @if($terms->hasPages())
-                <div class="d-flex justify-content-between align-items-center mt-4">
-                    <div>
+            @if($terms->total() > 0)
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mt-4">
+                    <div class="d-flex align-items-center gap-2">
                         <span class="text-muted small">Showing {{ $terms->firstItem() ?? 0 }} to {{ $terms->lastItem() ?? 0 }} of {{ $terms->total() }} records</span>
+                        <form method="GET" action="{{ request()->url() }}" class="d-inline-block ms-3">
+                            @foreach(request()->query() as $key => $value)
+                                @if(!in_array($key, ['per_page', 'page'], true))
+                                    <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                                @endif
+                            @endforeach
+                            <select name="per_page" class="form-select form-select-sm d-inline-block w-auto" onchange="this.form.submit()">
+                                @foreach([10, 15, 20, 25, 50, 100] as $size)
+                                    <option value="{{ $size }}" @selected($perPage == $size)>{{ $size }} / page</option>
+                                @endforeach
+                            </select>
+                        </form>
                     </div>
                     <div>
                         {{ $terms->links() }}
