@@ -74,4 +74,11 @@ return [
         'customer_id' => env('Customer_ID', env('GOOGLE_ADS_CUSTOMER_ID')),
     ],
 
+    'whatsapp' => [
+        'access_token' => env('WHATSAPP_ACCESS_TOKEN'),
+        'phone_number_id' => env('PHONE_NO_ID'),
+        'business_account_id' => env('WhatsApp_Business_Account_ID'),
+        'provider' => env('WHATSAPP_PROVIDER', 'log'),
+    ],
+
 ];

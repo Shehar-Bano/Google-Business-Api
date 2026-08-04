@@ -10,3 +10,4 @@ Artisan::command('inspire', function () {
 use Illuminate\Support\Facades\Schedule;
 
 Schedule::command('business:update-places')->daily();
+Schedule::command('queue:work --stop-when-empty')->everyMinute()->withoutOverlapping();

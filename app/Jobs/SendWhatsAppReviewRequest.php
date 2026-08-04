@@ -49,22 +49,21 @@ class SendWhatsAppReviewRequest implements ShouldQueue
             $business = $this->reviewRequest->business;
             $businessName = $business ? $business->name : 'Our Business';
 
-            // Resolve Redirection URL
-            // If the redirection_url in reviewRequest is empty, fall back to Google place or a placeholder
-            $redirectionUrl = $this->reviewRequest->redirection_url ?: 'https://search.google.com/local/writereview?placeid=' . ($business->google_place_id ?? '');
+            // Generate Short Tracking URL
+            $trackingUrl = route('link.redirect', ['id' => $this->reviewRequest->id]);
 
             // Construct final message
             if (!empty($this->customMessage)) {
                 $message = $this->customMessage;
                 // Substitute if present
                 $message = str_replace('{{BusinessName}}', $businessName, $message);
-                $message = str_replace('{{redirection_url}}', $redirectionUrl, $message);
+                $message = str_replace('{{redirection_url}}', $trackingUrl, $message);
             } else {
                 $message = "Thank you for visiting {$businessName} 🙏\n\n"
                     . "If you loved our service, please rate us ⭐⭐⭐⭐⭐ on Google.\n\n"
                     . "A review costs you nothing, but it helps small businesses like ours grow and serve you even better 🚀💛\n\n"
                     . "Review Link:\n"
-                    . "{$redirectionUrl}\n\n"
+                    . "{$trackingUrl}\n\n"
                     . "To activate the link, simply reply with \"Hi\". 💬";
             }
 

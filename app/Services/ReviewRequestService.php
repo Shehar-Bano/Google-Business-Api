@@ -50,7 +50,7 @@ class ReviewRequestService
                     throw new Exception("Authenticated user required for personal channel.");
                 }
 
-                $phoneNumber = $authUser->phone_number;
+                $phoneNumber = $authUser->phone;
                 if (empty($phoneNumber)) {
                     throw new Exception("Authenticated user does not have a registered phone number.");
                 }
@@ -75,7 +75,7 @@ class ReviewRequestService
 
                 foreach ($phoneNumbers as $phone) {
                     // Check if the phone number belongs to any user in the system
-                    $targetUser = User::where('phone_number', $phone)->first();
+                    $targetUser = User::where('phone', $phone)->first();
 
                     $reviewRequest = ReviewRequest::create([
                         'business_id' => $business->id,

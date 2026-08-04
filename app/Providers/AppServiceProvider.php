@@ -17,7 +17,12 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(OtpSenderInterface::class, DummyOtpSender::class);
         $this->app->bind(
             \App\Services\WhatsApp\WhatsAppProviderInterface::class,
-            \App\Services\WhatsApp\LogWhatsAppProvider::class
+            function ($app) {
+                if (config('services.whatsapp.provider') === 'meta') {
+                    return $app->make(\App\Services\WhatsApp\MetaWhatsAppProvider::class);
+                }
+                return $app->make(\App\Services\WhatsApp\LogWhatsAppProvider::class);
+            }
         );
     }
 
