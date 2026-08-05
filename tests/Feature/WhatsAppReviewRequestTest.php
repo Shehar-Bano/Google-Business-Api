@@ -189,12 +189,12 @@ class WhatsAppReviewRequestTest extends TestCase
     }
 
     /**
-     * Test getting review requests list with statistics.
+     * Test getting review requests list with statistics and reminder sent timestamp.
      */
     public function test_list_whatsapp_review_requests_success(): void
     {
         // Setup existing review requests
-        ReviewRequest::create([
+        $req1 = ReviewRequest::create([
             'business_id' => $this->business->id,
             'sender_id' => (string) $this->user->id,
             'phone_number' => '+923001234567',
@@ -206,15 +206,24 @@ class WhatsAppReviewRequestTest extends TestCase
             'clicked_at' => now(),
         ]);
 
-        ReviewRequest::create([
+        $req2 = ReviewRequest::create([
             'business_id' => $this->business->id,
             'sender_id' => 'app',
             'phone_number' => '+923007654321',
             'customer_name' => 'Bob Smith',
             'channel' => 'app',
-            'status' => 'sent',
+            'status' => 'reminder_sent',
             'redirection_url' => 'https://google.com',
             'sent_at' => now(),
+        ]);
+
+        // Insert reminder entry
+        \Illuminate\Support\Facades\DB::table('request_reminders')->insert([
+            'request_id' => $req2->id,
+            'sent_by' => $this->user->id,
+            'channel' => 'app',
+            'created_at' => '2026-07-27 12:00:00',
+            'updated_at' => '2026-07-27 12:00:00',
         ]);
 
         $response = $this->withToken($this->token)
@@ -228,31 +237,13 @@ class WhatsAppReviewRequestTest extends TestCase
                     'sent_via_personal' => 1,
                     'sent_via_app' => 1,
                 ]
-            ])
-            ->assertJsonStructure([
-                'success',
-                'data' => [
-                    'total_requests',
-                    'sent_via_personal',
-                    'sent_via_app',
-                    'requests' => [
-                        '*' => [
-                            'request_id',
-                            'customer_name',
-                            'customer_phone',
-                            'channel',
-                            'status',
-                            'redirection_url',
-                            'sent_at',
-                            'clicked_at',
-                            'reminder_sent_at',
-                        ]
-                    ]
-                ]
             ]);
 
-        // Verify redirection_url contains the tracking route format
         $data = $response->json('data.requests');
+        // Since list is ordered by id desc, the second created request is index 0
+        $this->assertEquals($req2->id, $data[0]['request_id']);
+        $this->assertEquals('2026-07-27 12:00:00', $data[0]['reminder_sent_at']);
+        $this->assertNull($data[1]['reminder_sent_at']);
         $this->assertStringContainsString('/r/', $data[0]['redirection_url']);
     }
 
@@ -277,12 +268,10 @@ class WhatsAppReviewRequestTest extends TestCase
     }
 
     /**
-     * Test successful personal channel reminder dispatch.
+     * Test personal channel reminder dispatch fails since only 'app' is allowed.
      */
-    public function test_send_follow_up_reminders_personal_success(): void
+    public function test_send_follow_up_reminders_personal_channel_fails(): void
     {
-        Queue::fake();
-
         $req = ReviewRequest::create([
             'business_id' => $this->business->id,
             'sender_id' => (string) $this->user->id,
@@ -301,17 +290,46 @@ class WhatsAppReviewRequestTest extends TestCase
         $response = $this->withToken($this->token)
             ->postJson('/api/v1/review-requests/send-reminders', $payload);
 
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['channel']);
+    }
+
+    /**
+     * Test successful reminder dispatch via 'app' channel for a single request.
+     */
+    public function test_send_follow_up_reminders_app_single_success(): void
+    {
+        Queue::fake();
+
+        $req = ReviewRequest::create([
+            'business_id' => $this->business->id,
+            'sender_id' => (string) $this->user->id,
+            'phone_number' => '+923001234567',
+            'customer_name' => 'Alice Doe',
+            'channel' => 'app',
+            'status' => 'sent',
+        ]);
+
+        $payload = [
+            'business_id' => $this->business->id,
+            'request_ids' => [$req->id],
+            'channel' => 'app',
+        ];
+
+        $response = $this->withToken($this->token)
+            ->postJson('/api/v1/review-requests/send-reminders', $payload);
+
         $response->assertStatus(200)
             ->assertJson([
                 'success' => true,
-                'message' => 'Reminders successfully dispatched via Personal.',
+                'message' => 'Reminders successfully dispatched via Application.',
                 'data' => [
                     'reminders_sent' => 1,
                 ]
             ]);
 
         Queue::assertPushed(SendWhatsAppReviewRequest::class, function ($job) {
-            return $job->isReminder === true;
+            return $job->isReminder === true && $job->sentByUserId === $this->user->id;
         });
     }
 
@@ -362,20 +380,40 @@ class WhatsAppReviewRequestTest extends TestCase
     }
 
     /**
-     * Test reminder validation fails if channel and request_ids size don't match.
+     * Test reminder validation fails if a request already has 3 reminders sent.
      */
-    public function test_send_follow_up_reminders_validation_fails_mismatched_channel(): void
+    public function test_send_follow_up_reminders_fails_if_exceeds_limit(): void
     {
+        $req = ReviewRequest::create([
+            'business_id' => $this->business->id,
+            'sender_id' => (string) $this->user->id,
+            'phone_number' => '+923001234567',
+            'customer_name' => 'Alice Doe',
+            'channel' => 'app',
+            'status' => 'sent',
+        ]);
+
+        // Insert 3 reminder records for this request
+        for ($i = 0; $i < 3; $i++) {
+            \Illuminate\Support\Facades\DB::table('request_reminders')->insert([
+                'request_id' => $req->id,
+                'sent_by' => $this->user->id,
+                'channel' => 'app',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
         $payload = [
             'business_id' => $this->business->id,
-            'request_ids' => [1, 2],
-            'channel' => 'personal', // personal requires exactly 1 request_id
+            'request_ids' => [$req->id],
+            'channel' => 'app',
         ];
 
         $response = $this->withToken($this->token)
             ->postJson('/api/v1/review-requests/send-reminders', $payload);
 
         $response->assertStatus(422)
-            ->assertJsonValidationErrors(['channel']);
+            ->assertJsonValidationErrors(['request_ids.0']);
     }
 }

@@ -21,24 +21,36 @@ class SendFollowUpReminders extends FormRequest
      */
     public function rules(): array
     {
-        $rules = [
+        return [
             'business_id' => 'required|exists:businesses,id',
             'request_ids' => 'required|array|min:1',
-            'request_ids.*' => 'required|integer|exists:review_requests,id',
-            'channel' => 'required|in:personal,app',
+            'request_ids.*' => [
+                'required',
+                'integer',
+                function ($attribute, $value, $fail) {
+                    $businessId = $this->input('business_id');
+                    $exists = \Illuminate\Support\Facades\DB::table('review_requests')
+                        ->where('id', $value)
+                        ->where('business_id', $businessId)
+                        ->exists();
+
+                    if (!$exists) {
+                        $fail("The selected request ID {$value} is invalid or does not belong to the selected business.");
+                        return;
+                    }
+
+                    // Count reminders already sent for this request
+                    $count = \Illuminate\Support\Facades\DB::table('request_reminders')
+                        ->where('request_id', $value)
+                        ->count();
+
+                    if ($count >= 3) {
+                        $fail("The request ID {$value} has already reached the maximum limit of 3 reminders.");
+                    }
+                }
+            ],
+            'channel' => 'required|in:app',
         ];
-
-        $requestIds = $this->input('request_ids');
-        if (is_array($requestIds)) {
-            $count = count($requestIds);
-            if ($count === 1) {
-                $rules['channel'] .= '|in:personal';
-            } elseif ($count > 1) {
-                $rules['channel'] .= '|in:app';
-            }
-        }
-
-        return $rules;
     }
 
     /**

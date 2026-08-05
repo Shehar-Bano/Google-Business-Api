@@ -143,7 +143,7 @@ class ReviewRequestService
             ]);
 
             // Dispatch WhatsApp job as a reminder
-            SendWhatsAppReviewRequest::dispatch($reviewRequest, null, true);
+            SendWhatsAppReviewRequest::dispatch($reviewRequest, null, true, $authUser ? $authUser->id : null);
         }
 
         return [

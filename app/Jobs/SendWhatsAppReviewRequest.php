@@ -32,13 +32,19 @@ class SendWhatsAppReviewRequest implements ShouldQueue
     public $isReminder;
 
     /**
+     * @var int|null
+     */
+    public $sentByUserId;
+
+    /**
      * Create a new job instance.
      */
-    public function __construct(ReviewRequest $reviewRequest, ?string $customMessage = null, bool $isReminder = false)
+    public function __construct(ReviewRequest $reviewRequest, ?string $customMessage = null, bool $isReminder = false, ?int $sentByUserId = null)
     {
         $this->reviewRequest = $reviewRequest;
         $this->customMessage = $customMessage;
         $this->isReminder = $isReminder;
+        $this->sentByUserId = $sentByUserId;
     }
 
     /**
@@ -89,6 +95,16 @@ class SendWhatsAppReviewRequest implements ShouldQueue
                     'sent_at' => now(),
                     'whatsapp_message_id' => $result['message_id'],
                 ]);
+
+                if ($this->isReminder) {
+                    \Illuminate\Support\Facades\DB::table('request_reminders')->insert([
+                        'request_id' => $this->reviewRequest->id,
+                        'sent_by' => $this->sentByUserId,
+                        'channel' => $this->reviewRequest->channel ?: 'app',
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
 
                 Log::info("WhatsApp review request sent successfully.", [
                     'review_request_id' => $this->reviewRequest->id,
