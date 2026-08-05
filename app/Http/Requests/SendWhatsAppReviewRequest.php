@@ -21,13 +21,20 @@ class SendWhatsAppReviewRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        $rules = [
             'business_id' => 'required|exists:businesses,id',
             'channel' => 'required|in:personal,app',
-            'phone_numbers' => 'required_if:channel,app|array',
-            'phone_numbers.*' => 'required_if:channel,app|string|max:50',
+            'customers' => 'required|array|min:1',
+            'customers.*.name' => 'required|string|max:255',
+            'customers.*.phone' => 'required|string|max:50',
             'message' => 'nullable|string',
         ];
+
+        if ($this->input('channel') === 'personal') {
+            $rules['customers'] = 'required|array|size:1';
+        }
+
+        return $rules;
     }
 
     /**

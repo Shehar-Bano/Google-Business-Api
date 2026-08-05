@@ -53,6 +53,7 @@ class WhatsAppReviewRequestController extends Controller
         $query->when($search !== '', function ($q) use ($search) {
             $q->where(function ($sub) use ($search) {
                 $sub->where('review_requests.phone_number', 'like', "%{$search}%")
+                    ->orWhere('review_requests.customer_name', 'like', "%{$search}%")
                     ->orWhere('review_requests.status', 'like', "%{$search}%")
                     ->orWhereHas('business', function ($bq) use ($search) {
                         $bq->where('name', 'like', "%{$search}%");

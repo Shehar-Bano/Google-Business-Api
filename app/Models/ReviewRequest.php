@@ -16,6 +16,7 @@ class ReviewRequest extends Model
         'sender_id',
         'sent_to',
         'phone_number',
+        'customer_name',
         'channel',
         'status',
         'redirection_url',

@@ -139,7 +139,12 @@
                                     @endif
                                 </td>
                                 <td>
-                                    @if($req->sentToUser)
+                                    @if(filled($req->customer_name))
+                                        <div class="cell-primary fw-medium">{{ $req->customer_name }}</div>
+                                        @if($req->sentToUser)
+                                            <small class="text-muted d-block">Registered: {{ $req->sentToUser->name }}</small>
+                                        @endif
+                                    @elseif($req->sentToUser)
                                         <div class="cell-primary fw-medium">{{ $req->sentToUser->name }}</div>
                                     @else
                                         <span class="text-secondary fw-semibold">— Guest Customer —</span>

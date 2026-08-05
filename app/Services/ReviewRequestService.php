@@ -50,16 +50,15 @@ class ReviewRequestService
                     throw new Exception("Authenticated user required for personal channel.");
                 }
 
-                $phoneNumber = $authUser->phone;
-                if (empty($phoneNumber)) {
-                    throw new Exception("Authenticated user does not have a registered phone number.");
-                }
+                $customer = $data['customers'][0];
+                $targetUser = User::where('phone', $customer['phone'])->first();
 
                 $reviewRequest = ReviewRequest::create([
                     'business_id' => $business->id,
                     'sender_id' => (string) $authUser->id,
-                    'sent_to' => $authUser->id,
-                    'phone_number' => $phoneNumber,
+                    'sent_to' => $targetUser ? $targetUser->id : null,
+                    'phone_number' => $customer['phone'],
+                    'customer_name' => $customer['name'],
                     'channel' => 'personal',
                     'status' => 'requested',
                     'redirection_url' => $redirectionUrl,
@@ -71,17 +70,18 @@ class ReviewRequestService
                 $createdRequests[] = $reviewRequest;
 
             } elseif ($channel === 'app') {
-                $phoneNumbers = $data['phone_numbers'] ?? [];
+                $customers = $data['customers'] ?? [];
 
-                foreach ($phoneNumbers as $phone) {
+                foreach ($customers as $customer) {
                     // Check if the phone number belongs to any user in the system
-                    $targetUser = User::where('phone', $phone)->first();
+                    $targetUser = User::where('phone', $customer['phone'])->first();
 
                     $reviewRequest = ReviewRequest::create([
                         'business_id' => $business->id,
                         'sender_id' => 'app',
                         'sent_to' => $targetUser ? $targetUser->id : null,
-                        'phone_number' => $phone,
+                        'phone_number' => $customer['phone'],
+                        'customer_name' => $customer['name'],
                         'channel' => 'app',
                         'status' => 'requested',
                         'redirection_url' => $redirectionUrl,
