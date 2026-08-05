@@ -16,4 +16,17 @@ class ExampleTest extends TestCase
 
         $response->assertStatus(200);
     }
+
+    public function test_openai_config_endpoint(): void
+    {
+        config(['services.openai.api_key' => 'mock-key']);
+
+        $response = $this->getJson('/api/v1/config/openai');
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'success' => true,
+                'openai_key' => 'mock-key',
+            ]);
+    }
 }

@@ -38,4 +38,16 @@ class ConfigController extends Controller
 
         ]);
     }
+
+    /**
+     * Get OpenAI configuration credentials.
+     * GET /api/config/openai
+     */
+    public function openaiConfig(): JsonResponse
+    {
+        return response()->json([
+            'success' => true,
+            'openai_key' => config('services.openai.api_key'),
+        ]);
+    }
 }

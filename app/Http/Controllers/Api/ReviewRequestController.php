@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SendWhatsAppReviewRequest;
+use App\Http\Requests\SendFollowUpReminders;
 use App\Services\ReviewRequestService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
@@ -151,6 +152,45 @@ class ReviewRequestController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to retrieve review requests: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Send follow-up reminders.
+     *
+     * POST /api/v1/review-requests/send-reminders
+     *
+     * @param SendFollowUpReminders $request
+     * @return JsonResponse
+     */
+    public function sendReminders(SendFollowUpReminders $request): JsonResponse
+    {
+        try {
+            $authUser = $request->user();
+            $result = $this->reviewRequestService->sendFollowUpReminders($request->validated(), $authUser);
+
+            $channel = $request->input('channel');
+            $channelName = $channel === 'personal' ? 'Personal' : 'Application';
+
+            return response()->json([
+                'success' => true,
+                'message' => "Reminders successfully dispatched via {$channelName}.",
+                'data' => [
+                    'reminders_sent' => $result['reminders_sent'],
+                    'sent_at' => $result['sent_at']
+                ]
+            ], 200);
+
+        } catch (Exception $e) {
+            Log::error("SendReminders API Error: " . $e->getMessage(), [
+                'payload' => $request->all(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to dispatch reminders: ' . $e->getMessage()
             ], 500);
         }
     }

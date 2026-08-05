@@ -27,12 +27,18 @@ class SendWhatsAppReviewRequest implements ShouldQueue
     protected $customMessage;
 
     /**
+     * @var bool
+     */
+    public $isReminder;
+
+    /**
      * Create a new job instance.
      */
-    public function __construct(ReviewRequest $reviewRequest, ?string $customMessage = null)
+    public function __construct(ReviewRequest $reviewRequest, ?string $customMessage = null, bool $isReminder = false)
     {
         $this->reviewRequest = $reviewRequest;
         $this->customMessage = $customMessage;
+        $this->isReminder = $isReminder;
     }
 
     /**
@@ -58,6 +64,12 @@ class SendWhatsAppReviewRequest implements ShouldQueue
                 // Substitute if present
                 $message = str_replace('{{BusinessName}}', $businessName, $message);
                 $message = str_replace('{{redirection_url}}', $trackingUrl, $message);
+            } elseif ($this->isReminder) {
+                $message = "Hi! This is a quick friendly reminder from {$businessName} 🌸\n\n"
+                    . "If you have a moment, we would really appreciate it if you could rate us ⭐⭐⭐⭐⭐ on Google. It helps us grow and serve you better!\n\n"
+                    . "Review Link:\n"
+                    . "{$trackingUrl}\n\n"
+                    . "Thank you so much! 😊";
             } else {
                 $message = "Thank you for visiting {$businessName} 🙏\n\n"
                     . "If you loved our service, please rate us ⭐⭐⭐⭐⭐ on Google.\n\n"
@@ -71,8 +83,9 @@ class SendWhatsAppReviewRequest implements ShouldQueue
             $result = $whatsAppProvider->sendMessage($this->reviewRequest->phone_number, $message);
 
             if ($result['success']) {
+                $status = $this->isReminder ? 'reminder_sent' : 'sent';
                 $this->reviewRequest->update([
-                    'status' => 'sent',
+                    'status' => $status,
                     'sent_at' => now(),
                     'whatsapp_message_id' => $result['message_id'],
                 ]);

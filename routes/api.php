@@ -70,6 +70,7 @@ Route::prefix('v1')->group(function () {
     // Config Credentials Routes
     Route::get('config/google', [App\Http\Controllers\Api\ConfigController::class, 'googleConfig']);
     Route::get('config/meta', [App\Http\Controllers\Api\ConfigController::class, 'metaConfig']);
+    Route::get('config/openai', [App\Http\Controllers\Api\ConfigController::class, 'openaiConfig']);
 
     // Google Ads Route
     Route::post('google/keyword-ideas', [App\Http\Controllers\Api\GoogleAdsController::class, 'getKeywordIdeas']);
@@ -119,6 +120,7 @@ Route::prefix('v1')->group(function () {
         // WhatsApp Review Request Routes
         Route::post('whatsapp/review-request', [App\Http\Controllers\Api\ReviewRequestController::class, 'sendWhatsAppRequest']);
         Route::get('whatsapp/review-requests', [App\Http\Controllers\Api\ReviewRequestController::class, 'listRequests']);
+        Route::post('review-requests/send-reminders', [App\Http\Controllers\Api\ReviewRequestController::class, 'sendReminders']);
 
         // Google Business Profile Management API Routes
         Route::get('google-business/accounts', [App\Http\Controllers\Api\GoogleBusinessController::class, 'getAccounts']);

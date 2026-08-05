@@ -275,4 +275,107 @@ class WhatsAppReviewRequestTest extends TestCase
                 ]
             ]);
     }
+
+    /**
+     * Test successful personal channel reminder dispatch.
+     */
+    public function test_send_follow_up_reminders_personal_success(): void
+    {
+        Queue::fake();
+
+        $req = ReviewRequest::create([
+            'business_id' => $this->business->id,
+            'sender_id' => (string) $this->user->id,
+            'phone_number' => '+923001234567',
+            'customer_name' => 'Alice Doe',
+            'channel' => 'personal',
+            'status' => 'sent',
+        ]);
+
+        $payload = [
+            'business_id' => $this->business->id,
+            'request_ids' => [$req->id],
+            'channel' => 'personal',
+        ];
+
+        $response = $this->withToken($this->token)
+            ->postJson('/api/v1/review-requests/send-reminders', $payload);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'success' => true,
+                'message' => 'Reminders successfully dispatched via Personal.',
+                'data' => [
+                    'reminders_sent' => 1,
+                ]
+            ]);
+
+        Queue::assertPushed(SendWhatsAppReviewRequest::class, function ($job) {
+            return $job->isReminder === true;
+        });
+    }
+
+    /**
+     * Test successful app channel reminder dispatch for multiple requests.
+     */
+    public function test_send_follow_up_reminders_app_success(): void
+    {
+        Queue::fake();
+
+        $req1 = ReviewRequest::create([
+            'business_id' => $this->business->id,
+            'sender_id' => (string) $this->user->id,
+            'phone_number' => '+923001234567',
+            'customer_name' => 'Alice Doe',
+            'channel' => 'app',
+            'status' => 'sent',
+        ]);
+
+        $req2 = ReviewRequest::create([
+            'business_id' => $this->business->id,
+            'sender_id' => (string) $this->user->id,
+            'phone_number' => '+923007654321',
+            'customer_name' => 'Bob Smith',
+            'channel' => 'app',
+            'status' => 'sent',
+        ]);
+
+        $payload = [
+            'business_id' => $this->business->id,
+            'request_ids' => [$req1->id, $req2->id],
+            'channel' => 'app',
+        ];
+
+        $response = $this->withToken($this->token)
+            ->postJson('/api/v1/review-requests/send-reminders', $payload);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'success' => true,
+                'message' => 'Reminders successfully dispatched via Application.',
+                'data' => [
+                    'reminders_sent' => 2,
+                ]
+            ]);
+
+        Queue::assertPushed(SendWhatsAppReviewRequest::class, 2);
+    }
+
+    /**
+     * Test reminder validation fails if channel and request_ids size don't match.
+     */
+    public function test_send_follow_up_reminders_validation_fails_mismatched_channel(): void
+    {
+        $payload = [
+            'business_id' => $this->business->id,
+            'request_ids' => [1, 2],
+            'channel' => 'personal', // personal requires exactly 1 request_id
+        ];
+
+        $response = $this->withToken($this->token)
+            ->postJson('/api/v1/review-requests/send-reminders', $payload);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['channel']);
+    }
 }

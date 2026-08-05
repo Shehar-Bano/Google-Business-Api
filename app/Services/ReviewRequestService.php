@@ -111,4 +111,45 @@ class ReviewRequestService
             throw $e;
         }
     }
+
+    /**
+     * Send follow-up reminders.
+     *
+     * @param array $data Input payload data.
+     * @param User|null $authUser Authenticated user model.
+     * @return array Service operation result.
+     * @throws Exception
+     */
+    public function sendFollowUpReminders(array $data, ?User $authUser): array
+    {
+        $businessId = $data['business_id'];
+        $requestIds = $data['request_ids'];
+        $channel = $data['channel'];
+
+        $business = Business::find($businessId);
+        if (!$business) {
+            throw new Exception("Business with ID {$businessId} not found.");
+        }
+
+        $reviewRequests = ReviewRequest::whereIn('id', $requestIds)
+            ->where('business_id', $businessId)
+            ->get();
+
+        foreach ($reviewRequests as $reviewRequest) {
+            // Update channel and reset status to requested so worker can process it
+            $reviewRequest->update([
+                'channel' => $channel,
+                'status' => 'requested',
+            ]);
+
+            // Dispatch WhatsApp job as a reminder
+            SendWhatsAppReviewRequest::dispatch($reviewRequest, null, true);
+        }
+
+        return [
+            'success' => true,
+            'reminders_sent' => $reviewRequests->count(),
+            'sent_at' => now()->format('Y-m-d H:i:s'),
+        ];
+    }
 }
