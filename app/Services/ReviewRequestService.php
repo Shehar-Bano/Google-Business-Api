@@ -78,7 +78,7 @@ class ReviewRequestService
 
                     $reviewRequest = ReviewRequest::create([
                         'business_id' => $business->id,
-                        'sender_id' => 'app',
+                        'sender_id' => $authUser ? (string) $authUser->id : 'app',
                         'sent_to' => $targetUser ? $targetUser->id : null,
                         'phone_number' => $customer['phone'],
                         'customer_name' => $customer['name'],

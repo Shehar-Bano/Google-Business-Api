@@ -153,7 +153,7 @@ class WhatsAppReviewRequestTest extends TestCase
 
         $this->assertDatabaseHas('review_requests', [
             'business_id' => $this->business->id,
-            'sender_id' => 'app',
+            'sender_id' => (string) $this->user->id,
             'phone_number' => '+923001234567',
             'customer_name' => 'Alice Doe',
             'channel' => 'app',
@@ -161,7 +161,7 @@ class WhatsAppReviewRequestTest extends TestCase
 
         $this->assertDatabaseHas('review_requests', [
             'business_id' => $this->business->id,
-            'sender_id' => 'app',
+            'sender_id' => (string) $this->user->id,
             'phone_number' => '+923007654321',
             'customer_name' => 'Bob Smith',
             'channel' => 'app',
