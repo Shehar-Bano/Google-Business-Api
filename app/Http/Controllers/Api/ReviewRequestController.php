@@ -121,10 +121,21 @@ class ReviewRequestController extends Controller
             $requests = $query->orderBy('id', 'desc')->get();
 
             $formattedRequests = $requests->map(function ($req) {
-                $latestReminder = \Illuminate\Support\Facades\DB::table('request_reminders')
+                $reminders = \Illuminate\Support\Facades\DB::table('request_reminders')
                     ->where('request_id', $req->id)
-                    ->orderBy('id', 'desc')
-                    ->first();
+                    ->orderBy('id', 'asc')
+                    ->get();
+
+                $latestReminder = $reminders->last();
+
+                $remindersData = $reminders->map(function ($r) {
+                    return [
+                        'reminder_id' => $r->id,
+                        'sent_by' => $r->sent_by,
+                        'channel' => $r->channel,
+                        'sent_at' => \Carbon\Carbon::parse($r->created_at)->format('Y-m-d H:i:s'),
+                    ];
+                });
 
                 return [
                     'request_id' => $req->id,
@@ -136,6 +147,8 @@ class ReviewRequestController extends Controller
                     'sent_at' => $req->sent_at?->format('Y-m-d H:i:s'),
                     'clicked_at' => $req->clicked_at?->format('Y-m-d H:i:s'),
                     'reminder_sent_at' => $latestReminder ? \Carbon\Carbon::parse($latestReminder->created_at)->format('Y-m-d H:i:s') : null,
+                    'reminders_count' => $reminders->count(),
+                    'reminders' => $remindersData,
                 ];
             });
 

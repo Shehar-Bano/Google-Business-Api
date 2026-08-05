@@ -136,9 +136,8 @@ class ReviewRequestService
             ->get();
 
         foreach ($reviewRequests as $reviewRequest) {
-            // Update channel and reset status to requested so worker can process it
+            // Update status to requested so worker can process it, without overwriting original channel
             $reviewRequest->update([
-                'channel' => $channel,
                 'status' => 'requested',
             ]);
 

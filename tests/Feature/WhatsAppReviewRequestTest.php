@@ -243,7 +243,15 @@ class WhatsAppReviewRequestTest extends TestCase
         // Since list is ordered by id desc, the second created request is index 0
         $this->assertEquals($req2->id, $data[0]['request_id']);
         $this->assertEquals('2026-07-27 12:00:00', $data[0]['reminder_sent_at']);
+        $this->assertEquals(1, $data[0]['reminders_count']);
+        $this->assertCount(1, $data[0]['reminders']);
+        $this->assertEquals($this->user->id, $data[0]['reminders'][0]['sent_by']);
+        $this->assertEquals('app', $data[0]['reminders'][0]['channel']);
+
         $this->assertNull($data[1]['reminder_sent_at']);
+        $this->assertEquals(0, $data[1]['reminders_count']);
+        $this->assertCount(0, $data[1]['reminders']);
+
         $this->assertStringContainsString('/r/', $data[0]['redirection_url']);
     }
 
@@ -306,7 +314,7 @@ class WhatsAppReviewRequestTest extends TestCase
             'sender_id' => (string) $this->user->id,
             'phone_number' => '+923001234567',
             'customer_name' => 'Alice Doe',
-            'channel' => 'app',
+            'channel' => 'personal',
             'status' => 'sent',
         ]);
 
@@ -327,6 +335,10 @@ class WhatsAppReviewRequestTest extends TestCase
                     'reminders_sent' => 1,
                 ]
             ]);
+
+        $req->refresh();
+        $this->assertEquals('personal', $req->channel);
+        $this->assertEquals('requested', $req->status);
 
         Queue::assertPushed(SendWhatsAppReviewRequest::class, function ($job) {
             return $job->isReminder === true && $job->sentByUserId === $this->user->id;
@@ -415,5 +427,44 @@ class WhatsAppReviewRequestTest extends TestCase
 
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['request_ids.0']);
+    }
+
+    /**
+     * Test redirection does not update status if requested by a crawler/bot.
+     */
+    public function test_redirection_does_not_update_status_if_crawler(): void
+    {
+        $req = ReviewRequest::create([
+            'business_id' => $this->business->id,
+            'sender_id' => (string) $this->user->id,
+            'phone_number' => '+923001234567',
+            'customer_name' => 'Alice Doe',
+            'channel' => 'app',
+            'status' => 'sent',
+        ]);
+
+        // Send request with WhatsApp User-Agent
+        $response = $this->withHeaders([
+            'User-Agent' => 'WhatsApp/2.21.12.21 A',
+        ])->get("/r/{$req->id}");
+
+        $response->assertRedirect();
+        
+        // Assert status is still 'sent'
+        $req->refresh();
+        $this->assertEquals('sent', $req->status);
+        $this->assertNull($req->clicked_at);
+
+        // Send request with standard browser User-Agent
+        $responseBrowser = $this->withHeaders([
+            'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+        ])->get("/r/{$req->id}");
+
+        $responseBrowser->assertRedirect();
+
+        // Assert status is now 'clicked'
+        $req->refresh();
+        $this->assertEquals('clicked', $req->status);
+        $this->assertNotNull($req->clicked_at);
     }
 }

@@ -17,11 +17,18 @@ class LinkRedirectionController extends Controller
     {
         $reviewRequest = ReviewRequest::findOrFail($id);
 
-        // Update tracking status and timestamp
-        $reviewRequest->update([
-            'clicked_at' => now(),
-            'status' => 'clicked',
-        ]);
+        $userAgent = request()->header('User-Agent', '');
+
+        // Detect WhatsApp/Meta crawlers or other search bots to avoid false clicks
+        $isCrawler = preg_match('/facebookexternalhit|whatsapp|bot|spider|crawl/i', $userAgent);
+
+        if (!$isCrawler) {
+            // Update tracking status and timestamp
+            $reviewRequest->update([
+                'clicked_at' => now(),
+                'status' => 'clicked',
+            ]);
+        }
 
         $redirectionUrl = $reviewRequest->redirection_url ?: 'https://search.google.com/local/writereview?placeid=' . ($reviewRequest->business->google_place_id ?? '');
 

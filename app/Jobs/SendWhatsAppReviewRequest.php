@@ -100,7 +100,7 @@ class SendWhatsAppReviewRequest implements ShouldQueue
                     \Illuminate\Support\Facades\DB::table('request_reminders')->insert([
                         'request_id' => $this->reviewRequest->id,
                         'sent_by' => $this->sentByUserId,
-                        'channel' => $this->reviewRequest->channel ?: 'app',
+                        'channel' => 'app',
                         'created_at' => now(),
                         'updated_at' => now(),
                     ]);
