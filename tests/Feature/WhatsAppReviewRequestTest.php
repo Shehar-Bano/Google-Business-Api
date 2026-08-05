@@ -68,6 +68,9 @@ class WhatsAppReviewRequestTest extends TestCase
                 ]
             ]);
 
+        $requests = $response->json('data.requests');
+        $this->assertStringContainsString('/r/', $requests[0]['redirection_url']);
+
         $this->assertDatabaseHas('review_requests', [
             'business_id' => $this->business->id,
             'sender_id' => (string) $this->user->id,
@@ -144,6 +147,10 @@ class WhatsAppReviewRequestTest extends TestCase
                 ]
             ]);
 
+        $requests = $response->json('data.requests');
+        $this->assertStringContainsString('/r/', $requests[0]['redirection_url']);
+        $this->assertStringContainsString('/r/', $requests[1]['redirection_url']);
+
         $this->assertDatabaseHas('review_requests', [
             'business_id' => $this->business->id,
             'sender_id' => 'app',
@@ -179,5 +186,93 @@ class WhatsAppReviewRequestTest extends TestCase
 
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['customers']);
+    }
+
+    /**
+     * Test getting review requests list with statistics.
+     */
+    public function test_list_whatsapp_review_requests_success(): void
+    {
+        // Setup existing review requests
+        ReviewRequest::create([
+            'business_id' => $this->business->id,
+            'sender_id' => (string) $this->user->id,
+            'phone_number' => '+923001234567',
+            'customer_name' => 'Alice Doe',
+            'channel' => 'personal',
+            'status' => 'clicked',
+            'redirection_url' => 'https://google.com',
+            'sent_at' => now(),
+            'clicked_at' => now(),
+        ]);
+
+        ReviewRequest::create([
+            'business_id' => $this->business->id,
+            'sender_id' => 'app',
+            'phone_number' => '+923007654321',
+            'customer_name' => 'Bob Smith',
+            'channel' => 'app',
+            'status' => 'sent',
+            'redirection_url' => 'https://google.com',
+            'sent_at' => now(),
+        ]);
+
+        $response = $this->withToken($this->token)
+            ->getJson('/api/v1/whatsapp/review-requests');
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'success' => true,
+                'data' => [
+                    'total_requests' => 2,
+                    'sent_via_personal' => 1,
+                    'sent_via_app' => 1,
+                ]
+            ])
+            ->assertJsonStructure([
+                'success',
+                'data' => [
+                    'total_requests',
+                    'sent_via_personal',
+                    'sent_via_app',
+                    'requests' => [
+                        '*' => [
+                            'request_id',
+                            'customer_name',
+                            'customer_phone',
+                            'channel',
+                            'status',
+                            'redirection_url',
+                            'sent_at',
+                            'clicked_at',
+                            'reminder_sent_at',
+                        ]
+                    ]
+                ]
+            ]);
+
+        // Verify redirection_url contains the tracking route format
+        $data = $response->json('data.requests');
+        $this->assertStringContainsString('/r/', $data[0]['redirection_url']);
+    }
+
+    /**
+     * Test list returns empty if user has no businesses/requests.
+     */
+    public function test_list_whatsapp_review_requests_empty_if_no_requests(): void
+    {
+        $response = $this->withToken($this->token)
+            ->getJson('/api/v1/whatsapp/review-requests');
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'success' => true,
+                'data' => [
+                    'total_requests' => 0,
+                    'sent_via_personal' => 0,
+                    'sent_via_app' => 0,
+                    'requests' => [],
+                ]
+            ]);
     }
 }

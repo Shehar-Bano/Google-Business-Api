@@ -46,12 +46,28 @@ class ReviewRequestController extends Controller
                 'count' => $result['count']
             ]);
 
+            $formattedRequests = collect($result['requests'])->map(function ($req) {
+                return [
+                    'id' => $req->id,
+                    'business_id' => $req->business_id,
+                    'sender_id' => $req->sender_id,
+                    'sent_to' => $req->sent_to,
+                    'phone_number' => $req->phone_number,
+                    'customer_name' => $req->customer_name,
+                    'channel' => $req->channel,
+                    'status' => $req->status,
+                    'redirection_url' => route('link.redirect', ['id' => $req->id]),
+                    'created_at' => $req->created_at,
+                    'updated_at' => $req->updated_at,
+                ];
+            });
+
             return response()->json([
                 'success' => true,
                 'message' => 'Review requests queued successfully.',
                 'data' => [
                     'count' => $result['count'],
-                    'requests' => $result['requests']
+                    'requests' => $formattedRequests
                 ]
             ], 200);
 
@@ -64,6 +80,77 @@ class ReviewRequestController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to queue review requests: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get review requests list with statistics for the logged-in user.
+     *
+     * GET /api/v1/whatsapp/review-requests
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return JsonResponse
+     */
+    public function listRequests(\Illuminate\Http\Request $request): JsonResponse
+    {
+        try {
+            $authUser = $request->user();
+            if (!$authUser) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized.'
+                ], 401);
+            }
+
+            // Get business IDs belonging to the authenticated user
+            $businessIds = $authUser->businesses()->pluck('id');
+
+            $query = \App\Models\ReviewRequest::whereIn('business_id', $businessIds);
+
+            // Optional filtering by business_id
+            if ($request->has('business_id')) {
+                $query->where('business_id', $request->input('business_id'));
+            }
+
+            $totalRequests = (clone $query)->count();
+            $sentViaPersonal = (clone $query)->where('channel', 'personal')->count();
+            $sentViaApp = (clone $query)->where('channel', 'app')->count();
+
+            $requests = $query->orderBy('id', 'desc')->get();
+
+            $formattedRequests = $requests->map(function ($req) {
+                return [
+                    'request_id' => $req->id,
+                    'customer_name' => $req->customer_name,
+                    'customer_phone' => $req->phone_number,
+                    'channel' => $req->channel,
+                    'status' => $req->status,
+                    'redirection_url' => route('link.redirect', ['id' => $req->id]),
+                    'sent_at' => $req->sent_at?->format('Y-m-d H:i:s'),
+                    'clicked_at' => $req->clicked_at?->format('Y-m-d H:i:s'),
+                    'reminder_sent_at' => null,
+                ];
+            });
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'total_requests' => $totalRequests,
+                    'sent_via_personal' => $sentViaPersonal,
+                    'sent_via_app' => $sentViaApp,
+                    'requests' => $formattedRequests
+                ]
+            ], 200);
+
+        } catch (Exception $e) {
+            Log::error("ListReviewRequests API Error: " . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to retrieve review requests: ' . $e->getMessage()
             ], 500);
         }
     }
