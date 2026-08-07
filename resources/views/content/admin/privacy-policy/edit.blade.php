@@ -30,10 +30,8 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Content <span class="text-danger">*</span></label>
-                            <textarea name="content" rows="18" class="form-control font-monospace @error('content') is-invalid @enderror"
-                                placeholder="<p>Your privacy policy content will be here.</p>">{{ old('content', $privacyPolicy->content) }}</textarea>
-                            <div class="form-text">HTML is allowed and will be returned exactly through the API.</div>
+                            <label class="form-label fw-semibold">Content <span class="text-danger">*</span></label>
+                            <textarea name="content" id="content" class="form-control @error('content') is-invalid @enderror" required>{{ old('content', $privacyPolicy->content) }}</textarea>
                             @error('content')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
 
@@ -61,3 +59,16 @@
     </form>
 </div>
 @endsection
+
+@push('my-script')
+    <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            CKEDITOR.replace('content', {
+                height: 400,
+                removeButtons: 'About',
+                allowedContent: true // Keep HTML formatting exactly as input
+            });
+        });
+    </script>
+@endpush

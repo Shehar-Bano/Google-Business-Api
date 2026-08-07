@@ -75,7 +75,7 @@ Route::prefix('v1')->group(function () {
     // Google Ads Route
     Route::post('google/keyword-ideas', [App\Http\Controllers\Api\GoogleAdsController::class, 'getKeywordIdeas']);
 
-        Route::middleware('api.token')->group(function () {
+    Route::middleware('api.token')->group(function () {
         Route::post('auth/google/login', [App\Http\Controllers\Api\AuthController::class, 'googleLogin']);
         Route::get('social/facebook/connect', [App\Http\Controllers\Api\SocialConnectionController::class, 'facebookConnect']);
         // Route::post('social/facebook/connect-token', [App\Http\Controllers\Api\SocialConnectionController::class, 'facebookConnectToken']);
@@ -94,15 +94,11 @@ Route::prefix('v1')->group(function () {
         Route::put('businesses/{business}', [App\Http\Controllers\Api\BusinessController::class, 'update']);
         Route::delete('businesses/{business}', [App\Http\Controllers\Api\BusinessController::class, 'destroy']);
         Route::post('businesses/{id}/offerings', [App\Http\Controllers\Api\OfferingController::class, 'saveBusinessOfferings']);
-
         // Preferences Routes
         Route::get('businesses/{businessId}/preferences', [App\Http\Controllers\Api\PreferenceController::class, 'show']);
-
         Route::delete('businesses/{businessId}/preferences', [App\Http\Controllers\Api\PreferenceController::class, 'destroy']);
-
         // Estimated Scores Route
         Route::get('businesses/{businessId}/estimated-scores', [App\Http\Controllers\Api\BusinessController::class, 'getEstimatedScores']);
-
         // Top Selling Items Routes
         Route::post('top-selling-items/{id}', [App\Http\Controllers\Api\TopSellingItemController::class, 'update']);
         Route::delete('top-selling-items/{id}', [App\Http\Controllers\Api\TopSellingItemController::class, 'destroy']);
@@ -116,17 +112,14 @@ Route::prefix('v1')->group(function () {
         Route::get('business/generated-posters/{id}', [App\Http\Controllers\Api\PosterController::class, 'generationStatus']);
         Route::post('business/generated-posters/{id}/approve', [App\Http\Controllers\Api\PosterController::class, 'approve']);
         Route::post('business/generated-posters/{id}/reject', [App\Http\Controllers\Api\PosterController::class, 'reject']);
-
         // WhatsApp Review Request Routes
         Route::post('whatsapp/review-request', [App\Http\Controllers\Api\ReviewRequestController::class, 'sendWhatsAppRequest']);
         Route::get('whatsapp/review-requests', [App\Http\Controllers\Api\ReviewRequestController::class, 'listRequests']);
         Route::post('review-requests/send-reminders', [App\Http\Controllers\Api\ReviewRequestController::class, 'sendReminders']);
-
         // Google Business Profile Management API Routes
         Route::get('google-business/accounts', [App\Http\Controllers\Api\GoogleBusinessController::class, 'getAccounts']);
         Route::get('google-business/accounts/{accountId}/locations', [App\Http\Controllers\Api\GoogleBusinessController::class, 'getLocations']);
         Route::get('google-business/locations/{locationId}/details', [App\Http\Controllers\Api\GoogleBusinessController::class, 'getLocationDetails']);
-
     });
 
     // AI Suggestion Routes
