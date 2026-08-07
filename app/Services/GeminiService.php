@@ -130,7 +130,7 @@ class GeminiService
             if (empty($this->apiKey)) {
                 Log::warning('Gemini API Key is missing for suggestions.');
 
-                return [];
+                return $this->getFallbackSuggestions($keyword);
             }
 
             $endpoint = "https://generativelanguage.googleapis.com/v1beta/models/{$this->model}:generateContent?key={$this->apiKey}";
@@ -166,19 +166,71 @@ class GeminiService
             if (! $response->successful()) {
                 Log::error('Gemini Suggestion API Error: '.$response->body());
 
-                return [];
+                return $this->getFallbackSuggestions($keyword);
             }
 
             $result = $response->json();
             $text = $result['candidates'][0]['content']['parts'][0]['text'] ?? '[]';
             $suggestions = json_decode(trim($text), true);
 
-            return is_array($suggestions) ? array_values(array_unique($suggestions)) : [];
+            return is_array($suggestions) ? array_values(array_unique($suggestions)) : $this->getFallbackSuggestions($keyword);
 
         } catch (\Exception $e) {
             Log::error('Gemini suggestOfferings Exception: '.$e->getMessage());
 
-            return [];
+            return $this->getFallbackSuggestions($keyword);
         }
+    }
+
+    /**
+     * High quality fallback business suggestions if Gemini API is rate-limited or key has expired.
+     */
+    protected function getFallbackSuggestions(string $keyword): array
+    {
+        $keyword = strtolower(trim($keyword));
+        
+        $lists = [
+            'web' => [
+                'Web Design', 'Web Development', 'E-commerce Website', 'SEO Optimization', 
+                'Digital Marketing', 'UI/UX Design', 'Domain & Hosting', 'Mobile App Development',
+                'Software Development', 'Graphic Design'
+            ],
+            'marketing' => [
+                'Social Media Marketing', 'Digital Marketing', 'SEO Optimization', 'Content Marketing',
+                'Email Campaigns', 'Brand Strategy', 'Pay-Per-Click Advertising', 'Copywriting',
+                'Graphic Design', 'Public Relations'
+            ],
+            'food' => [
+                'Fast Food Delivery', 'Catering Service', 'Meal Prep Service', 'Bakery Shop',
+                'Cafe Restaurant', 'Fine Dining', 'Street Food Truck', 'Dessert & Ice Cream',
+                'Organic Food Market', 'Beverage & Coffee Shop'
+            ],
+            'car' => [
+                'Car Wash & Detailing', 'Auto Repair Workshop', 'Car Rental Agency', 'Used Car Dealership',
+                'Tire Shop & Alignment', 'Auto Parts Store', 'Roadside Assistance', 'Towing Service',
+                'Car Accessories Shop', 'Vehicle Inspection'
+            ],
+            'estate' => [
+                'Property Management', 'Real Estate Brokerage', 'House Appraisal', 'Interior Design',
+                'Home Renovation', 'Moving Services', 'Mortgage Consultation', 'Commercial Leasing',
+                'Landscaping Services', 'Cleaning Service'
+            ]
+        ];
+
+        foreach ($lists as $key => $suggestions) {
+            if (str_contains($keyword, $key) || str_contains($key, $keyword)) {
+                return $suggestions;
+            }
+        }
+
+        return [
+            ucwords($keyword) . ' Services',
+            ucwords($keyword) . ' Consultation',
+            ucwords($keyword) . ' Products',
+            ucwords($keyword) . ' Support',
+            ucwords($keyword) . ' Solutions',
+            'Business Consulting',
+            'General Services'
+        ];
     }
 }

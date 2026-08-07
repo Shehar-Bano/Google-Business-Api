@@ -4,7 +4,7 @@ namespace App\Services;
 
 class AiSuggestionService
 {
-    public function __construct(protected GeminiService $geminiService) {}
+    public function __construct(protected OpenAiPosterService $openAiService) {}
 
     /**
      * Get suggestions based on keyword query.
@@ -15,6 +15,6 @@ class AiSuggestionService
             return [];
         }
 
-        return $this->geminiService->suggaestOfferings($query);
+        return $this->openAiService->suggestOfferings($query);
     }
 }

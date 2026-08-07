@@ -229,6 +229,80 @@ PROMPT;
         }
     }
 
+    /**
+     * Get related product/service suggestions based on user keyword using OpenAI.
+     */
+    public function suggestOfferings(string $keyword): array
+    {
+        if (blank($this->apiKey)) {
+            Log::error('OpenAI suggestion skipped because OpenAI API key is not configured.');
+            return [];
+        }
+
+        $developerPrompt = "You are an intelligent business category expansion engine.\n"
+            ."Your goal is to identify the broader business category or industry of the user's input keyword, and then suggest the 10 most relevant, distinct products, offerings, or services that a business in that same industry would offer.\n"
+            ."Rules:\n"
+            ."1. Do not just return items containing the keyword. Expand to the wider category.\n"
+            ."2. Examples:\n"
+            ."   - If user input is 'pizza', identify the category as 'Fast Food Restaurant' and suggest related items like 'Burger', 'Pasta', 'Fries', 'Garlic Bread', 'Chicken Wings', 'Sandwiches', 'Wraps', 'Salad', 'Beverages'.\n"
+            ."   - If user input is 'web' or 'website', identify the category as 'Software House / Digital Agency' and suggest related items like 'Mobile Application Development', 'Search Engine Optimization (SEO)', 'Social Media Marketing', 'UI/UX Design', 'Custom Software Development', 'Graphic Design', 'Content Writing'.\n"
+            ."3. Return a JSON object containing a 'suggestions' array of strings.";
+
+        $options = [];
+        if (app()->environment('local')) {
+            $options['proxy'] = '';
+        }
+
+        try {
+            $response = Http::withToken($this->apiKey)
+                ->withOptions($options)
+                ->acceptJson()
+                ->timeout(30)
+                ->post('https://api.openai.com/v1/responses', [
+                    'model' => $this->model,
+                    'input' => [
+                        ['role' => 'developer', 'content' => $developerPrompt],
+                        ['role' => 'user', 'content' => "User Keyword: " . $keyword],
+                    ],
+                    'text' => [
+                        'format' => [
+                            'type' => 'json_schema',
+                            'name' => 'business_suggestions',
+                            'strict' => true,
+                            'schema' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'suggestions' => [
+                                        'type' => 'array',
+                                        'items' => ['type' => 'string']
+                                    ]
+                                ],
+                                'required' => ['suggestions'],
+                                'additionalProperties' => false
+                            ]
+                        ]
+                    ]
+                ]);
+
+            if (! $response->successful()) {
+                Log::error('OpenAI suggestions generation failed.', ['status' => $response->status()]);
+                return [];
+            }
+
+            $content = $this->extractOutputText($response->json());
+            $result = json_decode($content, true);
+
+            if (is_array($result) && isset($result['suggestions']) && is_array($result['suggestions'])) {
+                return array_values(array_unique($result['suggestions']));
+            }
+
+            return [];
+        } catch (\Throwable $exception) {
+            Log::error('OpenAI suggestions generation exception.', ['message' => $exception->getMessage()]);
+            return [];
+        }
+    }
+
     protected function extractOutputText(array $response): string
     {
         if (is_string($response['output_text'] ?? null)) {
