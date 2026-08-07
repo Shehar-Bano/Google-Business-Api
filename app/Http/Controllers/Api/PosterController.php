@@ -25,7 +25,7 @@ class PosterController extends Controller
         ]);
 
         $user = $request->user();
-        if (!$user) {
+        if (! $user) {
             return response()->json([
                 'success' => false,
                 'message' => 'Unauthorized.',
@@ -41,7 +41,7 @@ class PosterController extends Controller
                 $request->integer('business_id') ?: null
             );
 
-            if (!$generated) {
+            if (! $generated) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Could not queue poster generation.',
@@ -50,12 +50,12 @@ class PosterController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Poster generated successfully.',
+                'message' => 'Poster generation queued.',
                 'data' => [
                     'id' => $generated->id,
                     'generation_status' => $generated->generation_status,
                     'status_url' => url("/api/v1/business/generated-posters/{$generated->id}"),
-                ]
+                ],
             ], 202);
 
         } catch (\InvalidArgumentException $e) {
@@ -64,10 +64,11 @@ class PosterController extends Controller
                 'message' => $e->getMessage(),
             ], 422);
         } catch (\Exception $e) {
-            Log::error('API generateWithTemplate Error: ' . $e->getMessage());
+            Log::error('API generateWithTemplate Error: '.$e->getMessage());
+
             return response()->json([
                 'success' => false,
-                'message' => 'Error generating poster: ' . $e->getMessage(),
+                'message' => 'Error generating poster: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -84,7 +85,7 @@ class PosterController extends Controller
         ]);
 
         $user = $request->user();
-        if (!$user) {
+        if (! $user) {
             return response()->json([
                 'success' => false,
                 'message' => 'Unauthorized.',
@@ -98,7 +99,7 @@ class PosterController extends Controller
                 $request->integer('business_id') ?: null
             );
 
-            if (!$generated) {
+            if (! $generated) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Could not queue poster generation.',
@@ -107,12 +108,12 @@ class PosterController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Poster generated successfully.',
+                'message' => 'Poster generation queued.',
                 'data' => [
                     'id' => $generated->id,
                     'generation_status' => $generated->generation_status,
                     'status_url' => url("/api/v1/business/generated-posters/{$generated->id}"),
-                ]
+                ],
             ], 202);
 
         } catch (\InvalidArgumentException $e) {
@@ -121,10 +122,11 @@ class PosterController extends Controller
                 'message' => $e->getMessage(),
             ], 422);
         } catch (\Exception $e) {
-            Log::error('API generateDirect Error: ' . $e->getMessage());
+            Log::error('API generateDirect Error: '.$e->getMessage());
+
             return response()->json([
                 'success' => false,
-                'message' => 'Error generating poster: ' . $e->getMessage(),
+                'message' => 'Error generating poster: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -136,7 +138,7 @@ class PosterController extends Controller
     public function approve(Request $request, $id): JsonResponse
     {
         $user = $request->user();
-        if (!$user) {
+        if (! $user) {
             return response()->json([
                 'success' => false,
                 'message' => 'Unauthorized.',
@@ -144,7 +146,7 @@ class PosterController extends Controller
         }
 
         $generated = \App\Models\AiGeneratedPoster::find($id);
-        if (!$generated) {
+        if (! $generated) {
             return response()->json([
                 'success' => false,
                 'message' => 'Generated poster not found.',
@@ -160,7 +162,7 @@ class PosterController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Poster approved successfully.',
-            'data' => $generated
+            'data' => $generated,
         ]);
     }
 
@@ -171,7 +173,7 @@ class PosterController extends Controller
     public function reject(Request $request, $id): JsonResponse
     {
         $user = $request->user();
-        if (!$user) {
+        if (! $user) {
             return response()->json([
                 'success' => false,
                 'message' => 'Unauthorized.',
@@ -179,7 +181,7 @@ class PosterController extends Controller
         }
 
         $generated = \App\Models\AiGeneratedPoster::find($id);
-        if (!$generated) {
+        if (! $generated) {
             return response()->json([
                 'success' => false,
                 'message' => 'Generated poster not found.',
@@ -198,7 +200,7 @@ class PosterController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Poster rejected successfully.',
-            'data' => $generated
+            'data' => $generated,
         ]);
     }
 
@@ -257,7 +259,7 @@ class PosterController extends Controller
     public function indexGenerated(Request $request): JsonResponse
     {
         $user = $request->user();
-        if (!$user) {
+        if (! $user) {
             return response()->json([
                 'success' => false,
                 'message' => 'Unauthorized.',

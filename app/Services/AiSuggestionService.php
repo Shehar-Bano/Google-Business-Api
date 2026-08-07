@@ -15,6 +15,6 @@ class AiSuggestionService
             return [];
         }
 
-        return $this->geminiService->suggestOfferings($query);
+        return $this->geminiService->suggaestOfferings($query);
     }
 }

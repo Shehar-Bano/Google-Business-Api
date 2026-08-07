@@ -37,6 +37,13 @@ class OpenAiPosterService
             return null;
         }
 
+        // Convert the template image to PNG if it's in another format (like JPEG)
+        $pngPath = $this->ensurePng($fullPath);
+        if (!$pngPath) {
+            Log::error('Failed to convert template image to PNG.', ['template_path' => $templatePath]);
+            return null;
+        }
+
         $business = $businessContext['business'] ?? [];
         $preferences = $businessContext['preferences'] ?? [];
         $imagePrompt = "Edit this marketing-poster template for the supplied business. Preserve the template's visual style, layout, colours, imagery, borders and spacing. Replace only placeholder copy with the exact copy below. Keep every word legible and correctly spelled. Do not add facts, prices, contact details, or offers not included below.\n\n"
@@ -44,6 +51,11 @@ class OpenAiPosterService
             . 'PREFERENCES: '.json_encode($preferences, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)."\n"
             . 'POSTER HEADLINE: '.($content['title'] ?? '')."\n"
             . 'POSTER INSTRUCTIONS: '.($content['marketing_instructions'] ?? '');
+
+        $options = [];
+        if (app()->environment('local')) {
+            $options['proxy'] = '';
+        }
 
         try {
             $imageData = null;
@@ -55,12 +67,10 @@ class OpenAiPosterService
                 $process = \Illuminate\Support\Facades\Process::timeout(180)->run([
                     'curl.exe', '-s', '-X', 'POST', 'https://api.openai.com/v1/images/edits',
                     '-H', 'Authorization: Bearer ' . $this->apiKey,
-                    '-F', 'image[]=@' . $fullPath,
+                    '-F', 'image=@' . $pngPath,
                     '-F', 'model=' . $this->imageModel,
                     '-F', 'prompt=<' . $promptFile,
-                    '-F', 'size=auto',
-                    '-F', 'quality=high',
-                    '-F', 'output_format=png'
+                    '-F', 'size=1024x1024'
                 ]);
 
                 @unlink($promptFile);
@@ -76,23 +86,26 @@ class OpenAiPosterService
             // Fallback to standard HTTP Client if not on Windows or if process execution failed
             if (empty($imageData)) {
                 $response = Http::withToken($this->apiKey)
-                    ->withOptions(['proxy' => ''])
+                    ->withOptions($options)
                     ->acceptJson()
                     ->timeout(120)
-                    ->attach('image[]', file_get_contents($fullPath), basename($fullPath))
+                    ->attach('image', file_get_contents($pngPath), 'image.png')
                     ->post('https://api.openai.com/v1/images/edits', [
                         'model' => $this->imageModel,
                         'prompt' => $imagePrompt,
-                        'size' => 'auto',
-                        'quality' => 'high',
-                        'output_format' => 'png',
+                        'size' => '1024x1024',
                     ]);
 
                 if ($response->successful()) {
                     $imageData = $response->json('data.0.b64_json');
                 } else {
-                    Log::error('OpenAI poster image generation failed.', ['status' => $response->status()]);
+                    Log::error('OpenAI poster image generation failed.', ['status' => $response->status(), 'response' => $response->body()]);
                 }
+            }
+
+            // Clean up temporary PNG file if it was created
+            if ($pngPath !== $fullPath) {
+                @unlink($pngPath);
             }
 
             if (! is_string($imageData) || $imageData === '') {
@@ -113,6 +126,11 @@ class OpenAiPosterService
 
             return 'storage/'.$path;
         } catch (\Throwable $exception) {
+            // Clean up temporary PNG file if it was created
+            if ($pngPath !== $fullPath) {
+                @unlink($pngPath);
+            }
+
             Log::error('OpenAI poster image generation exception.', ['message' => $exception->getMessage()]);
 
             return null;
@@ -150,9 +168,13 @@ PROMPT;
         ];
 
         try {
+            $options = [];
+            if (app()->environment('local')) {
+                $options['proxy'] = '';
+            }
+
             $response = Http::withToken($this->apiKey)
-                // The server environment has a broken localhost proxy; OpenAI must be reached directly.
-                ->withOptions(['proxy' => ''])
+                ->withOptions($options)
                 ->acceptJson()
                 ->timeout(60)
                 ->post('https://api.openai.com/v1/responses', [
@@ -222,5 +244,51 @@ PROMPT;
         }
 
         return '';
+    }
+
+    /**
+     * Helper to ensure the template image is a valid PNG format for DALL-E/GPT-Image.
+     * If the source file is a JPEG/GIF/WEBP, it creates a temporary PNG copy.
+     */
+    protected function ensurePng(string $filePath): ?string
+    {
+        if (!file_exists($filePath)) {
+            return null;
+        }
+
+        $info = getimagesize($filePath);
+        if ($info === false) {
+            return null;
+        }
+
+        if ($info['mime'] === 'image/png') {
+            return $filePath;
+        }
+
+        $tempPng = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'temp_poster_' . uniqid() . '.png';
+        $image = null;
+
+        switch ($info['mime']) {
+            case 'image/jpeg':
+                $image = imagecreatefromjpeg($filePath);
+                break;
+            case 'image/gif':
+                $image = imagecreatefromgif($filePath);
+                break;
+            case 'image/webp':
+                if (function_exists('imagecreatefromwebp')) {
+                    $image = imagecreatefromwebp($filePath);
+                }
+                break;
+        }
+
+        if (!$image) {
+            return null;
+        }
+
+        $success = imagepng($image, $tempPng);
+        imagedestroy($image);
+
+        return $success ? $tempPng : null;
     }
 }

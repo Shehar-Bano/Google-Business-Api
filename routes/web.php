@@ -25,5 +25,93 @@ Route::middleware('auth')->group(function () {
 
 Route::get('r/{id}', [LinkRedirectionController::class, 'redirect'])->name('link.redirect');
 
+Route::get('/run-queue', function () {
+    try {
+        // Increase execution time limit since AI image generation can take a bit of time
+        set_time_limit(300);
+        
+        \Illuminate\Support\Facades\Artisan::call('queue:work', [
+            '--queue' => 'poster-generation,default',
+            '--stop-when-empty' => true,
+            '--tries' => 1
+        ]);
+        
+        return response()->json([
+            'success' => true,
+            'output' => \Illuminate\Support\Facades\Artisan::output()
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage()
+        ]);
+    }
+});
+
+Route::get('/view-logs', function () {
+    $logFile = storage_path('logs/laravel.log');
+    if (!file_exists($logFile)) {
+        return 'Log file does not exist at ' . $logFile;
+    }
+    
+    $lines = file($logFile);
+    $lastLines = array_slice($lines, -150); // Read last 150 lines
+    
+    return response(implode("", $lastLines), 200, ['Content-Type' => 'text/plain']);
+});
+
+Route::get('/check-posters', function () {
+    try {
+        $posters = \App\Models\Poster::all();
+        $result = [];
+        
+        foreach ($posters as $poster) {
+            $fullPath = public_path($poster->image);
+            $exists = file_exists($fullPath);
+            $size = $exists ? filesize($fullPath) : 0;
+            
+            $result[] = [
+                'id' => $poster->id,
+                'title' => $poster->title,
+                'image_path' => $poster->image,
+                'full_path' => $fullPath,
+                'exists' => $exists,
+                'size_bytes' => $size,
+                'size_kb' => round($size / 1024, 2),
+                'status' => $poster->status
+            ];
+        }
+        
+        return response()->json([
+            'success' => true,
+            'posters' => $result
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage()
+        ]);
+    }
+});
+
+Route::get('/clear-cache', function () {
+    try {
+        \Illuminate\Support\Facades\Artisan::call('config:clear');
+        \Illuminate\Support\Facades\Artisan::call('cache:clear');
+        \Illuminate\Support\Facades\Artisan::call('route:clear');
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Cache cleared successfully!'
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage()
+        ]);
+    }
+});
+
 require __DIR__.'/admin.php';
 require __DIR__.'/auth.php';
+    

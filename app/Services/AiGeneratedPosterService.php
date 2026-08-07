@@ -116,7 +116,7 @@ class AiGeneratedPosterService
             $generated->update([
                 'generated_title' => $result['title'],
                 'generated_caption' => $result['caption'],
-                'generated_image' => asset($imagePath),
+                'generated_image' => $imagePath,
                 'generation_status' => 'completed',
                 'generation_error' => null,
             ]);

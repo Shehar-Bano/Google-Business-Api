@@ -75,8 +75,11 @@ class AiGeneratedPoster extends Model
 
         // If the URL is saved as absolute but contains localhost (due to .env APP_URL config),
         // we resolve it dynamically using the current request's asset helper.
-        if (str_starts_with($value, 'http://localhost/storage/')) {
-            return asset(str_replace('http://localhost/', '', $value));
+        if (str_contains($value, 'localhost')) {
+            $pos = strpos($value, 'storage/');
+            if ($pos !== false) {
+                return asset(substr($value, $pos));
+            }
         }
 
         if (str_starts_with($value, 'http://') || str_starts_with($value, 'https://')) {
