@@ -48,15 +48,22 @@ class PosterController extends Controller
                 ], 500);
             }
 
+            $generated->refresh();
+
             return response()->json([
                 'success' => true,
-                'message' => 'Poster generation queued.',
+                'message' => $generated->generation_status === 'completed' ? 'Poster generated successfully.' : 'Poster generation queued.',
                 'data' => [
                     'id' => $generated->id,
                     'generation_status' => $generated->generation_status,
+                    'status' => $generated->status,
+                    'title' => $generated->generated_title,
+                    'caption' => $generated->generated_caption,
+                    'image' => $generated->generated_image,
+                    'error' => $generated->generation_error,
                     'status_url' => url("/api/v1/business/generated-posters/{$generated->id}"),
                 ],
-            ], 202);
+            ], $generated->generation_status === 'completed' ? 200 : 202);
 
         } catch (\InvalidArgumentException $e) {
             return response()->json([
@@ -106,15 +113,22 @@ class PosterController extends Controller
                 ], 500);
             }
 
+            $generated->refresh();
+
             return response()->json([
                 'success' => true,
-                'message' => 'Poster generation queued.',
+                'message' => $generated->generation_status === 'completed' ? 'Poster generated successfully.' : 'Poster generation queued.',
                 'data' => [
                     'id' => $generated->id,
                     'generation_status' => $generated->generation_status,
+                    'status' => $generated->status,
+                    'title' => $generated->generated_title,
+                    'caption' => $generated->generated_caption,
+                    'image' => $generated->generated_image,
+                    'error' => $generated->generation_error,
                     'status_url' => url("/api/v1/business/generated-posters/{$generated->id}"),
                 ],
-            ], 202);
+            ], $generated->generation_status === 'completed' ? 200 : 202);
 
         } catch (\InvalidArgumentException $e) {
             return response()->json([

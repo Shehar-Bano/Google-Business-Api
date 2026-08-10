@@ -23,7 +23,7 @@ class GenerateAiPoster implements ShouldQueue
 
     public function __construct(public int $aiGeneratedPosterId)
     {
-        $this->onQueue('poster-generation');
+        $this->onQueue(env('POSTER_QUEUE', 'default'));
     }
 
     public function handle(AiGeneratedPosterService $posterService): void
