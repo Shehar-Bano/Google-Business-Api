@@ -4,6 +4,7 @@ namespace App\Services\Api\V1;
 
 use App\Models\ContentPage;
 use App\Models\SupportOption;
+use App\Models\Video;
 use Illuminate\Database\Eloquent\Collection;
 
 class ContentService
@@ -28,5 +29,13 @@ class ContentService
                 'content' => '',
                 'is_active' => true,
             ]);
+    }
+
+    public function videos(): array
+    {
+        return Video::query()
+            ->where('is_active', true)
+            ->pluck('video_url', 'screen_name')
+            ->toArray();
     }
 }

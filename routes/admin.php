@@ -79,4 +79,6 @@ Route::middleware(['auth', 'verified', 'role:super_admin|admin'])
         Route::resource('ai-generated-posters', App\Http\Controllers\Admin\AiGeneratedPosterController::class)->only(['index', 'show']);
         Route::post('ai-generated-posters/{ai_generated_poster}/approve', [App\Http\Controllers\Admin\AiGeneratedPosterController::class, 'approve'])->name('ai-generated-posters.approve');
         Route::post('ai-generated-posters/{ai_generated_poster}/reject', [App\Http\Controllers\Admin\AiGeneratedPosterController::class, 'reject'])->name('ai-generated-posters.reject');
+
+        Route::resource('videos', App\Http\Controllers\Admin\VideoController::class);
     });

@@ -63,6 +63,12 @@
                 <div>AI Generated Posters</div>
             </a>
         </li>
+        <li class="menu-item {{ request()->routeIs('admin.videos.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.videos.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons mdi mdi-video-outline"></i>
+                <div>Video Shorts</div>
+            </a>
+        </li>
 
         {{-- <li class="menu-item {{ request()->routeIs('admin.order-management.*') ? 'active' : '' }}">
             <a href="{{ route('admin.order-management.index') }}" class="menu-link">

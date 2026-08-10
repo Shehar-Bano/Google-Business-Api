@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             RolePermissionSeeder::class,
             AdminUserSeeder::class,
             BusinessCatalogSeeder::class,
+            VideoSeeder::class,
         ]);
 
         app(PermissionRegistrar::class)->forgetCachedPermissions();

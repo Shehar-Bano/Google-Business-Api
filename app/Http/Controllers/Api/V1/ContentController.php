@@ -33,4 +33,13 @@ class ContentController extends Controller
             'data' => PrivacyPolicyResource::make($this->contentService->privacyPolicy()),
         ]);
     }
+
+    public function videos(): JsonResponse
+    {
+        return response()->json([
+            'success' => true,
+            'message' => 'Videos fetched successfully.',
+            'data' => $this->contentService->videos(),
+        ]);
+    }
 }

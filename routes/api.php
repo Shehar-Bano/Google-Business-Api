@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('v1')->group(function () {
     Route::get('help-support', [ContentController::class, 'helpSupport']);
     Route::get('privacy-policy', [ContentController::class, 'privacyPolicy']);
+    Route::get('videos', [ContentController::class, 'videos']);
     // Route::get('orders', [OrderController::class, 'index']);
     // Route::get('orders/{order_id}', [OrderController::class, 'show']);
     Route::get('offerings/search', [App\Http\Controllers\Api\OfferingController::class, 'search']);
