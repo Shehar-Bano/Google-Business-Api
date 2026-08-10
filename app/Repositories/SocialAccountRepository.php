@@ -112,6 +112,22 @@ class SocialAccountRepository
     }
 
     /**
+     * Get all Instagram accounts for a user.
+     */
+    public function getInstagramAccounts(int $userId)
+    {
+        return InstagramAccount::where('user_id', $userId)->get();
+    }
+
+    /**
+     * Get the first/connected Instagram account for a user.
+     */
+    public function getConnectedInstagram(int $userId): ?InstagramAccount
+    {
+        return InstagramAccount::where('user_id', $userId)->first();
+    }
+
+    /**
      * Get all pages for a user's Facebook account.
      */
     public function getPages(int $userId)

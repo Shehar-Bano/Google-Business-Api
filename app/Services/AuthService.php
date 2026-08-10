@@ -18,7 +18,7 @@ class AuthService
      */
     public function loginWithGoogle(
         ?string $idToken,
-        User $user,
+        ?User $user = null,
         ?string $currentToken = null,
         ?string $accessToken = null,
         ?string $refreshToken = null,
@@ -59,12 +59,26 @@ class AuthService
             return null;
         }
 
-        // 2. Link Google details to the current logged-in user (no new user creation)
-        if (empty($user->email)) {
-            $user->email = $googleUser['email'];
-        }
-        if (empty($user->name)) {
-            $user->name = $googleUser['name'];
+        // 2. Link Google details to user or create user if logging in from public endpoint
+        if (!$user) {
+            $user = User::where('email', $googleUser['email'])->first();
+            if (!$user) {
+                $user = new User();
+                $user->email = $googleUser['email'];
+                $user->name = $googleUser['name'];
+            }
+            if (!$currentToken) {
+                $plainToken = bin2hex(random_bytes(32));
+                $user->api_access_token = hash('sha256', $plainToken);
+                $currentToken = $plainToken;
+            }
+        } else {
+            if (empty($user->email)) {
+                $user->email = $googleUser['email'];
+            }
+            if (empty($user->name)) {
+                $user->name = $googleUser['name'];
+            }
         }
         $user->save();
 

@@ -167,7 +167,7 @@ class SocialAuthTest extends TestCase
         $response->assertStatus(200)
             ->assertJson([
                 'success' => true,
-                'message' => 'Facebook and linked Instagram connected successfully.',
+                'message' => 'Facebook connected successfully.',
             ]);
 
         $this->assertDatabaseHas('social_accounts', [
@@ -181,9 +181,66 @@ class SocialAuthTest extends TestCase
             'page_id' => 'page-id-999',
             'page_name' => 'Burger King Pakistan',
         ]);
+    }
+
+    /**
+     * Test Instagram Callback and sync.
+     */
+    public function test_instagram_callback_and_sync()
+    {
+        $user = User::factory()->create();
+        $state = Crypt::encryptString(json_encode(['user_id' => $user->id, 'platform' => 'instagram']));
+
+        // Mock Socialite User Object
+        $socialiteUser = \Mockery::mock('Laravel\Socialite\Two\User');
+        $socialiteUser->shouldReceive('getId')->andReturn('fb-uid-777');
+        $socialiteUser->shouldReceive('getName')->andReturn('IG User');
+        $socialiteUser->shouldReceive('getEmail')->andReturn('ig@example.com');
+        $socialiteUser->shouldReceive('getAvatar')->andReturn('http://facebook.com/avatar.jpg');
+        $socialiteUser->token = 'fb-access-token-ig';
+        $socialiteUser->refreshToken = 'fb-refresh-token';
+        $socialiteUser->expiresIn = 3600;
+
+        // Mock Socialite Driver
+        Socialite::shouldReceive('driver')
+            ->with('facebook')
+            ->andReturn(self::mockDriver($socialiteUser));
+
+        // Mock Meta Graph Service
+        $this->mock(MetaGraphService::class, function ($mock) {
+            $mock->shouldReceive('fetchPages')
+                ->once()
+                ->with('fb-access-token-ig')
+                ->andReturn([
+                    [
+                        'page_id' => 'page-id-777',
+                        'page_name' => 'Burger King Pakistan',
+                        'page_access_token' => 'page-token-abc',
+                        'category' => 'Restaurant',
+                    ]
+                ]);
+
+            $mock->shouldReceive('fetchLinkedInstagramAccount')
+                ->once()
+                ->with('page-id-777', 'page-token-abc')
+                ->andReturn([
+                    'page_id' => 'page-id-777',
+                    'instagram_business_id' => 'ig-id-888',
+                    'username' => 'burgerking_pk',
+                    'profile_picture' => 'http://instagram.com/bk.jpg',
+                ]);
+        });
+
+        // Trigger Instagram callback route
+        $response = $this->get('/api/v1/social/instagram/callback?state=' . urlencode($state));
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'success' => true,
+                'message' => 'Instagram connected successfully.',
+            ]);
 
         $this->assertDatabaseHas('instagram_accounts', [
-            'social_account_id' => SocialAccount::first()->id,
             'instagram_business_id' => 'ig-id-888',
             'username' => 'burgerking_pk',
         ]);

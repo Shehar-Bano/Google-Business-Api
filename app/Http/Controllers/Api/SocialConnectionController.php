@@ -7,6 +7,7 @@ use App\Services\FacebookService;
 use App\Services\InstagramService;
 use App\Http\Requests\Api\ConnectFacebookPageRequest;
 use App\Http\Resources\Api\V1\SocialPageResource;
+use App\Http\Resources\Api\V1\InstagramAccountResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
@@ -32,6 +33,7 @@ class SocialConnectionController extends Controller
         // Securely pass user_id inside state payload to mapping callback
         $state = Crypt::encryptString(json_encode([
             'user_id' => $user->id,
+            'platform' => 'facebook',
         ]));
 
         return Socialite::driver('facebook')
@@ -42,8 +44,6 @@ class SocialConnectionController extends Controller
                 'pages_read_engagement',
                 'pages_manage_posts',
                 'business_management',
-                'instagram_basic',
-                'instagram_content_publish',
             ])
             ->with(['state' => $state])
             ->stateless()
@@ -103,7 +103,7 @@ class SocialConnectionController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Facebook and linked Instagram connected successfully.',
+                'message' => 'Facebook connected successfully.',
                 'user' => [
                     'id' => $socialAccount->user_id,
                     'facebook_connected' => true,
@@ -238,7 +238,11 @@ class SocialConnectionController extends Controller
         ]);
     }
 
-    public function facebookRedirectUrl()
+    /**
+     * Get Facebook OAuth redirect URL.
+     * GET /api/social/facebook/redirect-url
+     */
+    public function facebookRedirectUrl(): JsonResponse
     {
         $url = Socialite::driver('facebook')
             ->scopes([
@@ -247,6 +251,30 @@ class SocialConnectionController extends Controller
                 'pages_show_list',
                 'pages_read_engagement',
                 'pages_manage_posts',
+                'business_management',
+            ])
+            ->stateless()
+            ->redirect()
+            ->getTargetUrl();
+
+        return response()->json([
+            'success' => true,
+            'redirect_url' => $url,
+        ]);
+    }
+
+    /**
+     * Get Instagram OAuth redirect URL.
+     * GET /api/social/instagram/redirect-url
+     */
+    public function instagramRedirectUrl(): JsonResponse
+    {
+        $url = Socialite::driver('facebook')
+            ->scopes([
+                'email',
+                'public_profile',
+                'pages_show_list',
+                'pages_read_engagement',
                 'business_management',
                 'instagram_basic',
                 'instagram_content_publish',
@@ -258,6 +286,117 @@ class SocialConnectionController extends Controller
         return response()->json([
             'success' => true,
             'redirect_url' => $url,
+        ]);
+    }
+
+    /**
+     * Redirect the user to the Instagram authentication page.
+     * GET /api/social/instagram/connect
+     */
+    public function instagramConnect(Request $request)
+    {
+        $user = $request->user();
+
+        $state = Crypt::encryptString(json_encode([
+            'user_id' => $user->id,
+            'platform' => 'instagram',
+        ]));
+
+        return Socialite::driver('facebook')
+            ->scopes([
+                'email',
+                'public_profile',
+                'pages_show_list',
+                'pages_read_engagement',
+                'business_management',
+                'instagram_basic',
+                'instagram_content_publish',
+            ])
+            ->with(['state' => $state])
+            ->stateless()
+            ->redirect();
+    }
+
+    /**
+     * Handle the Instagram authentication callback.
+     * GET /api/social/instagram/callback
+     */
+    public function instagramCallback(Request $request): JsonResponse
+    {
+        $state = $request->query('state');
+        if (! $state) {
+            return response()->json([
+                'success' => false,
+                'message' => 'OAuth state parameter missing.',
+            ], 400);
+        }
+
+        try {
+            $payload = json_decode(Crypt::decryptString($state), true);
+            $userId = $payload['user_id'] ?? null;
+            if (! $userId) {
+                throw new \Exception('Invalid user ID inside state.');
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'State decryption failed: '.$e->getMessage(),
+            ], 400);
+        }
+
+        if ($request->has('error')) {
+            Log::warning('Instagram Connect Cancelled or Denied: '.$request->query('error_description'));
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Connection cancelled: '.$request->query('error_description'),
+            ], 400);
+        }
+
+        try {
+            $fbUser = Socialite::driver('facebook')->stateless()->user();
+
+            $facebookUser = [
+                'id' => $fbUser->getId(),
+                'name' => $fbUser->getName(),
+                'email' => $fbUser->getEmail(),
+                'avatar' => $fbUser->getAvatar(),
+                'token' => $fbUser->token,
+                'refreshToken' => $fbUser->refreshToken,
+                'expiresIn' => $fbUser->expiresIn,
+            ];
+
+            $result = $this->instagramService->connectAccount($userId, $facebookUser);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Instagram connected successfully.',
+                'user_id' => $userId,
+                'instagram_accounts' => $result['instagram_accounts'],
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Instagram Callback Error: '.$e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Authentication failed: '.$e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Get connected Instagram account details.
+     * GET /api/social/instagram/connected
+     */
+    public function getConnectedInstagram(Request $request): JsonResponse
+    {
+        $userId = $request->user()->id;
+        $account = $this->instagramService->getConnectedAccount($userId);
+
+        return response()->json([
+            'success' => true,
+            'data' => $account ? new InstagramAccountResource($account) : null,
         ]);
     }
 
