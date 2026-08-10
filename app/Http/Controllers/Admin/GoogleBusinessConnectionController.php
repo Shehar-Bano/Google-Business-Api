@@ -24,20 +24,13 @@ class GoogleBusinessConnectionController extends Controller
             ? $request->string('direction', 'asc')->toString() : 'asc';
 
         $search = trim($request->string('search')->toString());
-        $location = trim($request->string('location')->toString());
         $isVerified = $request->input('is_verified');
 
         // Get businesses with keywords and user context
         $connections = Business::query()
             ->with(['user.socialAccounts', 'keywordIdeas'])
             ->when($search !== '', function ($query) use ($search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%")
-                      ->orWhere('location', 'like', "%{$search}%");
-                });
-            })
-            ->when($location !== '', function ($query) use ($location) {
-                $query->where('location', 'like', "%{$location}%");
+                $query->where('name', 'like', "%{$search}%");
             })
             ->when($isVerified !== null && $isVerified !== '', function ($query) use ($isVerified) {
                 $query->where('isVerified', $isVerified);
@@ -46,6 +39,6 @@ class GoogleBusinessConnectionController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
-        return view('content.admin.google-business.connections', compact('connections', 'search', 'perPage', 'sort', 'direction', 'location', 'isVerified'));
+        return view('content.admin.google-business.connections', compact('connections', 'search', 'perPage', 'sort', 'direction', 'isVerified'));
     }
 }

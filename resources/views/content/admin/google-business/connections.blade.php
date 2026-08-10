@@ -35,7 +35,7 @@
                     <div class="input-group input-group-merge border-primary">
                         <span class="input-group-text"><i class="mdi mdi-magnify text-primary"></i></span>
                         <input type="text" name="search" id="global-search-input" value="{{ $search }}"
-                            class="form-control" placeholder="Type anything to search globally (Name, Location)..." autocomplete="off">
+                            class="form-control" placeholder="Type anything to search globally (Name)..." autocomplete="off">
                     </div>
                     <small class="form-text text-muted">Type to search. Filtering happens automatically as you type.</small>
                 </div>
@@ -44,11 +44,7 @@
                 <div class="border p-3 rounded mb-4 bg-light">
                     <h6 class="mb-3 fw-bold"><i class="mdi mdi-filter-variant me-1"></i> Filter Options</h6>
                     <div class="row g-3 align-items-end">
-                        <div class="col-12 col-md-5">
-                            <label class="form-label fw-medium">Location</label>
-                            <input type="text" name="location" value="{{ $location ?? '' }}" class="form-control" placeholder="Filter by location...">
-                        </div>
-                        <div class="col-12 col-md-5">
+                        <div class="col-12 col-md-10">
                             <label class="form-label fw-medium">Verification Status</label>
                             <select name="is_verified" class="form-select">
                                 <option value="">All Connections</option>
@@ -62,7 +58,7 @@
                             </button>
                         </div>
                     </div>
-                    @if(filled($location) || ($isVerified !== null && $isVerified !== ''))
+                    @if($isVerified !== null && $isVerified !== '')
                         <div class="mt-2 text-end">
                             <a href="{{ route('admin.google-business-connections.index') }}" class="btn btn-sm btn-outline-secondary">
                                 <i class="mdi mdi-refresh"></i> Reset Filters
@@ -118,7 +114,6 @@
                                         @endif
                                         <div>
                                             <div class="cell-primary fw-semibold">{{ $connection->name }}</div>
-                                            <small class="text-muted">{{ $connection->location }}</small>
                                         </div>
                                     </div>
                                 </td>
