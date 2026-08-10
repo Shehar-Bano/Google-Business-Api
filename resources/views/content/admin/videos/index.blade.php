@@ -51,9 +51,6 @@
             </div>
             <div>
                 <span class="badge bg-label-primary"><strong>{{ number_format($videos->total()) }}</strong> records</span>
-                <a href="{{ route('admin.videos.create') }}" class="btn btn-sm btn-primary ms-2">
-                    <i class="mdi mdi-plus me-1"></i> Add Video
-                </a>
             </div>
         </div>
         <div class="card-body">
