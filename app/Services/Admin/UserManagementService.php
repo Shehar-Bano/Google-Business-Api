@@ -60,7 +60,7 @@ class UserManagementService
     {
         $stats = ['total' => User::count()];
 
-        foreach (User::ADMIN_STATUSES as $s) {
+        foreach (User::ADMIN_STATS_STATUSES as $s) {
             $stats[$s] = User::where('status', $s)->count();
         }
 

@@ -21,7 +21,7 @@
                     <div class="um-stat-card__value">{{ number_format($stats['total']) }}</div>
                 </div>
             </div>
-            @foreach (\App\Models\User::ADMIN_STATUSES as $s)
+            @foreach (\App\Models\User::ADMIN_STATS_STATUSES as $s)
                 <div class="um-stat-card">
                     <div class="um-stat-card__icon um-stat-card__icon--{{ $s }}">
                         <i class="mdi {{ \App\Models\User::ADMIN_STATUS_ICONS[$s] }}"></i>
