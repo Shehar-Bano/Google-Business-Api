@@ -55,7 +55,7 @@
                 <div class="dash-stat-card__value">{{ number_format($userStats['total']) }}</div>
             </div>
         </div>
-        @foreach (\App\Models\User::ADMIN_STATUSES as $s)
+        @foreach (\App\Models\User::ADMIN_STATS_STATUSES as $s)
             <div class="dash-stat-card dash-stat-card--user-{{ $s }}">
                 <div class="dash-stat-card__icon"><i class="mdi {{ \App\Models\User::ADMIN_STATUS_ICONS[$s] }}"></i></div>
                 <div>
