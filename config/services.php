@@ -81,4 +81,13 @@ return [
         'provider' => env('WHATSAPP_PROVIDER', 'log'),
     ],
 
+    'twilio' => [
+        'sid' => env('TWILIO_SID'),
+        'token' => env('TWILIO_AUTH_TOKEN'),
+        'verify_sid' => env('TWILIO_VERIFY_SID'),
+        'from' => env('TWILIO_PHONE_NUMBER'),
+        'messaging_sid' => env('TWILIO_MESSAGING_SID'),
+        'app_hash' => env('TWILIO_APP_HASH'),
+    ],
+
 ];

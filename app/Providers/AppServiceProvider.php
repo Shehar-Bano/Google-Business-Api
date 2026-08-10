@@ -14,7 +14,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->bind(OtpSenderInterface::class, DummyOtpSender::class);
+        $this->app->bind(OtpSenderInterface::class, function ($app) {
+            if (config('services.twilio.sid') && config('services.twilio.token')) {
+                return $app->make(\App\Services\Otp\Senders\TwilioOtpSender::class);
+            }
+            return $app->make(DummyOtpSender::class);
+        });
+
         $this->app->bind(
             \App\Services\WhatsApp\WhatsAppProviderInterface::class,
             function ($app) {
