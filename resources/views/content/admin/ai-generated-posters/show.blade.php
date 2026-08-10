@@ -106,45 +106,7 @@
                         </div>
                     @endif
 
-                    @if($aiGeneratedPoster->status === 'pending')
-                        <div class="mt-4 border-top pt-3 d-flex gap-2">
-                            <form action="{{ route('admin.ai-generated-posters.approve', $aiGeneratedPoster) }}" method="POST">
-                                @csrf
-                                <button type="submit" class="btn btn-success">
-                                    <i class="mdi mdi-check me-1"></i> Approve Output
-                                </button>
-                            </form>
 
-                            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#rejectDetailModal">
-                                <i class="mdi mdi-close me-1"></i> Reject Output
-                            </button>
-                        </div>
-
-                        {{-- Rejection Modal --}}
-                        <div class="modal fade" id="rejectDetailModal" tabindex="-1" aria-labelledby="rejectDetailModalLabel" aria-hidden="true">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <form action="{{ route('admin.ai-generated-posters.reject', $aiGeneratedPoster) }}" method="POST">
-                                        @csrf
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="rejectDetailModalLabel">Reject AI Poster #{{ $aiGeneratedPoster->id }}</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <div class="mb-3">
-                                                <label class="form-label fw-semibold">Rejection Reason</label>
-                                                <textarea name="rejection_reason" class="form-control" rows="3" placeholder="Explain why this poster was rejected..." required></textarea>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                                            <button type="submit" class="btn btn-danger">Submit Rejection</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    @endif
                 </div>
             </div>
         </div>
