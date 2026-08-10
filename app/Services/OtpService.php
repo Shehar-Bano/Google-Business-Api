@@ -155,6 +155,15 @@ class OtpService
                 $user->assignRole('player');
             }
         } else {
+            // Check if user is suspended
+            if ($user->status === User::STATUS_SUSPENDED) {
+                return [
+                    'success' => false,
+                    'status' => 403,
+                    'message' => 'Your account has been suspended. Please contact support.',
+                ];
+            }
+
             // Update phone if not set
             if (empty($user->phone)) {
                 $user->phone = $mobileNumber;

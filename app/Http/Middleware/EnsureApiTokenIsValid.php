@@ -35,6 +35,15 @@ class EnsureApiTokenIsValid
             ], 401);
         }
 
+        if ($user->status === User::STATUS_SUSPENDED) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Your account has been suspended. Please contact support.',
+                'error_code' => 'ACCOUNT_SUSPENDED',
+                'errors' => new \stdClass(),
+            ], 403);
+        }
+
         $request->setUserResolver(fn () => $user);
 
         return $next($request);

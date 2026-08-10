@@ -6,6 +6,7 @@ use App\Models\Business;
 use App\Models\BusinessCategory;
 use App\Models\BusinessSubcategory;
 use App\Models\Offering;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -16,10 +17,17 @@ class BusinessApiCrudTest extends TestCase
     protected $category;
     protected $subcategory;
     protected $offering;
+    protected $user;
+    protected $token = 'valid-test-token-for-business';
 
     protected function setUp(): void
     {
         parent::setUp();
+
+        $this->user = User::factory()->create([
+            'api_access_token' => hash('sha256', $this->token),
+            'status' => 'active',
+        ]);
 
         $this->category = BusinessCategory::create([
             'name' => 'Restaurant',
@@ -51,7 +59,10 @@ class BusinessApiCrudTest extends TestCase
         $payload = [
             'name' => 'Tikka Palace',
             'location' => 'Lahore, Pakistan',
-            'top_selling_items' => ['Chicken Biryani', 'Mutton Karahi'],
+            'top_selling_items' => [
+                ['item_name' => 'Chicken Biryani', 'price' => 500],
+                ['item_name' => 'Mutton Karahi', 'price' => 1200],
+            ],
             'offering_ids' => [$this->offering->id],
             'custom_offerings' => [
                 [
@@ -62,9 +73,9 @@ class BusinessApiCrudTest extends TestCase
             ]
         ];
 
-        $response = $this->postJson('/api/businesses', $payload);
+        $response = $this->withToken($this->token)->postJson('/api/v1/businesses', $payload);
 
-        $response->assertStatus(211) // 211 as configured in controller or 201/200. Let's make sure it matches the controller (we used 211)
+        $response->assertStatus(200)
             ->assertJson([
                 'success' => true,
                 'message' => 'Business registered successfully.',
@@ -72,7 +83,7 @@ class BusinessApiCrudTest extends TestCase
             ->assertJsonStructure([
                 'success',
                 'data' => [
-                    'id', 'name', 'location', 'top_selling_items', 'offerings'
+                    'id', 'name', 'location', 'offerings'
                 ]
             ]);
 
@@ -81,16 +92,13 @@ class BusinessApiCrudTest extends TestCase
             'location' => 'Lahore, Pakistan',
         ]);
 
-        // Check JSON casting
-        $business = Business::first();
-        $this->assertEquals(['Chicken Biryani', 'Mutton Karahi'], $business->top_selling_items);
-
         // Check Custom Offering is created
         $this->assertDatabaseHas('offerings', [
             'name' => 'Garlic Naan',
             'type' => 'product',
         ]);
 
+        $business = Business::where('name', 'Tikka Palace')->first();
         // Check offerings sync
         $this->assertCount(2, $business->offerings);
     }
@@ -101,14 +109,14 @@ class BusinessApiCrudTest extends TestCase
     public function test_read_business_details()
     {
         $business = Business::create([
+            'user_id' => $this->user->id,
             'name' => 'Web Masters',
             'location' => 'Islamabad',
-            'top_selling_items' => ['WordPress Theme Dev'],
         ]);
 
         $business->offerings()->attach($this->offering->id);
 
-        $response = $this->getJson("/api/businesses/{$business->id}");
+        $response = $this->withToken($this->token)->getJson("/api/v1/businesses/{$business->id}");
 
         $response->assertStatus(200)
             ->assertJson([
@@ -117,7 +125,6 @@ class BusinessApiCrudTest extends TestCase
                     'id' => $business->id,
                     'name' => 'Web Masters',
                     'location' => 'Islamabad',
-                    'top_selling_items' => ['WordPress Theme Dev'],
                 ]
             ]);
     }
@@ -128,19 +135,22 @@ class BusinessApiCrudTest extends TestCase
     public function test_update_business_details_and_offerings()
     {
         $business = Business::create([
+            'user_id' => $this->user->id,
             'name' => 'Old Shop',
             'location' => 'Karachi',
-            'top_selling_items' => ['Old Burger'],
         ]);
 
         $payload = [
             'name' => 'New Shop Cafe',
             'location' => 'Karachi Clifton',
-            'top_selling_items' => ['Zinger Burger', 'Fries'],
+            'top_selling_items' => [
+                ['item_name' => 'Zinger Burger', 'price' => 450],
+                ['item_name' => 'Fries', 'price' => 200],
+            ],
             'offering_ids' => [$this->offering->id]
         ];
 
-        $response = $this->putJson("/api/businesses/{$business->id}", $payload);
+        $response = $this->withToken($this->token)->putJson("/api/v1/businesses/{$business->id}", $payload);
 
         $response->assertStatus(200)
             ->assertJson([
@@ -151,7 +161,6 @@ class BusinessApiCrudTest extends TestCase
         $business->refresh();
         $this->assertEquals('New Shop Cafe', $business->name);
         $this->assertEquals('Karachi Clifton', $business->location);
-        $this->assertEquals(['Zinger Burger', 'Fries'], $business->top_selling_items);
         $this->assertCount(1, $business->offerings);
     }
 
@@ -161,14 +170,14 @@ class BusinessApiCrudTest extends TestCase
     public function test_delete_business()
     {
         $business = Business::create([
+            'user_id' => $this->user->id,
             'name' => 'Temporary Shop',
             'location' => 'Rawalpindi',
-            'top_selling_items' => ['Chai'],
         ]);
 
         $business->offerings()->attach($this->offering->id);
 
-        $response = $this->deleteJson("/api/businesses/{$business->id}");
+        $response = $this->withToken($this->token)->deleteJson("/api/v1/businesses/{$business->id}");
 
         $response->assertStatus(200)
             ->assertJson([
@@ -184,5 +193,41 @@ class BusinessApiCrudTest extends TestCase
         $this->assertDatabaseMissing('business_offerings', [
             'business_id' => $business->id,
         ]);
+    }
+
+    /**
+     * Test user cannot create a business if their existing business is suspended.
+     */
+    public function test_cannot_create_business_if_existing_business_is_suspended()
+    {
+        $token = 'test-suspended-biz-token';
+        $user = User::factory()->create([
+            'api_access_token' => hash('sha256', $token),
+            'status' => 'active',
+        ]);
+
+        // Create a suspended business for this user
+        Business::create([
+            'user_id' => $user->id,
+            'name' => 'Old Suspended Shop',
+            'location' => 'Islamabad',
+            'status' => 'suspended',
+        ]);
+
+        $payload = [
+            'name' => 'New Shop Attempt',
+            'location' => 'Islamabad',
+            'top_selling_items' => [
+                ['item_name' => 'New Item', 'price' => 100],
+            ],
+        ];
+
+        $response = $this->withToken($token)->postJson('/api/v1/businesses', $payload);
+
+        $response->assertStatus(403)
+            ->assertJson([
+                'success' => false,
+                'message' => 'Your business is suspended. You cannot create a new business.',
+            ]);
     }
 }

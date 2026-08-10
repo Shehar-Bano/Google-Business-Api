@@ -66,17 +66,20 @@ class BusinessController extends Controller
             ], 422);
         }
 
-        // Check if user already owns a business
+        // Check if user has any suspended business
         $userId = $request->user()?->id;
-        // if ($userId) {
-        //     $existingBusiness = Business::where('user_id', $userId)->first();
-        //     if ($existingBusiness) {
-        //         return response()->json([
-        //             'success' => false,
-        //             'message' => 'User business already exist.',
-        //         ], 422);
-        //     }
-        // }
+        if ($userId) {
+            $hasSuspendedBusiness = Business::where('user_id', $userId)
+                ->where('status', 'suspended')
+                ->exists();
+
+            if ($hasSuspendedBusiness) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Your business is suspended. You cannot create a new business.',
+                ], 403);
+            }
+        }
 
         DB::beginTransaction();
 

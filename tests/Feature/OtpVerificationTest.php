@@ -15,7 +15,7 @@ class OtpVerificationTest extends TestCase
      */
     public function test_send_otp_validation_fails_without_mobile_number(): void
     {
-        $response = $this->postJson('/api/send-otp', []);
+        $response = $this->postJson('/api/v1/auth/send-otp', []);
 
         $response->assertStatus(422)
             ->assertJson([
@@ -30,7 +30,7 @@ class OtpVerificationTest extends TestCase
      */
     public function test_send_otp_succeeds_with_mobile_number(): void
     {
-        $response = $this->postJson('/api/send-otp', [
+        $response = $this->postJson('/api/v1/auth/send-otp', [
             'mobile_number' => '+923001234567',
         ]);
 
@@ -63,7 +63,7 @@ class OtpVerificationTest extends TestCase
     public function test_send_otp_replaces_unexpired_otp_for_same_mobile_number(): void
     {
         // First OTP request
-        $response1 = $this->postJson('/api/send-otp', [
+        $response1 = $this->postJson('/api/v1/auth/send-otp', [
             'mobile_number' => '+923001234567',
         ]);
         $otp1 = $response1->json('otp');
@@ -72,7 +72,7 @@ class OtpVerificationTest extends TestCase
         $this->assertEquals(1, Otp::count());
 
         // Second OTP request within 30 seconds
-        $response2 = $this->postJson('/api/send-otp', [
+        $response2 = $this->postJson('/api/v1/auth/send-otp', [
             'mobile_number' => '+923001234567',
         ]);
         $otp2 = $response2->json('otp');
@@ -96,7 +96,7 @@ class OtpVerificationTest extends TestCase
      */
     public function test_verify_otp_validation_fails_without_required_fields(): void
     {
-        $response = $this->postJson('/api/verify-otp', []);
+        $response = $this->postJson('/api/v1/auth/verify-otp', []);
 
         $response->assertStatus(422)
             ->assertJson([
@@ -111,12 +111,12 @@ class OtpVerificationTest extends TestCase
      */
     public function test_verify_otp_succeeds_with_correct_otp(): void
     {
-        $sendResponse = $this->postJson('/api/send-otp', [
+        $sendResponse = $this->postJson('/api/v1/auth/send-otp', [
             'mobile_number' => '+923001234567',
         ]);
         $otp = $sendResponse->json('otp');
 
-        $verifyResponse = $this->postJson('/api/verify-otp', [
+        $verifyResponse = $this->postJson('/api/v1/auth/verify-otp', [
             'mobile_number' => '+923001234567',
             'otp' => $otp,
         ]);
@@ -139,11 +139,11 @@ class OtpVerificationTest extends TestCase
      */
     public function test_verify_otp_fails_with_incorrect_otp(): void
     {
-        $this->postJson('/api/send-otp', [
+        $this->postJson('/api/v1/auth/send-otp', [
             'mobile_number' => '+923001234567',
         ]);
 
-        $verifyResponse = $this->postJson('/api/verify-otp', [
+        $verifyResponse = $this->postJson('/api/v1/auth/verify-otp', [
             'mobile_number' => '+923001234567',
             'otp' => '9999', // Incorrect OTP
         ]);
@@ -160,7 +160,7 @@ class OtpVerificationTest extends TestCase
      */
     public function test_verify_otp_fails_if_otp_is_expired(): void
     {
-        $sendResponse = $this->postJson('/api/send-otp', [
+        $sendResponse = $this->postJson('/api/v1/auth/send-otp', [
             'mobile_number' => '+923001234567',
         ]);
         $otp = $sendResponse->json('otp');
@@ -170,7 +170,7 @@ class OtpVerificationTest extends TestCase
             'expires_at' => now()->subSecond(),
         ]);
 
-        $verifyResponse = $this->postJson('/api/verify-otp', [
+        $verifyResponse = $this->postJson('/api/v1/auth/verify-otp', [
             'mobile_number' => '+923001234567',
             'otp' => $otp,
         ]);
@@ -187,19 +187,19 @@ class OtpVerificationTest extends TestCase
      */
     public function test_otp_cannot_be_reused(): void
     {
-        $sendResponse = $this->postJson('/api/send-otp', [
+        $sendResponse = $this->postJson('/api/v1/auth/send-otp', [
             'mobile_number' => '+923001234567',
         ]);
         $otp = $sendResponse->json('otp');
 
         // First verification (success)
-        $this->postJson('/api/verify-otp', [
+        $this->postJson('/api/v1/auth/verify-otp', [
             'mobile_number' => '+923001234567',
             'otp' => $otp,
         ])->assertStatus(200);
 
         // Second verification (should fail since it is already verified)
-        $verifyResponse = $this->postJson('/api/verify-otp', [
+        $verifyResponse = $this->postJson('/api/v1/auth/verify-otp', [
             'mobile_number' => '+923001234567',
             'otp' => $otp,
         ]);
@@ -217,13 +217,13 @@ class OtpVerificationTest extends TestCase
     public function test_resend_otp_invalidates_previous_otp_and_sends_new_one(): void
     {
         // First OTP request
-        $response1 = $this->postJson('/api/send-otp', [
+        $response1 = $this->postJson('/api/v1/auth/send-otp', [
             'mobile_number' => '+923001234567',
         ]);
         $otp1 = $response1->json('otp');
 
         // Resend OTP request
-        $response2 = $this->postJson('/api/resend-otp', [
+        $response2 = $this->postJson('/api/v1/auth/resend-otp', [
             'mobile_number' => '+923001234567',
         ]);
         $otp2 = $response2->json('otp');
@@ -238,15 +238,43 @@ class OtpVerificationTest extends TestCase
         $this->assertNotEquals($otp1, $otp2);
 
         // Try verifying with the old OTP (should fail)
-        $this->postJson('/api/verify-otp', [
+        $this->postJson('/api/v1/auth/verify-otp', [
             'mobile_number' => '+923001234567',
             'otp' => $otp1,
         ])->assertStatus(422);
 
         // Try verifying with the new OTP (should succeed)
-        $this->postJson('/api/verify-otp', [
+        $this->postJson('/api/v1/auth/verify-otp', [
             'mobile_number' => '+923001234567',
             'otp' => $otp2,
         ])->assertStatus(200);
+    }
+
+    /**
+     * Test verification fails if user is suspended.
+     */
+    public function test_verify_otp_fails_if_user_is_suspended(): void
+    {
+        $user = \App\Models\User::create([
+            'phone' => '+923009998888',
+            'status' => \App\Models\User::STATUS_SUSPENDED,
+            'role' => 'user',
+        ]);
+
+        $sendResponse = $this->postJson('/api/v1/auth/send-otp', [
+            'mobile_number' => '+923009998888',
+        ]);
+        $otp = $sendResponse->json('otp');
+
+        $verifyResponse = $this->postJson('/api/v1/auth/verify-otp', [
+            'mobile_number' => '+923009998888',
+            'otp' => $otp,
+        ]);
+
+        $verifyResponse->assertStatus(403)
+            ->assertJson([
+                'success' => false,
+                'message' => 'Your account has been suspended. Please contact support.',
+            ]);
     }
 }
