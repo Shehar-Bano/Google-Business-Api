@@ -45,12 +45,7 @@ class TwilioOtpSender implements OtpSenderInterface
         try {
             $from = config('services.twilio.from');
             $messagingSid = config('services.twilio.messaging_sid');
-            $appHash = config('services.twilio.app_hash');
-
             $body = "Your verification code is: {$otp}";
-            if (!empty($appHash)) {
-                $body .= "\n" . trim($appHash, "'\"");
-            }
 
             $messagePayload = [
                 'body' => $body,
