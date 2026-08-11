@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Repositories\SocialAccountRepository;
 use App\Models\SocialAccount;
+use App\Models\SocialPage;
 use Illuminate\Support\Facades\Log;
 
 class FacebookService
