@@ -132,18 +132,25 @@ class AiGeneratedPosterService
     }
 
     /**
-     * Approve AI Poster and publish to connected social pages (Facebook Page).
+     * Approve AI Poster and publish to connected social pages (Facebook Page) immediately or on scheduled date.
      */
-    public function approvePoster(AiGeneratedPoster $poster, int $adminId): bool
+    public function approvePoster(AiGeneratedPoster $poster, int $adminId, ?\Carbon\Carbon $scheduledAt = null): bool
     {
+        $isScheduled = $scheduledAt && $scheduledAt->isFuture();
+
         $updated = $this->aiPosterRepo->update($poster, [
             'status' => 'approved',
             'approved_by' => $adminId,
             'approved_at' => now(),
+            'scheduled_at' => $isScheduled ? $scheduledAt : now(),
         ]);
 
         if ($updated) {
-            $this->publishToSocialMedia($poster);
+            if ($isScheduled) {
+                \App\Jobs\PublishPosterToSocialMedia::dispatch($poster->id)->delay($scheduledAt);
+            } else {
+                $this->publishToSocialMedia($poster);
+            }
         }
 
         return $updated;
@@ -159,7 +166,15 @@ class AiGeneratedPosterService
             $caption = $poster->generated_caption ?: ($poster->generated_title ?: $poster->prompt);
             $imagePath = $poster->generated_image;
 
-            return $facebookService->publishPost($poster->user_id, $caption, $imagePath);
+            $result = $facebookService->publishPost($poster->user_id, $caption, $imagePath);
+            if ($result && ! empty($result['id'])) {
+                $poster->update([
+                    'published_at' => now(),
+                    'social_post_id' => $result['id'],
+                ]);
+            }
+
+            return $result;
         } catch (\Throwable $e) {
             Log::error("Failed to auto-publish approved poster #{$poster->id} to social media: " . $e->getMessage());
             return null;

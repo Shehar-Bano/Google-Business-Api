@@ -26,10 +26,15 @@ class AiGeneratedPoster extends Model
         'rejection_reason',
         'approved_by',
         'approved_at',
+        'scheduled_at',
+        'published_at',
+        'social_post_id',
     ];
 
     protected $casts = [
         'approved_at' => 'datetime',
+        'scheduled_at' => 'datetime',
+        'published_at' => 'datetime',
     ];
 
     /**

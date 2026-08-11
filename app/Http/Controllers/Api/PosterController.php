@@ -167,17 +167,59 @@ class PosterController extends Controller
             ], 404);
         }
 
+        // Check if date and/or time are provided in the request
+        $scheduledAt = null;
+        if ($request->filled('scheduled_at')) {
+            try {
+                $scheduledAt = \Carbon\Carbon::parse($request->input('scheduled_at'));
+            } catch (\Throwable $e) {}
+        } elseif ($request->filled('scheduled_date')) {
+            $time = $request->input('scheduled_time', '00:00:00');
+            try {
+                $scheduledAt = \Carbon\Carbon::parse($request->input('scheduled_date') . ' ' . $time);
+            } catch (\Throwable $e) {}
+        } elseif ($request->filled('date')) {
+            $time = $request->input('time', '00:00:00');
+            try {
+                $scheduledAt = \Carbon\Carbon::parse($request->input('date') . ' ' . $time);
+            } catch (\Throwable $e) {}
+        }
+
+        $isScheduled = $scheduledAt && $scheduledAt->isFuture();
+
         $generated->update([
             'status' => 'approved',
             'approved_by' => $user->id,
             'approved_at' => now(),
+            'scheduled_at' => $isScheduled ? $scheduledAt : now(),
         ]);
 
+        if ($isScheduled) {
+            // Queue Job dispatched with delay for scheduled time
+            \App\Jobs\PublishPosterToSocialMedia::dispatch($generated->id)->delay($scheduledAt);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Poster approved and scheduled for publishing at ' . $scheduledAt->format('Y-m-d H:i:s') . '.',
+                'data' => $generated->fresh(),
+                'is_scheduled' => true,
+                'scheduled_at' => $scheduledAt->format('Y-m-d H:i:s'),
+            ]);
+        }
+
+        // Immediate publishing (Now)
         $publishResult = null;
         try {
             $facebookService = app(\App\Services\FacebookService::class);
             $caption = $generated->generated_caption ?: ($generated->generated_title ?: $generated->prompt);
             $publishResult = $facebookService->publishPost($generated->user_id, $caption, $generated->generated_image);
+
+            if ($publishResult && ! empty($publishResult['id'])) {
+                $generated->update([
+                    'published_at' => now(),
+                    'social_post_id' => $publishResult['id'],
+                ]);
+            }
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::error("Social auto-publish failed on poster approve: " . $e->getMessage());
         }
@@ -186,7 +228,8 @@ class PosterController extends Controller
             'success' => true,
             'message' => 'Poster approved and published successfully.',
             'data' => $generated->fresh(),
-            'social_published' => !empty($publishResult),
+            'is_scheduled' => false,
+            'social_published' => ! empty($publishResult),
             'social_publish_data' => $publishResult,
         ]);
     }

@@ -47,13 +47,24 @@ class AiGeneratedPosterController extends Controller
     /**
      * Approve AI Generated Poster.
      */
-    public function approve(AiGeneratedPoster $aiGeneratedPoster)
+    public function approve(Request $request, AiGeneratedPoster $aiGeneratedPoster)
     {
         $adminId = auth()->id();
-        $this->aiPosterService->approvePoster($aiGeneratedPoster, $adminId);
+        $scheduledAt = null;
+        if ($request->filled('scheduled_at')) {
+            try {
+                $scheduledAt = \Carbon\Carbon::parse($request->input('scheduled_at'));
+            } catch (\Throwable $e) {}
+        }
+
+        $this->aiPosterService->approvePoster($aiGeneratedPoster, $adminId, $scheduledAt);
+
+        $msg = $scheduledAt && $scheduledAt->isFuture()
+            ? "AI Generated Poster approved and scheduled for {$scheduledAt->format('Y-m-d H:i')}."
+            : 'AI Generated Poster approved and published successfully.';
 
         return redirect()->route('admin.ai-generated-posters.index')
-            ->with('success', 'AI Generated Poster approved successfully.');
+            ->with('success', $msg);
     }
 
     /**
