@@ -36,6 +36,11 @@ class FacebookService
         $pages = $this->metaGraphService->fetchPages($facebookUser['token']);
         $this->socialAccountRepo->syncPages($socialAccount, $pages);
 
+        // Auto-connect the first page if none is currently connected
+        if (!empty($pages) && !$this->socialAccountRepo->getConnectedPage($userId)) {
+            $this->socialAccountRepo->connectPage($userId, $pages[0]['page_id']);
+        }
+
         // 3. For every page, detect and auto-connect linked Instagram accounts
         foreach ($pages as $page) {
             $igAccount = $this->metaGraphService->fetchLinkedInstagramAccount($page['page_id'], $page['page_access_token']);

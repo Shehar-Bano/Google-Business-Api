@@ -42,9 +42,11 @@ class MetaGraphService
             }
 
             $data = $response->json();
-            $pages = [];
+            $rawPages = $data['data'] ?? [];
+            Log::info('Meta Graph API fetched pages count: ' . count($rawPages), ['pages' => $rawPages]);
 
-            foreach ($data['data'] ?? [] as $item) {
+            $pages = [];
+            foreach ($rawPages as $item) {
                 $pages[] = [
                     'page_id' => $item['id'],
                     'page_name' => $item['name'],

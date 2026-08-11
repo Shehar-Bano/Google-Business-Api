@@ -162,11 +162,13 @@ class SocialConnectionController extends Controller
             ];
 
             $socialAccount = $this->facebookService->connectAccount($userId, $facebookUser);
+            $pages = $this->facebookService->getPages($userId);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Facebook and linked Instagram connected successfully.',
                 'account_id' => $socialAccount->id,
+                'pages' => SocialPageResource::collection($pages),
             ]);
 
         } catch (\Exception $e) {
@@ -242,9 +244,18 @@ class SocialConnectionController extends Controller
      * Get Facebook OAuth redirect URL.
      * GET /api/social/facebook/redirect-url
      */
-    public function facebookRedirectUrl(): JsonResponse
+    public function facebookRedirectUrl(Request $request): JsonResponse
     {
-        $url = Socialite::driver('facebook')
+        $userId = $request->user()?->id;
+        if (! $userId && $request->bearerToken()) {
+            $hashed = hash('sha256', $request->bearerToken());
+            $userId = \App\Models\User::where('api_access_token', $hashed)->value('id');
+        }
+        if (! $userId && $request->has('user_id')) {
+            $userId = (int) $request->input('user_id');
+        }
+
+        $driver = Socialite::driver('facebook')
             ->scopes([
                 'email',
                 'public_profile',
@@ -253,9 +264,17 @@ class SocialConnectionController extends Controller
                 'pages_manage_posts',
                 'business_management',
             ])
-            ->stateless()
-            ->redirect()
-            ->getTargetUrl();
+            ->stateless();
+
+        if ($userId) {
+            $state = Crypt::encryptString(json_encode([
+                'user_id' => $userId,
+                'platform' => 'facebook',
+            ]));
+            $driver->with(['state' => $state]);
+        }
+
+        $url = $driver->redirect()->getTargetUrl();
 
         return response()->json([
             'success' => true,
@@ -267,9 +286,18 @@ class SocialConnectionController extends Controller
      * Get Instagram OAuth redirect URL.
      * GET /api/social/instagram/redirect-url
      */
-    public function instagramRedirectUrl(): JsonResponse
+    public function instagramRedirectUrl(Request $request): JsonResponse
     {
-        $url = Socialite::driver('facebook')
+        $userId = $request->user()?->id;
+        if (! $userId && $request->bearerToken()) {
+            $hashed = hash('sha256', $request->bearerToken());
+            $userId = \App\Models\User::where('api_access_token', $hashed)->value('id');
+        }
+        if (! $userId && $request->has('user_id')) {
+            $userId = (int) $request->input('user_id');
+        }
+
+        $driver = Socialite::driver('facebook')
             ->scopes([
                 'email',
                 'public_profile',
@@ -279,9 +307,17 @@ class SocialConnectionController extends Controller
                 'instagram_basic',
                 'instagram_content_publish',
             ])
-            ->stateless()
-            ->redirect()
-            ->getTargetUrl();
+            ->stateless();
+
+        if ($userId) {
+            $state = Crypt::encryptString(json_encode([
+                'user_id' => $userId,
+                'platform' => 'instagram',
+            ]));
+            $driver->with(['state' => $state]);
+        }
+
+        $url = $driver->redirect()->getTargetUrl();
 
         return response()->json([
             'success' => true,

@@ -82,7 +82,7 @@ Route::prefix('v1')->group(function () {
 
     Route::middleware('api.token')->group(function () {
         Route::get('social/facebook/connect', [App\Http\Controllers\Api\SocialConnectionController::class, 'facebookConnect']);
-        // Route::post('social/facebook/connect-token', [App\Http\Controllers\Api\SocialConnectionController::class, 'facebookConnectToken']);
+        Route::post('social/facebook/connect-token', [App\Http\Controllers\Api\SocialConnectionController::class, 'facebookConnectToken']);
         Route::get('social/accounts', [App\Http\Controllers\Api\SocialConnectionController::class, 'status']);
         Route::delete('social/facebook/disconnect', [App\Http\Controllers\Api\SocialConnectionController::class, 'disconnectFacebook']);
 
