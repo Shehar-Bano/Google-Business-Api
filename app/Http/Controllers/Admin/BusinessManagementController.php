@@ -53,7 +53,13 @@ class BusinessManagementController extends Controller
                 $query->where('name', 'like', "%{$businessName}%");
             })
             ->when($status !== '', function ($query) use ($status) {
-                $query->where('status', $status);
+                if ($status === 'approved') {
+                    $query->where(function ($q) {
+                        $q->where('status', 'approved')->orWhereNull('status');
+                    });
+                } else {
+                    $query->where('status', $status);
+                }
             })
             ->when($location !== '', function ($query) use ($location) {
                 $query->where('location', 'like', "%{$location}%");

@@ -68,9 +68,15 @@ class DashboardController extends Controller
                 $posterQuery->whereBetween('created_at', [$start, $end]);
                 $keywordQuery->whereBetween('created_at', [$start, $end]);
             }
+
+            $sampleBusinessId = \App\Models\BusinessKeywordIdea::latest()->value('business_id')
+                ?? \App\Models\Business::value('id')
+                ?? 1;
+
             $aiStats = [
                 'total_generated_posters' => $posterQuery->count(),
                 'total_keywords' => $keywordQuery->count(),
+                'sample_business_id' => $sampleBusinessId,
             ];
 
             // Chart Data

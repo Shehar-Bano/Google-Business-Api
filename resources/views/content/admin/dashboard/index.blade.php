@@ -48,21 +48,21 @@
         <h5 class="dash-section-title"><i class="mdi mdi-account-group-outline me-2 text-primary"></i>User Statistics</h5>
     </div>
     <div class="dash-stats-grid mb-4">
-        <div class="dash-stat-card dash-stat-card--primary">
+        <a href="{{ route('admin.user-management.index') }}" class="dash-stat-card dash-stat-card--primary">
             <div class="dash-stat-card__icon"><i class="mdi mdi-account-multiple"></i></div>
             <div>
                 <div class="dash-stat-card__label">Total Users</div>
                 <div class="dash-stat-card__value">{{ number_format($userStats['total']) }}</div>
             </div>
-        </div>
+        </a>
         @foreach (\App\Models\User::ADMIN_STATS_STATUSES as $s)
-            <div class="dash-stat-card dash-stat-card--user-{{ $s }}">
+            <a href="{{ route('admin.user-management.index', ['status' => $s]) }}" class="dash-stat-card dash-stat-card--user-{{ $s }}">
                 <div class="dash-stat-card__icon"><i class="mdi {{ \App\Models\User::ADMIN_STATUS_ICONS[$s] }}"></i></div>
                 <div>
                     <div class="dash-stat-card__label">{{ \App\Models\User::ADMIN_STATUS_LABELS[$s] }}</div>
                     <div class="dash-stat-card__value">{{ number_format($userStats[$s] ?? 0) }}</div>
                 </div>
-            </div>
+            </a>
         @endforeach
     </div>
 
@@ -75,27 +75,27 @@
                     Statistics</h5>
             </div>
             <div class="dash-stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));">
-                <div class="dash-stat-card dash-stat-card--primary">
+                <a href="{{ route('admin.business-management.index') }}" class="dash-stat-card dash-stat-card--primary">
                     <div class="dash-stat-card__icon"><i class="mdi mdi-briefcase"></i></div>
                     <div>
                         <div class="dash-stat-card__label">Total Businesses</div>
                         <div class="dash-stat-card__value">{{ number_format($businessStats['total']) }}</div>
                     </div>
-                </div>
-                <div class="dash-stat-card dash-stat-card--user-active">
+                </a>
+                <a href="{{ route('admin.business-management.index', ['status' => 'approved']) }}" class="dash-stat-card dash-stat-card--user-active">
                     <div class="dash-stat-card__icon"><i class="mdi mdi-check-circle-outline"></i></div>
                     <div>
                         <div class="dash-stat-card__label">Approved</div>
                         <div class="dash-stat-card__value">{{ number_format($businessStats['approved']) }}</div>
                     </div>
-                </div>
-                <div class="dash-stat-card dash-stat-card--user-rejected">
+                </a>
+                <a href="{{ route('admin.business-management.index', ['status' => 'suspended']) }}" class="dash-stat-card dash-stat-card--user-rejected">
                     <div class="dash-stat-card__icon"><i class="mdi mdi-lock-outline"></i></div>
                     <div>
                         <div class="dash-stat-card__label">Suspended</div>
                         <div class="dash-stat-card__value">{{ number_format($businessStats['suspended']) }}</div>
                     </div>
-                </div>
+                </a>
             </div>
         </div>
 
@@ -107,7 +107,7 @@
             <h5 class="dash-section-title"><i class="mdi mdi-robot-outline me-2 text-primary"></i>AI Integration Stats</h5>
         </div>
         <div class="dash-stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));">
-            <div class="dash-stat-card"
+            <a href="{{ route('admin.ai-generated-posters.index') }}" class="dash-stat-card"
                 style="background: linear-gradient(180deg, #ffffff 0%, #f5f3ff 100%); border-color: #ddd6fe;">
                 <div class="dash-stat-card__icon" style="background: #f3e8ff; color: #7c3aed;"><i
                         class="mdi mdi-image-multiple"></i></div>
@@ -116,8 +116,8 @@
                     <div class="dash-stat-card__value" style="color: #4c1d95;">
                         {{ number_format($aiStats['total_generated_posters']) }}</div>
                 </div>
-            </div>
-            <div class="dash-stat-card"
+            </a>
+            <a href="{{ route('admin.business-management.index') }}" class="dash-stat-card"
                 style="background: linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%); border-color: #bbf7d0;">
                 <div class="dash-stat-card__icon" style="background: #d1fae5; color: #059669;"><i
                         class="mdi mdi-google-ads"></i></div>
@@ -126,7 +126,7 @@
                     <div class="dash-stat-card__value" style="color: #064e3b;">
                         {{ number_format($aiStats['total_keywords']) }}</div>
                 </div>
-            </div>
+            </a>
         </div>
     </div>
 
@@ -252,6 +252,17 @@
             align-items: center;
             gap: 0.9rem;
             box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+            text-decoration: none !important;
+            color: inherit !important;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .dash-stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 14px 28px rgba(15, 23, 42, 0.1);
+            border-color: #cbd5e1;
+            color: inherit !important;
         }
 
         .dash-stat-card__icon {
