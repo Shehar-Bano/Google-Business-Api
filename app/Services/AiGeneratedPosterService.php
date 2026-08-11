@@ -132,15 +132,38 @@ class AiGeneratedPosterService
     }
 
     /**
-     * Approve AI Poster.
+     * Approve AI Poster and publish to connected social pages (Facebook Page).
      */
     public function approvePoster(AiGeneratedPoster $poster, int $adminId): bool
     {
-        return $this->aiPosterRepo->update($poster, [
+        $updated = $this->aiPosterRepo->update($poster, [
             'status' => 'approved',
             'approved_by' => $adminId,
             'approved_at' => now(),
         ]);
+
+        if ($updated) {
+            $this->publishToSocialMedia($poster);
+        }
+
+        return $updated;
+    }
+
+    /**
+     * Publish approved poster to connected social channels (Facebook Page).
+     */
+    public function publishToSocialMedia(AiGeneratedPoster $poster): ?array
+    {
+        try {
+            $facebookService = app(\App\Services\FacebookService::class);
+            $caption = $poster->generated_caption ?: ($poster->generated_title ?: $poster->prompt);
+            $imagePath = $poster->generated_image;
+
+            return $facebookService->publishPost($poster->user_id, $caption, $imagePath);
+        } catch (\Throwable $e) {
+            Log::error("Failed to auto-publish approved poster #{$poster->id} to social media: " . $e->getMessage());
+            return null;
+        }
     }
 
     /**

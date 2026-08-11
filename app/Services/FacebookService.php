@@ -87,4 +87,23 @@ class FacebookService
     {
         return $this->socialAccountRepo->disconnectPage($userId);
     }
+
+    /**
+     * Publish an approved poster image and caption to the user's connected Facebook Page.
+     */
+    public function publishPost(int $userId, string $caption, ?string $imagePath): ?array
+    {
+        $page = $this->getConnectedPage($userId) ?? $this->getPages($userId)->first();
+        if (!$page) {
+            Log::warning("FacebookService publishPost skipped: No connected or available Facebook Page found for User ID {$userId}");
+            return null;
+        }
+
+        return $this->metaGraphService->publishPagePhoto(
+            $page->page_id,
+            $page->page_access_token,
+            $caption,
+            $imagePath
+        );
+    }
 }

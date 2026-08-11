@@ -113,4 +113,71 @@ class MetaGraphService
             return null;
         }
     }
+
+    /**
+     * Publish a photo post to a Facebook Page.
+     * Graph API: POST /{page-id}/photos
+     */
+    public function publishPagePhoto(string $pageId, string $pageAccessToken, ?string $caption, ?string $imagePath): ?array
+    {
+        try {
+            $url = $this->getUrl("/{$pageId}/photos");
+            $message = $caption ?? '';
+
+            // Resolve file path if relative
+            $resolvedPath = null;
+            if ($imagePath && !filter_var($imagePath, FILTER_VALIDATE_URL)) {
+                $cleanPath = ltrim(str_replace('storage/', '', $imagePath), '/');
+                $candidates = [
+                    public_path($imagePath),
+                    public_path('storage/' . $cleanPath),
+                    storage_path('app/public/' . $cleanPath),
+                ];
+                foreach ($candidates as $cand) {
+                    if (file_exists($cand) && is_file($cand)) {
+                        $resolvedPath = $cand;
+                        break;
+                    }
+                }
+            }
+
+            if ($resolvedPath && file_exists($resolvedPath)) {
+                $response = Http::attach(
+                    'source',
+                    file_get_contents($resolvedPath),
+                    basename($resolvedPath)
+                )->post($url, [
+                    'access_token' => $pageAccessToken,
+                    'message' => $message,
+                ]);
+            } elseif ($imagePath && filter_var($imagePath, FILTER_VALIDATE_URL)) {
+                $response = Http::post($url, [
+                    'access_token' => $pageAccessToken,
+                    'url' => $imagePath,
+                    'message' => $message,
+                ]);
+            } else {
+                // Post to feed without image
+                $feedUrl = $this->getUrl("/{$pageId}/feed");
+                $response = Http::post($feedUrl, [
+                    'access_token' => $pageAccessToken,
+                    'message' => $message,
+                ]);
+            }
+
+            if (!$response->successful()) {
+                Log::error("Meta Graph API publish photo error for page {$pageId}: " . $response->body());
+                return null;
+            }
+
+            $result = $response->json();
+            Log::info("Successfully published post to Facebook Page {$pageId}", $result);
+
+            return $result;
+
+        } catch (\Throwable $e) {
+            Log::error("Meta Graph API publishPagePhoto Exception: " . $e->getMessage());
+            return null;
+        }
+    }
 }

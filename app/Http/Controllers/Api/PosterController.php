@@ -173,10 +173,21 @@ class PosterController extends Controller
             'approved_at' => now(),
         ]);
 
+        $publishResult = null;
+        try {
+            $facebookService = app(\App\Services\FacebookService::class);
+            $caption = $generated->generated_caption ?: ($generated->generated_title ?: $generated->prompt);
+            $publishResult = $facebookService->publishPost($generated->user_id, $caption, $generated->generated_image);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error("Social auto-publish failed on poster approve: " . $e->getMessage());
+        }
+
         return response()->json([
             'success' => true,
-            'message' => 'Poster approved successfully.',
-            'data' => $generated,
+            'message' => 'Poster approved and published successfully.',
+            'data' => $generated->fresh(),
+            'social_published' => !empty($publishResult),
+            'social_publish_data' => $publishResult,
         ]);
     }
 
