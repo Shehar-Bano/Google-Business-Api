@@ -76,7 +76,10 @@ class BusinessManagementController extends Controller
 
         $stats = [
             'total' => Business::count(),
-            'with_offerings' => Business::has('offerings')->count(),
+            'suspended' => Business::where('status', 'suspended')->count(),
+            'approved' => Business::where(function ($q) {
+                $q->where('status', 'approved')->orWhereNull('status');
+            })->count(),
             'locations_count' => Business::distinct('location')->count(),
         ];
 
@@ -206,7 +209,7 @@ class BusinessManagementController extends Controller
             ['business_id' => $business->id, 'old_status' => $oldStatus, 'new_status' => $newStatus]
         );
 
-        return redirect()->route('admin.business-management.index')
+        return redirect()->back()
             ->with('success', 'Business status updated successfully.');
     }
 

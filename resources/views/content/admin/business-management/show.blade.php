@@ -87,11 +87,22 @@
                                 <strong
                                     class="cell-primary">{{ $business->created_at?->format('Y-m-d H:i') ?? '—' }}</strong>
                             </div>
-                            <div class="mt-4 border-top pt-3 text-center d-grid gap-2">
-                                <a href="{{ route('admin.business-management.edit', $business) }}"
-                                    class="btn btn-primary btn-sm w-100 d-flex align-items-center justify-content-center gap-1">
-                                    <i class="mdi mdi-pencil me-1"></i> Edit Status
-                                </a>
+
+                            {{-- Status Update Panel --}}
+                            <div class="mt-4 p-3 bg-light rounded text-start border">
+                                <form action="{{ route('admin.business-management.update', $business) }}" method="POST">
+                                    @csrf
+                                    @method('PUT')
+                                    <h6 class="fw-bold mb-3 small"><i class="mdi mdi-briefcase-edit-outline me-1 text-primary"></i> Update Business Status</h6>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold small text-muted">Business Status</label>
+                                        <select name="status" class="form-select form-select-sm">
+                                            <option value="approved" @selected(($business->status ?? 'approved') === 'approved')>Approved</option>
+                                            <option value="suspended" @selected(($business->status ?? 'approved') === 'suspended')>Suspended</option>
+                                        </select>
+                                    </div>
+                                    <button class="btn btn-dark btn-sm w-100 mb-2" type="submit">Save Changes</button>
+                                </form>
                                 <a href="{{ route('admin.business-management.keyword-ideas', $business) }}"
                                     class="btn btn-outline-primary btn-sm w-100 d-flex align-items-center justify-content-center gap-1">
                                     <i class="mdi mdi-google me-1"></i> View Keyword Ideas

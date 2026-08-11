@@ -15,27 +15,22 @@
 
         {{-- Stats Grid --}}
         <div class="um-stats-grid mb-4">
-            <div class="um-stat-card">
+            <a href="{{ route('admin.business-management.index') }}" class="um-stat-card text-decoration-none text-reset">
                 <div class="um-stat-card__icon um-stat-card__icon--primary"><i class="mdi mdi-briefcase"></i></div>
                 <div>
                     <div class="um-stat-card__label">Total Businesses</div>
                     <div class="um-stat-card__value">{{ number_format($stats['total']) }}</div>
                 </div>
-            </div>
-            {{-- <div class="um-stat-card">
-            <div class="um-stat-card__icon um-stat-card__icon--success"><i class="mdi mdi-check-decagram"></i></div>
-            <div>
-                <div class="um-stat-card__label">With Offerings</div>
-                <div class="um-stat-card__value">{{ number_format($stats['with_offerings']) }}</div>
-            </div>
-        </div> --}}
-            <div class="um-stat-card">
-                <div class="um-stat-card__icon um-stat-card__icon--warning"><i class="mdi mdi-map-marker-radius"></i></div>
-                <div>
-                    <div class="um-stat-card__label">Unique Locations</div>
-                    <div class="um-stat-card__value">{{ number_format($stats['locations_count']) }}</div>
+            </a>
+            <a href="{{ route('admin.business-management.index', ['status' => 'suspended']) }}" class="um-stat-card text-decoration-none text-reset">
+                <div class="um-stat-card__icon" style="background: #1e293b; color: #f1f5f9;">
+                    <i class="mdi mdi-lock-outline"></i>
                 </div>
-            </div>
+                <div>
+                    <div class="um-stat-card__label">Suspended Businesses</div>
+                    <div class="um-stat-card__value">{{ number_format($stats['suspended'] ?? 0) }}</div>
+                </div>
+            </a>
         </div>
 
         <div class="card mt-4">
@@ -195,14 +190,6 @@
                                                 'href' => route('admin.business-management.show', $business),
                                                 'title' => 'View Business Details',
                                             ])
-                                            <form action="{{ route('admin.business-management.update', $business) }}" method="POST" class="d-inline">
-                                                @csrf
-                                                @method('PUT')
-                                                <select name="status" class="form-select form-select-sm um-status-select" onchange="this.form.submit()" title="Update Status">
-                                                    <option value="approved" @selected(($business->status ?? 'approved') === 'approved')>Approved</option>
-                                                    <option value="suspended" @selected(($business->status ?? 'approved') === 'suspended')>Suspended</option>
-                                                </select>
-                                            </form>
                                             <form action="{{ route('admin.business-management.destroy', $business) }}"
                                                 method="POST" class="d-inline"
                                                 onsubmit="return confirm('Are you sure you want to delete this business?');">
