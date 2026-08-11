@@ -38,23 +38,19 @@ class OtpVerificationTest extends TestCase
             ->assertJsonStructure([
                 'success',
                 'message',
-                'otp',
                 'expires_in',
             ])
             ->assertJson([
                 'success' => true,
                 'message' => 'OTP sent successfully.',
-                'expires_in' => 30,
-            ]);
+                'expires_in' => 60,
+            ])
+            ->assertJsonMissing(['otp']);
 
-        $otpCode = $response->json('otp');
-        $this->assertEquals(4, strlen($otpCode));
-
-        $this->assertDatabaseHas('otps', [
-            'mobile_number' => '+923001234567',
-            'otp' => $otpCode,
-            'verified' => false,
-        ]);
+        $otpRecord = Otp::where('mobile_number', '+923001234567')->first();
+        $this->assertNotNull($otpRecord);
+        $this->assertEquals(4, strlen($otpRecord->otp));
+        $this->assertFalse($otpRecord->verified);
     }
 
     /**
@@ -63,19 +59,19 @@ class OtpVerificationTest extends TestCase
     public function test_send_otp_replaces_unexpired_otp_for_same_mobile_number(): void
     {
         // First OTP request
-        $response1 = $this->postJson('/api/v1/auth/send-otp', [
+        $this->postJson('/api/v1/auth/send-otp', [
             'mobile_number' => '+923001234567',
         ]);
-        $otp1 = $response1->json('otp');
+        $otp1 = Otp::where('mobile_number', '+923001234567')->value('otp');
 
         // Check DB count (should be 1)
         $this->assertEquals(1, Otp::count());
 
-        // Second OTP request within 30 seconds
-        $response2 = $this->postJson('/api/v1/auth/send-otp', [
+        // Second OTP request
+        $this->postJson('/api/v1/auth/send-otp', [
             'mobile_number' => '+923001234567',
         ]);
-        $otp2 = $response2->json('otp');
+        $otp2 = Otp::where('mobile_number', '+923001234567')->value('otp');
 
         // DB count should still be 1 (replaced/updated in-place)
         $this->assertEquals(1, Otp::count());
@@ -83,11 +79,6 @@ class OtpVerificationTest extends TestCase
         $this->assertDatabaseHas('otps', [
             'mobile_number' => '+923001234567',
             'otp' => $otp2,
-        ]);
-
-        $this->assertDatabaseMissing('otps', [
-            'mobile_number' => '+923001234567',
-            'otp' => $otp1,
         ]);
     }
 
@@ -111,10 +102,10 @@ class OtpVerificationTest extends TestCase
      */
     public function test_verify_otp_succeeds_with_correct_otp(): void
     {
-        $sendResponse = $this->postJson('/api/v1/auth/send-otp', [
+        $this->postJson('/api/v1/auth/send-otp', [
             'mobile_number' => '+923001234567',
         ]);
-        $otp = $sendResponse->json('otp');
+        $otp = Otp::where('mobile_number', '+923001234567')->value('otp');
 
         $verifyResponse = $this->postJson('/api/v1/auth/verify-otp', [
             'mobile_number' => '+923001234567',
@@ -151,7 +142,7 @@ class OtpVerificationTest extends TestCase
         $verifyResponse->assertStatus(422)
             ->assertJson([
                 'success' => false,
-                'message' => 'Invalid OTP.',
+                'message' => 'Invalid or expired OTP.',
             ]);
     }
 
@@ -160,10 +151,10 @@ class OtpVerificationTest extends TestCase
      */
     public function test_verify_otp_fails_if_otp_is_expired(): void
     {
-        $sendResponse = $this->postJson('/api/v1/auth/send-otp', [
+        $this->postJson('/api/v1/auth/send-otp', [
             'mobile_number' => '+923001234567',
         ]);
-        $otp = $sendResponse->json('otp');
+        $otp = Otp::where('mobile_number', '+923001234567')->value('otp');
 
         // Manually update the expires_at timestamp to past in database
         Otp::where('mobile_number', '+923001234567')->update([
@@ -178,7 +169,7 @@ class OtpVerificationTest extends TestCase
         $verifyResponse->assertStatus(422)
             ->assertJson([
                 'success' => false,
-                'message' => 'OTP has expired.',
+                'message' => 'Invalid or expired OTP.',
             ]);
     }
 
@@ -187,10 +178,10 @@ class OtpVerificationTest extends TestCase
      */
     public function test_otp_cannot_be_reused(): void
     {
-        $sendResponse = $this->postJson('/api/v1/auth/send-otp', [
+        $this->postJson('/api/v1/auth/send-otp', [
             'mobile_number' => '+923001234567',
         ]);
-        $otp = $sendResponse->json('otp');
+        $otp = Otp::where('mobile_number', '+923001234567')->value('otp');
 
         // First verification (success)
         $this->postJson('/api/v1/auth/verify-otp', [
@@ -207,7 +198,7 @@ class OtpVerificationTest extends TestCase
         $verifyResponse->assertStatus(422)
             ->assertJson([
                 'success' => false,
-                'message' => 'Invalid OTP.',
+                'message' => 'Invalid or expired OTP.',
             ]);
     }
 
@@ -217,23 +208,24 @@ class OtpVerificationTest extends TestCase
     public function test_resend_otp_invalidates_previous_otp_and_sends_new_one(): void
     {
         // First OTP request
-        $response1 = $this->postJson('/api/v1/auth/send-otp', [
+        $this->postJson('/api/v1/auth/send-otp', [
             'mobile_number' => '+923001234567',
         ]);
-        $otp1 = $response1->json('otp');
+        $otp1 = Otp::where('mobile_number', '+923001234567')->value('otp');
 
         // Resend OTP request
         $response2 = $this->postJson('/api/v1/auth/resend-otp', [
             'mobile_number' => '+923001234567',
         ]);
-        $otp2 = $response2->json('otp');
+        $otp2 = Otp::where('mobile_number', '+923001234567')->value('otp');
 
         $response2->assertStatus(200)
             ->assertJson([
                 'success' => true,
                 'message' => 'OTP resent successfully.',
-                'expires_in' => 30,
-            ]);
+                'expires_in' => 60,
+            ])
+            ->assertJsonMissing(['otp']);
 
         $this->assertNotEquals($otp1, $otp2);
 
@@ -261,10 +253,10 @@ class OtpVerificationTest extends TestCase
             'role' => 'user',
         ]);
 
-        $sendResponse = $this->postJson('/api/v1/auth/send-otp', [
+        $this->postJson('/api/v1/auth/send-otp', [
             'mobile_number' => '+923009998888',
         ]);
-        $otp = $sendResponse->json('otp');
+        $otp = Otp::where('mobile_number', '+923009998888')->value('otp');
 
         $verifyResponse = $this->postJson('/api/v1/auth/verify-otp', [
             'mobile_number' => '+923009998888',

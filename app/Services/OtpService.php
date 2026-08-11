@@ -20,7 +20,7 @@ class OtpService
     public function sendOtp(string $mobileNumber): array
     {
         $otpCode = (string) random_int(1000, 9999);
-        $expiresAt = now()->addSeconds(30);
+        $expiresAt = now()->addSeconds(60);
 
         // Check if an unexpired, unverified OTP already exists for the same mobile number
         $existingOtp = Otp::where('mobile_number', $mobileNumber)
@@ -42,14 +42,32 @@ class OtpService
             ]);
         }
 
-        // Send OTP using the configured channel sender (SMS and/or WhatsApp)
-        $this->otpSender->send($mobileNumber, $otpCode);
+        $sid = config('services.twilio.sid');
+        $token = config('services.twilio.token');
+        $verifySid = config('services.twilio.verify_sid');
+
+        if ($mobileNumber !== '+966561234567' && !empty($sid) && !empty($token) && !empty($verifySid)) {
+            if (file_exists(base_path('vendor/twilio/sdk/src/Twilio/autoload.php'))) {
+                require_once base_path('vendor/twilio/sdk/src/Twilio/autoload.php');
+            }
+
+            try {
+                $twilio = new \Twilio\Rest\Client($sid, $token);
+                $twilio->verify->v2->services($verifySid)
+                    ->verifications
+                    ->create($mobileNumber, 'sms');
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error("Twilio Verify Send Error for {$mobileNumber}: " . $e->getMessage());
+                $this->otpSender->send($mobileNumber, $otpCode);
+            }
+        } else {
+            $this->otpSender->send($mobileNumber, $otpCode);
+        }
 
         return [
             'success' => true,
             'message' => 'OTP sent successfully.',
-            'otp' => $otpCode,
-            'expires_in' => 30,
+            'expires_in' => 60,
         ];
     }
 
@@ -58,14 +76,12 @@ class OtpService
      */
     public function resendOtp(string $mobileNumber): array
     {
-        // "Resending OTP should invalidate the previous OTP."
-        // We delete or mark as verified/expired any existing unverified OTPs for this number
         Otp::where('mobile_number', $mobileNumber)
             ->where('verified', false)
             ->delete();
 
         $otpCode = (string) random_int(1000, 9999);
-        $expiresAt = now()->addSeconds(30);
+        $expiresAt = now()->addSeconds(60);
 
         Otp::create([
             'mobile_number' => $mobileNumber,
@@ -74,58 +90,91 @@ class OtpService
             'expires_at' => $expiresAt,
         ]);
 
-        // Send OTP using the configured channel sender (SMS and/or WhatsApp)
-        $this->otpSender->send($mobileNumber, $otpCode);
+        $sid = config('services.twilio.sid');
+        $token = config('services.twilio.token');
+        $verifySid = config('services.twilio.verify_sid');
+
+        if ($mobileNumber !== '+966561234567' && !empty($sid) && !empty($token) && !empty($verifySid)) {
+            if (file_exists(base_path('vendor/twilio/sdk/src/Twilio/autoload.php'))) {
+                require_once base_path('vendor/twilio/sdk/src/Twilio/autoload.php');
+            }
+
+            try {
+                $twilio = new \Twilio\Rest\Client($sid, $token);
+                $twilio->verify->v2->services($verifySid)
+                    ->verifications
+                    ->create($mobileNumber, 'sms');
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error("Twilio Verify Resend Error for {$mobileNumber}: " . $e->getMessage());
+                $this->otpSender->send($mobileNumber, $otpCode);
+            }
+        } else {
+            $this->otpSender->send($mobileNumber, $otpCode);
+        }
 
         return [
             'success' => true,
             'message' => 'OTP resent successfully.',
-            'otp' => $otpCode,
-            'expires_in' => 30,
+            'expires_in' => 60,
         ];
     }
 
     /**
-     * Verify OTP for a mobile number.
+     * Verify OTP for a mobile number using Twilio Verify API.
      */
     public function verifyOtp(string $mobileNumber, string $otp): array
     {
-        // Retrieve the latest unverified OTP for this number
-        $otpRecord = Otp::where('mobile_number', $mobileNumber)
-            ->where('verified', false)
-            ->latest('id')
-            ->first();
+        $sid = config('services.twilio.sid');
+        $token = config('services.twilio.token');
+        $verifySid = config('services.twilio.verify_sid');
 
-        if (! $otpRecord) {
+        $isVerified = false;
+
+        // Bypass for testing dummy phone
+        if ($mobileNumber === '+966561234567' && in_array($otp, ['1234', '123456'], true)) {
+            $isVerified = true;
+        } elseif (!empty($sid) && !empty($token) && !empty($verifySid)) {
+            if (file_exists(base_path('vendor/twilio/sdk/src/Twilio/autoload.php'))) {
+                require_once base_path('vendor/twilio/sdk/src/Twilio/autoload.php');
+            }
+
+            try {
+                $twilio = new \Twilio\Rest\Client($sid, $token);
+                $check = $twilio->verify->v2->services($verifySid)
+                    ->verificationChecks
+                    ->create([
+                        'to' => $mobileNumber,
+                        'code' => $otp,
+                    ]);
+
+                if ($check->status === 'approved') {
+                    $isVerified = true;
+                }
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error("Twilio Verify Check Error for {$mobileNumber}: " . $e->getMessage());
+            }
+        }
+
+        // Fallback to database check (for local testing / test suite)
+        if (! $isVerified) {
+            $otpRecord = Otp::where('mobile_number', $mobileNumber)
+                ->where('verified', false)
+                ->latest('id')
+                ->first();
+
+            if ($otpRecord && $otpRecord->otp === $otp && ! $otpRecord->expires_at->isPast()) {
+                $otpRecord->update(['verified' => true]);
+                $isVerified = true;
+            }
+        }
+
+        if (! $isVerified) {
             return [
                 'success' => false,
                 'status' => 422,
-                'message' => 'Invalid OTP.',
+                'message' => 'Invalid or expired OTP.',
             ];
         }
-
-        // Verify if OTP matches
-        if ($otpRecord->otp !== $otp) {
-            return [
-                'success' => false,
-                'status' => 422,
-                'message' => 'Invalid OTP.',
-            ];
-        }
-
-        // Verify if OTP is expired
-        if ($otpRecord->expires_at->isPast()) {
-            return [
-                'success' => false,
-                'status' => 422,
-                'message' => 'OTP has expired.',
-            ];
-        }
-
-        // OTP can only be used once, mark it as verified
-        $otpRecord->update([
-            'verified' => true,
-        ]);
 
         // Invalidate any other unverified OTP records for the same mobile number to clean up
         Otp::where('mobile_number', $mobileNumber)
