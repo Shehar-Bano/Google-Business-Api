@@ -44,18 +44,36 @@
                             default              => 'bg-label-secondary',
                         };
                     @endphp
-                    <span class="badge {{ $statusBadge }} mb-3">
-                        {{ \App\Models\User::STATUS_LABELS[$user->status] ?? $user->status }}
-                    </span>
+                    <div class="d-flex justify-content-center align-items-center gap-2 mb-3">
+                        <span class="badge {{ $statusBadge }} text-capitalize">
+                            {{ \App\Models\User::STATUS_LABELS[$user->status] ?? $user->status }}
+                        </span>
+                        @if($user->otp_verified)
+                            <span class="badge bg-label-success"><i class="mdi mdi-check-decagram-outline me-1"></i> OTP Verified</span>
+                        @else
+                            <span class="badge bg-label-warning"><i class="mdi mdi-alert-circle-outline me-1"></i> OTP Unverified</span>
+                        @endif
+                    </div>
 
                     <div class="text-start mt-3">
                         <div class="d-flex justify-content-between border-bottom py-2">
-                            <span class="text-muted small">User Type</span>
-                            <strong class="text-capitalize">{{ $user->role ?? '—' }}</strong>
+                            <span class="text-muted small">Connected Business</span>
+                            @php $uBus = $user->businesses->first(); @endphp
+                            @if($uBus)
+                                <a href="{{ route('admin.business-management.show', $uBus) }}" class="fw-semibold text-primary text-decoration-none">
+                                    {{ $uBus->name }}
+                                </a>
+                            @else
+                                <span class="text-muted small fst-italic">— None —</span>
+                            @endif
                         </div>
                         <div class="d-flex justify-content-between border-bottom py-2">
                             <span class="text-muted small">Phone</span>
                             <strong>{{ $user->phone ?? '—' }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between border-bottom py-2">
+                            <span class="text-muted small">User Type</span>
+                            <strong class="text-capitalize">{{ $user->role ?? '—' }}</strong>
                         </div>
                         <div class="d-flex justify-content-between border-bottom py-2">
                             <span class="text-muted small">City</span>
@@ -71,22 +89,25 @@
                         </div>
                     </div>
 
-                    {{-- Status Update --}}
-                    <div class="mt-4">
+                    {{-- Status & OTP Update --}}
+                    <div class="mt-4 p-3 bg-light rounded text-start border">
                         <form action="{{ route('admin.user-management.update-status', $user) }}" method="POST">
                             @csrf
                             @method('PATCH')
-                            <label class="form-label text-start d-block fw-semibold small">Update Status</label>
-                            <div class="input-group input-group-sm">
-                                <select name="status" class="form-select">
-                                    @foreach(\App\Models\User::ADMIN_STATUS_LABELS as $val => $label)
-                                        <option value="{{ $val }}" @selected($user->status === $val)>
-                                            {{ ($val === 'otp_pending' && $user->otp_verified) ? 'OTP Verified' : $label }}
-                                        </option>
-                                    @endforeach
+                            <input type="hidden" name="otp_verified_present" value="1">
+                            <h6 class="fw-bold mb-3 small"><i class="mdi mdi-account-cog-outline me-1 text-primary"></i> Update User Status</h6>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold small text-muted">Account Status</label>
+                                <select name="status" class="form-select form-select-sm">
+                                    <option value="active" @selected($user->status === 'active')>Active</option>
+                                    <option value="suspended" @selected($user->status === 'suspended')>Suspended</option>
                                 </select>
-                                <button class="btn btn-dark" type="submit">Update</button>
                             </div>
+                            <div class="mb-3 form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="otp_verified" value="1" id="otpVerifiedSwitch" @checked($user->otp_verified)>
+                                <label class="form-check-label fw-semibold small" for="otpVerifiedSwitch">OTP Verified</label>
+                            </div>
+                            <button class="btn btn-dark btn-sm w-100" type="submit">Save Changes</button>
                         </form>
                     </div>
                 </div>

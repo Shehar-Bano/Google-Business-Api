@@ -29,6 +29,7 @@ class UserManagementService
         $dateTo   = trim($request->string('date_to')->toString());
 
         $users = User::query()
+            ->with('businesses')
             ->when($search !== '', function (Builder $query) use ($search): void {
                 $query->where(function (Builder $sub) use ($search): void {
                     $sub->where('name', 'like', "%{$search}%")

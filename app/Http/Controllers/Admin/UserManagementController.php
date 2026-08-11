@@ -35,14 +35,19 @@ class UserManagementController extends Controller
         
         $this->userManagementService->updateStatus($user, $newStatus);
 
+        if ($request->has('otp_verified_present')) {
+            $user->otp_verified = $request->boolean('otp_verified');
+            $user->save();
+        }
+
         \App\Models\AdminAuditLog::log(
             'user_status_update',
             'User',
             (string) $user->id,
-            "Updated user {$user->name} status from '{$oldStatus}' to '{$newStatus}'.",
-            ['user_id' => $user->id, 'old_status' => $oldStatus, 'new_status' => $newStatus]
+            "Updated user " . ($user->phone ?: $user->name ?: ('#' . $user->id)) . " status from '{$oldStatus}' to '{$newStatus}'.",
+            ['user_id' => $user->id, 'old_status' => $oldStatus, 'new_status' => $newStatus, 'otp_verified' => $user->otp_verified]
         );
 
-        return redirect()->route('admin.user-management.index')->with('success', 'User status updated successfully.');
+        return redirect()->back()->with('success', 'User status updated successfully.');
     }
 }

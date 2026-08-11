@@ -14,24 +14,22 @@
 
         {{-- Stats Grid --}}
         <div class="um-stats-grid mb-4">
-            <div class="um-stat-card">
+            <a href="{{ route('admin.user-management.index') }}" class="um-stat-card text-decoration-none text-reset">
                 <div class="um-stat-card__icon um-stat-card__icon--primary"><i class="mdi mdi-account-multiple"></i></div>
                 <div>
                     <div class="um-stat-card__label">Total Users</div>
                     <div class="um-stat-card__value">{{ number_format($stats['total']) }}</div>
                 </div>
-            </div>
-            @foreach (\App\Models\User::ADMIN_STATS_STATUSES as $s)
-                <div class="um-stat-card">
-                    <div class="um-stat-card__icon um-stat-card__icon--{{ $s }}">
-                        <i class="mdi {{ \App\Models\User::ADMIN_STATUS_ICONS[$s] }}"></i>
-                    </div>
-                    <div>
-                        <div class="um-stat-card__label">{{ \App\Models\User::ADMIN_STATUS_LABELS[$s] }}</div>
-                        <div class="um-stat-card__value">{{ number_format($stats[$s] ?? 0) }}</div>
-                    </div>
+            </a>
+            <a href="{{ route('admin.user-management.index', ['status' => 'suspended']) }}" class="um-stat-card text-decoration-none text-reset">
+                <div class="um-stat-card__icon" style="background: #1e293b; color: #f1f5f9;">
+                    <i class="mdi mdi-account-lock-outline"></i>
                 </div>
-            @endforeach
+                <div>
+                    <div class="um-stat-card__label">Suspended Users</div>
+                    <div class="um-stat-card__value">{{ number_format($stats['suspended'] ?? 0) }}</div>
+                </div>
+            </a>
         </div>
 
     <div class="card mt-4">
@@ -73,9 +71,8 @@
                             <label class="form-label fw-medium">Status</label>
                             <select name="status" class="form-select">
                                 <option value="">All Statuses</option>
-                                @foreach(\App\Models\User::ADMIN_STATUS_LABELS as $val => $label)
-                                    <option value="{{ $val }}" @selected($status === $val)>{{ $label }}</option>
-                                @endforeach
+                                <option value="active" @selected($status === 'active')>Active</option>
+                                <option value="suspended" @selected($status === 'suspended')>Suspended</option>
                             </select>
                         </div>
                         <div class="col-12 col-md-2">
@@ -119,6 +116,7 @@
                                 };
                             @endphp
                             <th><a href="{{ $getSortUrl('id') }}" class="text-dark fw-bold"># <i class="mdi {{ $getSortIcon('id') }} ml-1"></i></a></th>
+                            <th class="text-dark fw-bold">Business</th>
                             <th><a href="{{ $getSortUrl('phone') }}" class="text-dark fw-bold">Phone <i class="mdi {{ $getSortIcon('phone') }} ml-1"></i></a></th>
                             <th><a href="{{ $getSortUrl('status') }}" class="text-dark fw-bold">Status <i class="mdi {{ $getSortIcon('status') }} ml-1"></i></a></th>
                             <th><a href="{{ $getSortUrl('created_at') }}" class="text-dark fw-bold">Created At <i class="mdi {{ $getSortIcon('created_at') }} ml-1"></i></a></th>
@@ -137,9 +135,29 @@
                                     'rejected' => 'bg-label-danger',
                                     default => 'bg-label-secondary',
                                 };
+                                $userBusiness = $user->businesses->first();
                             @endphp
                             <tr>
                                 <td class="cell-muted">{{ $user->id }}</td>
+                                <td>
+                                    @if($userBusiness)
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="um-user-avatar bg-label-info text-info" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-weight: 700; font-size: 0.85rem;">
+                                                {{ strtoupper(substr($userBusiness->name, 0, 1)) }}
+                                            </div>
+                                            <div>
+                                                <a href="{{ route('admin.business-management.show', $userBusiness) }}" class="cell-primary fw-semibold text-primary text-decoration-none">
+                                                    {{ $userBusiness->name }}
+                                                </a>
+                                                @if($user->businesses->count() > 1)
+                                                    <span class="badge bg-label-secondary ms-1" title="Total Businesses">+{{ $user->businesses->count() - 1 }}</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    @else
+                                        <span class="text-muted fst-italic">— No Business —</span>
+                                    @endif
+                                </td>
                                 <td>
                                     <div class="d-flex align-items-center gap-2">
                                         <div class="um-user-avatar bg-label-primary" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 8px;">
@@ -158,28 +176,17 @@
                                 <td class="cell-muted">{{ $user->created_at?->format('Y-m-d') }}</td>
                                 <td class="text-end">
                                     <div class="d-inline-flex align-items-center gap-1">
-                                        <form action="{{ route('admin.user-management.update-status', $user) }}" method="POST" class="d-inline">
-                                            @csrf
-                                            @method('PATCH')
-                                            <select name="status" class="form-select form-select-sm um-status-select" onchange="this.form.submit()" title="Update Status">
-                                                @foreach (\App\Models\User::ADMIN_STATUS_LABELS as $val => $label)
-                                                    <option value="{{ $val }}" @selected($user->status === $val)>
-                                                        {{ $val === 'otp_pending' && $user->otp_verified ? 'OTP Verified' : $label }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                        </form>
                                         @include('admin.components.action-buttons', [
                                             'type' => 'view',
                                             'href' => route('admin.user-management.show', $user),
-                                            'title' => 'View User',
+                                            'title' => 'View User Details',
                                         ])
                                     </div>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="text-center py-4 text-muted">No users found.</td>
+                                <td colspan="6" class="text-center py-4 text-muted">No users found.</td>
                             </tr>
                         @endforelse
                     </tbody>
