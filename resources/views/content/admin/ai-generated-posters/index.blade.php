@@ -142,44 +142,6 @@
                                             'href'  => route('admin.ai-generated-posters.show', $item),
                                             'title' => 'View Details',
                                         ])
-
-                                        @if($item->status === 'pending')
-                                            <form action="{{ route('admin.ai-generated-posters.approve', $item) }}" method="POST" class="d-inline">
-                                                @csrf
-                                                <button type="submit" class="action-icon-btn action-icon-edit border-0 bg-transparent text-success" title="Approve Poster">
-                                                    <i class="mdi mdi-check-circle-outline"></i>
-                                                </button>
-                                            </form>
-
-                                            <button type="button" class="action-icon-btn action-icon-delete border-0 bg-transparent text-danger" title="Reject Poster" data-bs-toggle="modal" data-bs-target="#rejectModal-{{ $item->id }}">
-                                                <i class="mdi mdi-close-circle-outline"></i>
-                                            </button>
-
-                                            {{-- Rejection Modal --}}
-                                            <div class="modal fade" id="rejectModal-{{ $item->id }}" tabindex="-1" aria-labelledby="rejectModalLabel-{{ $item->id }}" aria-hidden="true">
-                                                <div class="modal-dialog text-start">
-                                                    <div class="modal-content">
-                                                        <form action="{{ route('admin.ai-generated-posters.reject', $item) }}" method="POST">
-                                                            @csrf
-                                                            <div class="modal-header">
-                                                                <h5 class="modal-title" id="rejectModalLabel-{{ $item->id }}">Reject AI Poster #{{ $item->id }}</h5>
-                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                            </div>
-                                                            <div class="modal-body">
-                                                                <div class="mb-3">
-                                                                    <label class="form-label fw-semibold">Rejection Reason</label>
-                                                                    <textarea name="rejection_reason" class="form-control" rows="3" placeholder="Explain why this poster was rejected (branding issues, wrong prompt alignment, etc.)..." required></textarea>
-                                                                </div>
-                                                            </div>
-                                                            <div class="modal-footer">
-                                                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                                                                <button type="submit" class="btn btn-danger">Submit Rejection</button>
-                                                            </div>
-                                                        </form>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        @endif
                                     </div>
                                 </td>
                             </tr>

@@ -102,13 +102,40 @@ class InstagramService
             return null;
         }
 
-        // Get access token: page access token or direct social account access token
-        $page = $this->socialAccountRepo->findPageById($userId, $igAccount->page_id);
-        $accessToken = $page?->page_access_token ?? $igAccount->socialAccount?->access_token;
+        // 1. Get Facebook Page and token
+        $page = null;
+        if (! empty($igAccount->page_id) && ! str_starts_with($igAccount->page_id, 'instagram_')) {
+            $page = $this->socialAccountRepo->findPageById($userId, $igAccount->page_id);
+        }
+        if (! $page) {
+            $page = $this->socialAccountRepo->getConnectedPage($userId) 
+                ?? \App\Models\SocialPage::where('user_id', $userId)->whereNotNull('page_access_token')->first();
+        }
+
+        $accessToken = $page?->page_access_token;
+        $igBusinessId = $igAccount->instagram_business_id;
+
+        // If we have a connected Facebook Page, query Meta Graph API to resolve the official instagram_business_account ID
+        if ($page && $page->page_access_token) {
+            try {
+                $linkedIg = $this->metaGraphService->fetchLinkedInstagramAccount($page->page_id, $page->page_access_token);
+                if ($linkedIg && ! empty($linkedIg['instagram_business_id'])) {
+                    $igBusinessId = $linkedIg['instagram_business_id'];
+                    $igAccount->update([
+                        'instagram_business_id' => $igBusinessId,
+                        'page_id' => $page->page_id,
+                        'username' => $linkedIg['username'] ?? $igAccount->username,
+                        'profile_picture' => $linkedIg['profile_picture'] ?? $igAccount->profile_picture,
+                    ]);
+                }
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning("Failed to refresh linked IG business account from page {$page->page_id}: " . $e->getMessage());
+            }
+        }
 
         if (! $accessToken) {
             $socialAccount = \App\Models\SocialAccount::where('user_id', $userId)
-                ->whereIn('provider', ['instagram', 'facebook'])
+                ->whereIn('provider', ['facebook', 'instagram'])
                 ->latest()
                 ->first();
             $accessToken = $socialAccount?->access_token;
@@ -119,15 +146,27 @@ class InstagramService
             return null;
         }
 
-        // Build public URL for Instagram API
+        // Build public URL for Instagram API (ensure https and publicly accessible)
         $imageUrl = $imagePath;
         if ($imagePath && ! filter_var($imagePath, FILTER_VALIDATE_URL)) {
             $clean = ltrim(str_replace('storage/', '', $imagePath), '/');
-            $imageUrl = asset('storage/' . $clean);
+            $appUrl = config('app.url');
+            if (str_contains($appUrl, 'localhost') || str_contains($appUrl, '127.0.0.1')) {
+                $publicHost = 'https://darkviolet-wallaby-198670.hostingersite.com';
+                $imageUrl = "{$publicHost}/public/storage/{$clean}";
+            } else {
+                $imageUrl = asset('storage/' . $clean);
+            }
         }
 
+        \Illuminate\Support\Facades\Log::info("Publishing to Instagram for User {$userId}", [
+            'ig_business_id' => $igBusinessId,
+            'image_url' => $imageUrl,
+            'caption' => $caption,
+        ]);
+
         return $this->metaGraphService->publishInstagramPhoto(
-            $igAccount->instagram_business_id,
+            $igBusinessId,
             $accessToken,
             $caption,
             $imageUrl

@@ -351,6 +351,8 @@ class SocialConnectionController extends Controller
                 'pages_read_engagement',
                 'pages_manage_posts',
                 'business_management',
+                'instagram_basic',
+                'instagram_content_publish',
             ])
             ->stateless();
 
