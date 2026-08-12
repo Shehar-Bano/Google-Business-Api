@@ -16,10 +16,10 @@ class InstagramService
     /**
      * Connect or update user's Instagram account via Meta Graph API.
      */
-    public function connectAccount(int $userId, array $facebookUser): array
+    public function connectAccount(int $userId, array $facebookUser, string $provider = 'instagram'): array
     {
         $accountDetails = [
-            'provider' => 'facebook',
+            'provider' => $provider,
             'provider_user_id' => $facebookUser['id'],
             'name' => $facebookUser['name'],
             'email' => $facebookUser['email'] ?? null,
@@ -29,22 +29,36 @@ class InstagramService
             'token_expires_at' => isset($facebookUser['expiresIn']) ? now()->addSeconds($facebookUser['expiresIn']) : null,
         ];
 
-        // 1. Save or update the base social account
+        // 1. Save or update the base social account (social_accounts table)
         $socialAccount = $this->socialAccountRepo->updateOrCreateAccount($userId, $accountDetails);
 
-        // 2. Fetch user pages
+        // 2. Fetch and sync user pages (social_pages table)
         $pages = $this->metaGraphService->fetchPages($facebookUser['token']);
-        $this->socialAccountRepo->syncPages($socialAccount, $pages);
+        if (! empty($pages)) {
+            $this->socialAccountRepo->syncPages($socialAccount, $pages);
+        }
 
         $connectedAccounts = [];
 
-        // 3. For each page, detect and connect linked Instagram accounts
+        // 3. For each page, detect and connect linked Instagram accounts (instagram_accounts table)
         foreach ($pages as $page) {
             $igAccount = $this->metaGraphService->fetchLinkedInstagramAccount($page['page_id'], $page['page_access_token']);
             if ($igAccount) {
                 $this->socialAccountRepo->syncInstagramAccount($socialAccount, $igAccount);
                 $connectedAccounts[] = $igAccount;
             }
+        }
+
+        // 4. If direct Instagram login was used without Facebook pages, save direct Instagram account
+        if (empty($connectedAccounts) && ! empty($facebookUser['id'])) {
+            $directIg = [
+                'page_id' => 'instagram_'.$facebookUser['id'],
+                'instagram_business_id' => (string) $facebookUser['id'],
+                'username' => $facebookUser['name'] ?? 'instagram_business',
+                'profile_picture' => $facebookUser['avatar'] ?? null,
+            ];
+            $this->socialAccountRepo->syncInstagramAccount($socialAccount, $directIg);
+            $connectedAccounts[] = $directIg;
         }
 
         return [

@@ -481,7 +481,12 @@ class SocialConnectionController extends Controller
         try {
             $clientId = config('services.instagram.client_id') ?: config('services.facebook.client_id');
             $clientSecret = config('services.instagram.client_secret') ?: config('services.facebook.client_secret');
-            $redirectUri = config('services.instagram.redirect') ?: config('services.facebook.redirect');
+            $redirectUri = config('services.instagram.redirect') ?: 'https://darkviolet-wallaby-198670.hostingersite.com/public/api/social/instagram/callback';
+
+            Log::info("Instagram Callback: Processing code for User {$userId}", [
+                'clientId' => $clientId,
+                'redirectUri' => $redirectUri,
+            ]);
 
             // 1. Direct Instagram OAuth Token Exchange
             $tokenRes = Http::asForm()->post('https://api.instagram.com/oauth/access_token', [
@@ -490,6 +495,23 @@ class SocialConnectionController extends Controller
                 'grant_type' => 'authorization_code',
                 'redirect_uri' => $redirectUri,
                 'code' => $code,
+            ]);
+
+            // If not successful, retry with the exact current callback URL
+            if (! $tokenRes->successful() && $request->url() !== $redirectUri) {
+                Log::warning('Instagram Token Exchange first attempt failed, retrying with request URL: '.$request->url());
+                $tokenRes = Http::asForm()->post('https://api.instagram.com/oauth/access_token', [
+                    'client_id' => $clientId,
+                    'client_secret' => $clientSecret,
+                    'grant_type' => 'authorization_code',
+                    'redirect_uri' => $request->url(),
+                    'code' => $code,
+                ]);
+            }
+
+            Log::info("Instagram Token Exchange Final Response: ", [
+                'status' => $tokenRes->status(),
+                'body' => $tokenRes->body(),
             ]);
 
             if ($tokenRes->successful() && ! empty($tokenRes->json('access_token'))) {
@@ -512,6 +534,12 @@ class SocialConnectionController extends Controller
                     'fields' => 'id,username,account_type,media_count,profile_picture_url',
                     'access_token' => $accessToken,
                 ]);
+                if (! $profileRes->successful()) {
+                    $profileRes = Http::get('https://graph.instagram.com/me', [
+                        'fields' => 'id,username,account_type,media_count',
+                        'access_token' => $accessToken,
+                    ]);
+                }
                 $profile = $profileRes->successful() ? $profileRes->json() : [];
 
                 $instagramUser = [
@@ -524,15 +552,20 @@ class SocialConnectionController extends Controller
                     'expiresIn' => 5184000,
                 ];
 
-                $result = $this->instagramService->connectAccount($userId, $instagramUser);
+                $result = $this->instagramService->connectAccount($userId, $instagramUser, 'instagram');
+                Log::info("Instagram Direct Account Connected for User {$userId}", $result);
 
                 return response()->json([
                     'success' => true,
                     'message' => 'Instagram connected successfully via Instagram Login.',
                     'user_id' => $userId,
+                    'account_id' => $result['social_account']->id,
                     'instagram_accounts' => $result['instagram_accounts'],
                 ]);
             }
+
+            // If token exchange failed, log error details
+            Log::error('Instagram Direct Token Exchange failed: '.$tokenRes->body());
 
             // 2. Fallback to Meta Facebook Driver
             $fbUser = Socialite::driver('facebook')->stateless()->user();
@@ -546,12 +579,14 @@ class SocialConnectionController extends Controller
                 'expiresIn' => $fbUser->expiresIn,
             ];
 
-            $result = $this->instagramService->connectAccount($userId, $facebookUser);
+            $result = $this->instagramService->connectAccount($userId, $facebookUser, 'facebook');
+            Log::info("Instagram Meta Account Connected for User {$userId}", $result);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Instagram connected successfully.',
                 'user_id' => $userId,
+                'account_id' => $result['social_account']->id,
                 'instagram_accounts' => $result['instagram_accounts'],
             ]);
 
@@ -561,6 +596,55 @@ class SocialConnectionController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Authentication failed: '.$e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Connect Instagram directly using access token (e.g. from Mobile SDK or Graph API).
+     * POST /api/social/instagram/connect-token
+     */
+    public function instagramConnectToken(Request $request): JsonResponse
+    {
+        $request->validate([
+            'access_token' => 'required|string',
+        ]);
+
+        $token = $request->input('access_token');
+        $userId = $request->user()->id;
+
+        try {
+            $profileRes = Http::get('https://graph.instagram.com/v20.0/me', [
+                'fields' => 'id,username,account_type,media_count,profile_picture_url',
+                'access_token' => $token,
+            ]);
+            $profile = $profileRes->successful() ? $profileRes->json() : [];
+
+            $instagramUser = [
+                'id' => (string) ($profile['id'] ?? $request->input('user_id', 'instagram_'.time())),
+                'name' => $profile['username'] ?? $request->input('username', 'Instagram User'),
+                'email' => null,
+                'avatar' => $profile['profile_picture_url'] ?? null,
+                'token' => $token,
+                'refreshToken' => null,
+                'expiresIn' => 5184000,
+            ];
+
+            $result = $this->instagramService->connectAccount($userId, $instagramUser, 'instagram');
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Instagram connected successfully via access token.',
+                'account_id' => $result['social_account']->id,
+                'instagram_accounts' => $result['instagram_accounts'],
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Direct Instagram token connection error: '.$e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Connection failed: '.$e->getMessage(),
             ], 500);
         }
     }

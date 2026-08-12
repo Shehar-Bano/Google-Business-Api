@@ -67,11 +67,11 @@ Route::prefix('v1')->group(function () {
     // Authentication & Social Connections Routes (Facebook & Instagram)
     Route::post('auth/google/login', [App\Http\Controllers\Api\AuthController::class, 'googleLogin']);
     Route::get('social/facebook/callback', [App\Http\Controllers\Api\SocialConnectionController::class, 'facebookCallback']);
-    Route::get('v1/social/facebook/callback', [App\Http\Controllers\Api\SocialConnectionController::class, 'facebookCallback']);
+    Route::get('social/facebook/callback', [App\Http\Controllers\Api\SocialConnectionController::class, 'facebookCallback']);
     Route::get('/social/facebook/redirect-url', [App\Http\Controllers\Api\SocialConnectionController::class, 'facebookRedirectUrl']);
 
     Route::get('social/instagram/callback', [App\Http\Controllers\Api\SocialConnectionController::class, 'instagramCallback']);
-    Route::get('v1/social/instagram/callback', [App\Http\Controllers\Api\SocialConnectionController::class, 'instagramCallback']);
+    Route::get('social/instagram/callback', [App\Http\Controllers\Api\SocialConnectionController::class, 'instagramCallback']);
     Route::get('/social/instagram/redirect-url', [App\Http\Controllers\Api\SocialConnectionController::class, 'instagramRedirectUrl']);
 
     // Config Credentials Routes
@@ -94,6 +94,9 @@ Route::prefix('v1')->group(function () {
 
         // Instagram Connection Routes
         Route::get('social/instagram/connect', [App\Http\Controllers\Api\SocialConnectionController::class, 'instagramConnect']);
+        Route::get('/social/instagram/connect', [App\Http\Controllers\Api\SocialConnectionController::class, 'instagramConnect']);
+        Route::post('social/instagram/connect-token', [App\Http\Controllers\Api\SocialConnectionController::class, 'instagramConnectToken']);
+        Route::post('/social/instagram/connect-token', [App\Http\Controllers\Api\SocialConnectionController::class, 'instagramConnectToken']);
         Route::get('social/instagram/connected', [App\Http\Controllers\Api\SocialConnectionController::class, 'getConnectedInstagram']);
         Route::delete('social/instagram/disconnect', [App\Http\Controllers\Api\SocialConnectionController::class, 'disconnectInstagram']);
 

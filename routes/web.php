@@ -25,6 +25,19 @@ Route::middleware('auth')->group(function () {
 
 Route::get('r/{id}', [LinkRedirectionController::class, 'redirect'])->name('link.redirect');
 
+// Social OAuth Callbacks (supports all domain prefixes: /public/api/..., /api/..., /v1/...)
+Route::get('social/instagram/callback', [App\Http\Controllers\Api\SocialConnectionController::class, 'instagramCallback']);
+Route::get('api/social/instagram/callback', [App\Http\Controllers\Api\SocialConnectionController::class, 'instagramCallback']);
+Route::get('public/api/social/instagram/callback', [App\Http\Controllers\Api\SocialConnectionController::class, 'instagramCallback']);
+Route::get('public/api/v1/social/instagram/callback', [App\Http\Controllers\Api\SocialConnectionController::class, 'instagramCallback']);
+Route::get('v1/social/instagram/callback', [App\Http\Controllers\Api\SocialConnectionController::class, 'instagramCallback']);
+
+Route::get('social/facebook/callback', [App\Http\Controllers\Api\SocialConnectionController::class, 'facebookCallback']);
+Route::get('api/social/facebook/callback', [App\Http\Controllers\Api\SocialConnectionController::class, 'facebookCallback']);
+Route::get('public/api/social/facebook/callback', [App\Http\Controllers\Api\SocialConnectionController::class, 'facebookCallback']);
+Route::get('public/api/v1/social/facebook/callback', [App\Http\Controllers\Api\SocialConnectionController::class, 'facebookCallback']);
+Route::get('v1/social/facebook/callback', [App\Http\Controllers\Api\SocialConnectionController::class, 'facebookCallback']);
+
 Route::get('/run-queue', function () {
     try {
         // Increase execution time limit since AI image generation can take a bit of time
