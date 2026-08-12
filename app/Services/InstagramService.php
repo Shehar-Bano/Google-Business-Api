@@ -98,11 +98,24 @@ class InstagramService
     {
         $igAccount = $this->getConnectedAccount($userId);
         if (! $igAccount) {
+            \Illuminate\Support\Facades\Log::warning("Instagram publish skipped: No connected Instagram account found for user {$userId}");
             return null;
         }
 
+        // Get access token: page access token or direct social account access token
         $page = $this->socialAccountRepo->findPageById($userId, $igAccount->page_id);
-        if (! $page) {
+        $accessToken = $page?->page_access_token ?? $igAccount->socialAccount?->access_token;
+
+        if (! $accessToken) {
+            $socialAccount = \App\Models\SocialAccount::where('user_id', $userId)
+                ->whereIn('provider', ['instagram', 'facebook'])
+                ->latest()
+                ->first();
+            $accessToken = $socialAccount?->access_token;
+        }
+
+        if (! $accessToken) {
+            \Illuminate\Support\Facades\Log::warning("Instagram publish skipped: No valid access token found for user {$userId}");
             return null;
         }
 
@@ -115,7 +128,7 @@ class InstagramService
 
         return $this->metaGraphService->publishInstagramPhoto(
             $igAccount->instagram_business_id,
-            $page->page_access_token,
+            $accessToken,
             $caption,
             $imageUrl
         );
