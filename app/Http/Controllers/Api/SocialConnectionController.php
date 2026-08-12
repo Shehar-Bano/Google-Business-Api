@@ -200,6 +200,64 @@ class SocialConnectionController extends Controller
     }
 
     /**
+     * Connect Google account directly for the authenticated user.
+     * POST /api/social/google/connect-token
+     */
+    public function googleConnectToken(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $bearerToken = $request->bearerToken();
+
+        $authService = app(\App\Services\AuthService::class);
+        $result = $authService->loginWithGoogle(
+            $request->input('id_token'),
+            $user,
+            $bearerToken,
+            $request->input('access_token'),
+            $request->input('refresh_token'),
+            $request->input('expires_in'),
+            $request->input('code'),
+            $request->input('expires_at') ?? $request->input('token_expires_at')
+        );
+
+        if (! $result) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to verify and connect Google account.',
+            ], 400);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Google account connected successfully.',
+            'user' => $result['user'],
+            'social_account' => $user->socialAccounts()->where('provider', 'google')->first(),
+        ]);
+    }
+
+    /**
+     * Disconnect Google connection for the authenticated user.
+     * DELETE /api/social/google/disconnect
+     */
+    public function disconnectGoogle(Request $request): JsonResponse
+    {
+        $userId = $request->user()->id;
+        $deleted = \App\Models\SocialAccount::where('user_id', $userId)->where('provider', 'google')->delete();
+
+        if (! $deleted) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No active Google connection found.',
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Google connection successfully disconnected.',
+        ]);
+    }
+
+    /**
      * Get social account connection status.
      * GET /api/social/accounts
      */

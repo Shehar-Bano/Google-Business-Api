@@ -60,14 +60,19 @@ class AuthService
         }
 
         // 2. Link Google details to user or create user if logging in from public endpoint
-        if (!$user) {
+        if (! $user && $currentToken) {
+            $hashed = hash('sha256', $currentToken);
+            $user = User::where('api_access_token', $hashed)->first();
+        }
+
+        if (! $user) {
             $user = User::where('email', $googleUser['email'])->first();
-            if (!$user) {
+            if (! $user) {
                 $user = new User();
                 $user->email = $googleUser['email'];
                 $user->name = $googleUser['name'];
             }
-            if (!$currentToken) {
+            if (! $currentToken) {
                 $plainToken = bin2hex(random_bytes(32));
                 $user->api_access_token = hash('sha256', $plainToken);
                 $currentToken = $plainToken;

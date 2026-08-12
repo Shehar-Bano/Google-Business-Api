@@ -12,14 +12,22 @@ class AuthController extends Controller
     public function __construct(protected AuthService $authService) {}
 
     /**
-     * Authenticate user using Google ID Token.
+     * Authenticate user or link Google account using Google ID Token.
      */
     public function googleLogin(GoogleLoginRequest $request): JsonResponse
     {
+        $user = $request->user();
+        $bearerToken = $request->bearerToken();
+
+        if (! $user && $bearerToken) {
+            $hashed = hash('sha256', $bearerToken);
+            $user = \App\Models\User::where('api_access_token', $hashed)->first();
+        }
+
         $result = $this->authService->loginWithGoogle(
             $request->input('id_token'),
-            $request->user(),
-            $request->bearerToken(),
+            $user,
+            $bearerToken,
             $request->input('access_token'),
             $request->input('refresh_token'),
             $request->input('expires_in'),

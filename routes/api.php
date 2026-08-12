@@ -67,9 +67,11 @@ Route::prefix('v1')->group(function () {
     // Authentication & Social Connections Routes (Facebook & Instagram)
     Route::post('auth/google/login', [App\Http\Controllers\Api\AuthController::class, 'googleLogin']);
     Route::get('social/facebook/callback', [App\Http\Controllers\Api\SocialConnectionController::class, 'facebookCallback']);
+    Route::get('v1/social/facebook/callback', [App\Http\Controllers\Api\SocialConnectionController::class, 'facebookCallback']);
     Route::get('/social/facebook/redirect-url', [App\Http\Controllers\Api\SocialConnectionController::class, 'facebookRedirectUrl']);
 
     Route::get('social/instagram/callback', [App\Http\Controllers\Api\SocialConnectionController::class, 'instagramCallback']);
+    Route::get('v1/social/instagram/callback', [App\Http\Controllers\Api\SocialConnectionController::class, 'instagramCallback']);
     Route::get('/social/instagram/redirect-url', [App\Http\Controllers\Api\SocialConnectionController::class, 'instagramRedirectUrl']);
 
     // Config Credentials Routes
@@ -81,6 +83,10 @@ Route::prefix('v1')->group(function () {
     Route::post('google/keyword-ideas', [App\Http\Controllers\Api\GoogleAdsController::class, 'getKeywordIdeas']);
 
     Route::middleware('api.token')->group(function () {
+        // Google Connection Routes
+        Route::post('social/google/connect-token', [App\Http\Controllers\Api\SocialConnectionController::class, 'googleConnectToken']);
+        Route::delete('social/google/disconnect', [App\Http\Controllers\Api\SocialConnectionController::class, 'disconnectGoogle']);
+
         Route::get('social/facebook/connect', [App\Http\Controllers\Api\SocialConnectionController::class, 'facebookConnect']);
         Route::post('social/facebook/connect-token', [App\Http\Controllers\Api\SocialConnectionController::class, 'facebookConnectToken']);
         Route::get('social/accounts', [App\Http\Controllers\Api\SocialConnectionController::class, 'status']);
