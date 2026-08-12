@@ -208,18 +208,10 @@ class PosterController extends Controller
         }
 
         // Immediate publishing (Now)
-        $publishResult = null;
+        $socialResult = null;
         try {
-            $facebookService = app(\App\Services\FacebookService::class);
-            $caption = $generated->generated_caption ?: ($generated->generated_title ?: $generated->prompt);
-            $publishResult = $facebookService->publishPost($generated->user_id, $caption, $generated->generated_image);
-
-            if ($publishResult && ! empty($publishResult['id'])) {
-                $generated->update([
-                    'published_at' => now(),
-                    'social_post_id' => $publishResult['id'],
-                ]);
-            }
+            $posterService = app(\App\Services\AiGeneratedPosterService::class);
+            $socialResult = $posterService->publishToSocialMedia($generated);
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::error("Social auto-publish failed on poster approve: " . $e->getMessage());
         }
@@ -229,8 +221,8 @@ class PosterController extends Controller
             'message' => 'Poster approved and published successfully.',
             'data' => $generated->fresh(),
             'is_scheduled' => false,
-            'social_published' => ! empty($publishResult),
-            'social_publish_data' => $publishResult,
+            'social_published' => ! empty($socialResult['facebook']) || ! empty($socialResult['instagram']),
+            'social_publish_data' => $socialResult,
         ]);
     }
 

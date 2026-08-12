@@ -73,6 +73,7 @@ class PreferenceController extends Controller
             'model_ethnicity' => 'nullable|string|max:255',
             'audience' => 'nullable|string|max:255',
             'cta' => 'nullable|string|max:255',
+            'brand_color' => 'nullable|string|max:50',
             'stop_creative_auto_approval' => 'nullable|boolean',
             'images' => 'nullable|array',
             'images.*.type' => 'required|string|in:interior_photos,team_photos',
@@ -106,6 +107,7 @@ class PreferenceController extends Controller
             'model_ethnicity',
             'audience',
             'cta',
+            'brand_color',
         ]);
 
         if ($request->has('stop_creative_auto_approval')) {

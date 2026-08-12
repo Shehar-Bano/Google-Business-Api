@@ -76,5 +76,35 @@ class InstagramService
     {
         return $this->socialAccountRepo->disconnectInstagram($userId);
     }
+
+    /**
+     * Publish photo post to connected Instagram Business Account.
+     */
+    public function publishPost(int $userId, string $caption, ?string $imagePath): ?array
+    {
+        $igAccount = $this->getConnectedAccount($userId);
+        if (! $igAccount) {
+            return null;
+        }
+
+        $page = $this->socialAccountRepo->findPageById($userId, $igAccount->page_id);
+        if (! $page) {
+            return null;
+        }
+
+        // Build public URL for Instagram API
+        $imageUrl = $imagePath;
+        if ($imagePath && ! filter_var($imagePath, FILTER_VALIDATE_URL)) {
+            $clean = ltrim(str_replace('storage/', '', $imagePath), '/');
+            $imageUrl = asset('storage/' . $clean);
+        }
+
+        return $this->metaGraphService->publishInstagramPhoto(
+            $igAccount->instagram_business_id,
+            $page->page_access_token,
+            $caption,
+            $imageUrl
+        );
+    }
 }
 

@@ -157,24 +157,33 @@ class AiGeneratedPosterService
     }
 
     /**
-     * Publish approved poster to connected social channels (Facebook Page).
+     * Publish approved poster to connected social channels (Facebook Page and Instagram).
      */
     public function publishToSocialMedia(AiGeneratedPoster $poster): ?array
     {
         try {
             $facebookService = app(\App\Services\FacebookService::class);
+            $instagramService = app(\App\Services\InstagramService::class);
+
             $caption = $poster->generated_caption ?: ($poster->generated_title ?: $poster->prompt);
             $imagePath = $poster->generated_image;
 
-            $result = $facebookService->publishPost($poster->user_id, $caption, $imagePath);
-            if ($result && ! empty($result['id'])) {
+            $fbResult = $facebookService->publishPost($poster->user_id, $caption, $imagePath);
+            $igResult = $instagramService->publishPost($poster->user_id, $caption, $imagePath);
+
+            $postId = $fbResult['id'] ?? ($igResult['id'] ?? null);
+
+            if ($postId) {
                 $poster->update([
                     'published_at' => now(),
-                    'social_post_id' => $result['id'],
+                    'social_post_id' => $postId,
                 ]);
             }
 
-            return $result;
+            return [
+                'facebook' => $fbResult,
+                'instagram' => $igResult,
+            ];
         } catch (\Throwable $e) {
             Log::error("Failed to auto-publish approved poster #{$poster->id} to social media: " . $e->getMessage());
             return null;
@@ -227,7 +236,7 @@ class AiGeneratedPosterService
             ],
             'preferences' => $preferences ? $preferences->only([
                 'business_tagline', 'business_description', 'different_than_competition', 'why_visit_us',
-                'target_gender', 'target_age_group', 'region', 'model_ethnicity', 'audience', 'cta',
+                'target_gender', 'target_age_group', 'region', 'model_ethnicity', 'audience', 'cta', 'brand_color',
                 'nearest_landmark', 'guidelines_to_customer',
             ]) : [],
         ];

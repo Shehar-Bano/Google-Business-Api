@@ -23,7 +23,7 @@ class SocialConnectionController extends Controller
     ) {}
 
     /**
-     * Redirect the user to the Facebook authentication page.
+     * Redirect the user or return redirect URL for Facebook authentication.
      * GET /api/social/facebook/connect
      */
     public function facebookConnect(Request $request)
@@ -36,7 +36,7 @@ class SocialConnectionController extends Controller
             'platform' => 'facebook',
         ]));
 
-        return Socialite::driver('facebook')
+        $targetUrl = Socialite::driver('facebook')
             ->scopes([
                 'email',
                 'public_profile',
@@ -47,7 +47,17 @@ class SocialConnectionController extends Controller
             ])
             ->with(['state' => $state])
             ->stateless()
-            ->redirect();
+            ->redirect()
+            ->getTargetUrl();
+
+        if ($request->wantsJson() || $request->is('api/*') || $request->expectsJson() || $request->header('Accept') === 'application/json' || $request->header('User-Agent')) {
+            return response()->json([
+                'success' => true,
+                'redirect_url' => $targetUrl,
+            ]);
+        }
+
+        return redirect()->away($targetUrl);
     }
 
     /**
@@ -75,6 +85,14 @@ class SocialConnectionController extends Controller
                 'success' => false,
                 'message' => 'State decryption failed: '.$e->getMessage(),
             ], 400);
+        }
+
+        $user = \App\Models\User::find($userId);
+        if (! $user) {
+            return response()->json([
+                'success' => false,
+                'message' => "User with ID {$userId} does not exist in the database. Please ensure you are logged in with a valid user.",
+            ], 404);
         }
 
         if ($request->has('error')) {
@@ -286,6 +304,35 @@ class SocialConnectionController extends Controller
      * Get Instagram OAuth redirect URL.
      * GET /api/social/instagram/redirect-url
      */
+    /**
+     * Build Instagram Login OAuth URL using official Instagram Business Login.
+     */
+    protected function getInstagramDirectUrl(?int $userId = null): string
+    {
+        $clientId = config('services.instagram.client_id') ?: env('Instagram_app_ID', '1010962951719509');
+        $redirectUri = config('services.instagram.redirect') ?: 'https://darkviolet-wallaby-198670.hostingersite.com/public/api/social/instagram/callback';
+
+        $state = Crypt::encryptString(json_encode([
+            'user_id' => $userId,
+            'platform' => 'instagram',
+        ]));
+
+        $params = http_build_query([
+            'force_reauth' => 'true',
+            'client_id' => $clientId,
+            'redirect_uri' => $redirectUri,
+            'response_type' => 'code',
+            'scope' => 'instagram_business_basic,instagram_business_manage_messages,instagram_business_manage_comments',
+            'state' => $state,
+        ]);
+
+        return "https://www.instagram.com/oauth/authorize?{$params}";
+    }
+
+    /**
+     * Get Instagram OAuth redirect URL.
+     * GET /api/social/instagram/redirect-url
+     */
     public function instagramRedirectUrl(Request $request): JsonResponse
     {
         $userId = $request->user()?->id;
@@ -297,27 +344,7 @@ class SocialConnectionController extends Controller
             $userId = (int) $request->input('user_id');
         }
 
-        $driver = Socialite::driver('facebook')
-            ->scopes([
-                'email',
-                'public_profile',
-                'pages_show_list',
-                'pages_read_engagement',
-                'business_management',
-                'instagram_basic',
-                'instagram_content_publish',
-            ])
-            ->stateless();
-
-        if ($userId) {
-            $state = Crypt::encryptString(json_encode([
-                'user_id' => $userId,
-                'platform' => 'instagram',
-            ]));
-            $driver->with(['state' => $state]);
-        }
-
-        $url = $driver->redirect()->getTargetUrl();
+        $url = $this->getInstagramDirectUrl($userId);
 
         return response()->json([
             'success' => true,
@@ -326,31 +353,22 @@ class SocialConnectionController extends Controller
     }
 
     /**
-     * Redirect the user to the Instagram authentication page.
+     * Redirect the user or return redirect URL for Instagram authentication.
      * GET /api/social/instagram/connect
      */
     public function instagramConnect(Request $request)
     {
         $user = $request->user();
+        $targetUrl = $this->getInstagramDirectUrl($user?->id);
 
-        $state = Crypt::encryptString(json_encode([
-            'user_id' => $user->id,
-            'platform' => 'instagram',
-        ]));
+        if ($request->wantsJson() || $request->is('api/*') || $request->expectsJson() || $request->header('Accept') === 'application/json' || $request->header('User-Agent')) {
+            return response()->json([
+                'success' => true,
+                'redirect_url' => $targetUrl,
+            ]);
+        }
 
-        return Socialite::driver('facebook')
-            ->scopes([
-                'email',
-                'public_profile',
-                'pages_show_list',
-                'pages_read_engagement',
-                'business_management',
-                'instagram_basic',
-                'instagram_content_publish',
-            ])
-            ->with(['state' => $state])
-            ->stateless()
-            ->redirect();
+        return redirect()->away($targetUrl);
     }
 
     /**
@@ -380,6 +398,14 @@ class SocialConnectionController extends Controller
             ], 400);
         }
 
+        $user = \App\Models\User::find($userId);
+        if (! $user) {
+            return response()->json([
+                'success' => false,
+                'message' => "User with ID {$userId} does not exist in the database. Please make sure you are logged in with a valid user.",
+            ], 404);
+        }
+
         if ($request->has('error')) {
             Log::warning('Instagram Connect Cancelled or Denied: '.$request->query('error_description'));
 
@@ -389,9 +415,69 @@ class SocialConnectionController extends Controller
             ], 400);
         }
 
-        try {
-            $fbUser = Socialite::driver('facebook')->stateless()->user();
+        $code = $request->query('code');
+        if ($code) {
+            $code = rtrim(str_replace('#_', '', $code), '#_');
+        }
 
+        try {
+            $clientId = config('services.instagram.client_id') ?: config('services.facebook.client_id');
+            $clientSecret = config('services.instagram.client_secret') ?: config('services.facebook.client_secret');
+            $redirectUri = config('services.instagram.redirect') ?: config('services.facebook.redirect');
+
+            // 1. Direct Instagram OAuth Token Exchange
+            $tokenRes = Http::asForm()->post('https://api.instagram.com/oauth/access_token', [
+                'client_id' => $clientId,
+                'client_secret' => $clientSecret,
+                'grant_type' => 'authorization_code',
+                'redirect_uri' => $redirectUri,
+                'code' => $code,
+            ]);
+
+            if ($tokenRes->successful() && ! empty($tokenRes->json('access_token'))) {
+                $tokenData = $tokenRes->json();
+                $accessToken = $tokenData['access_token'];
+                $igUserId = $tokenData['user_id'] ?? null;
+
+                // Long-lived access token exchange (60 days)
+                $longLivedRes = Http::get('https://graph.instagram.com/access_token', [
+                    'grant_type' => 'ig_exchange_token',
+                    'client_secret' => $clientSecret,
+                    'access_token' => $accessToken,
+                ]);
+                if ($longLivedRes->successful() && ! empty($longLivedRes->json('access_token'))) {
+                    $accessToken = $longLivedRes->json('access_token');
+                }
+
+                // Profile fetch
+                $profileRes = Http::get('https://graph.instagram.com/v20.0/me', [
+                    'fields' => 'id,username,account_type,media_count,profile_picture_url',
+                    'access_token' => $accessToken,
+                ]);
+                $profile = $profileRes->successful() ? $profileRes->json() : [];
+
+                $instagramUser = [
+                    'id' => (string) ($profile['id'] ?? $igUserId),
+                    'name' => $profile['username'] ?? 'Instagram User',
+                    'email' => null,
+                    'avatar' => $profile['profile_picture_url'] ?? null,
+                    'token' => $accessToken,
+                    'refreshToken' => null,
+                    'expiresIn' => 5184000,
+                ];
+
+                $result = $this->instagramService->connectAccount($userId, $instagramUser);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Instagram connected successfully via Instagram Login.',
+                    'user_id' => $userId,
+                    'instagram_accounts' => $result['instagram_accounts'],
+                ]);
+            }
+
+            // 2. Fallback to Meta Facebook Driver
+            $fbUser = Socialite::driver('facebook')->stateless()->user();
             $facebookUser = [
                 'id' => $fbUser->getId(),
                 'name' => $fbUser->getName(),

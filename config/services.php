@@ -48,6 +48,12 @@ return [
         'redirect' => env('FACEBOOK_REDIRECT_URI'),
     ],
 
+    'instagram' => [
+        'client_id' => env('Instagram_app_ID', env('INSTAGRAM_APP_ID')),
+        'client_secret' => env('Instagram_app_secret', env('INSTAGRAM_APP_SECRET')),
+        'redirect' => env('INSTAGRAM_REDIRECT_URI', env('FACEBOOK_REDIRECT_URI')),
+    ],
+
     'google' => [
         'client_id' => env('Google_Client_ID'),
         'client_secret' => env('Google_Client_Secret'),

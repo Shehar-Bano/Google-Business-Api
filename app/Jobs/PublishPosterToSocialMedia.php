@@ -27,7 +27,7 @@ class PublishPosterToSocialMedia implements ShouldQueue
         $this->onQueue(env('POSTER_QUEUE', 'default'));
     }
 
-    public function handle(FacebookService $facebookService): void
+    public function handle(FacebookService $facebookService, \App\Services\InstagramService $instagramService): void
     {
         $poster = AiGeneratedPoster::find($this->aiGeneratedPosterId);
         if (! $poster || $poster->status !== 'approved') {
@@ -42,16 +42,23 @@ class PublishPosterToSocialMedia implements ShouldQueue
         }
 
         $caption = $poster->generated_caption ?: ($poster->generated_title ?: $poster->prompt);
-        $result = $facebookService->publishPost($poster->user_id, $caption, $poster->generated_image);
+        
+        // 1. Publish to Facebook Page
+        $fbResult = $facebookService->publishPost($poster->user_id, $caption, $poster->generated_image);
 
-        if ($result && ! empty($result['id'])) {
+        // 2. Publish to linked Instagram Account
+        $igResult = $instagramService->publishPost($poster->user_id, $caption, $poster->generated_image);
+
+        $postId = $fbResult['id'] ?? ($igResult['id'] ?? null);
+
+        if ($postId) {
             $poster->update([
                 'published_at' => now(),
-                'social_post_id' => $result['id'],
+                'social_post_id' => $postId,
             ]);
-            Log::info("PublishPosterToSocialMedia: Poster {$this->aiGeneratedPosterId} successfully published to Facebook. Post ID: {$result['id']}");
+            Log::info("PublishPosterToSocialMedia: Poster {$this->aiGeneratedPosterId} successfully published. FB Post ID: " . ($fbResult['id'] ?? 'none') . ", IG Post ID: " . ($igResult['id'] ?? 'none'));
         } else {
-            Log::warning("PublishPosterToSocialMedia: Poster {$this->aiGeneratedPosterId} publish returned empty or failed result.", ['result' => $result]);
+            Log::warning("PublishPosterToSocialMedia: Poster {$this->aiGeneratedPosterId} publish returned empty or failed result.", ['fb' => $fbResult, 'ig' => $igResult]);
         }
     }
 

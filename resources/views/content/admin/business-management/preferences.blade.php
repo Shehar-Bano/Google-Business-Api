@@ -31,13 +31,24 @@
                     <div class="card-header pb-2"><h5 class="mb-0 fw-bold">Branding & Competitiveness</h5></div>
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-md-6 mb-3 border-bottom pb-2">
+                            <div class="col-md-4 mb-3 border-bottom pb-2">
                                 <span class="text-muted small d-block">Business Tagline</span>
                                 <span class="fw-semibold">{{ $business->preferences->business_tagline ?: '—' }}</span>
                             </div>
-                            <div class="col-md-6 mb-3 border-bottom pb-2">
+                            <div class="col-md-4 mb-3 border-bottom pb-2">
                                 <span class="text-muted small d-block">Call To Action (CTA)</span>
                                 <span class="fw-semibold text-primary">{{ $business->preferences->cta ?: '—' }}</span>
+                            </div>
+                            <div class="col-md-4 mb-3 border-bottom pb-2">
+                                <span class="text-muted small d-block">Brand Color</span>
+                                @if($business->preferences->brand_color)
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span style="display:inline-block; width:18px; height:18px; border-radius:4px; background-color: {{ $business->preferences->brand_color }}; border: 1px solid #cbd5e1;"></span>
+                                        <span class="fw-semibold">{{ $business->preferences->brand_color }}</span>
+                                    </div>
+                                @else
+                                    <span class="fw-semibold text-muted">—</span>
+                                @endif
                             </div>
                             <div class="col-12 mb-3 border-bottom pb-2">
                                 <span class="text-muted small d-block">Business Description</span>

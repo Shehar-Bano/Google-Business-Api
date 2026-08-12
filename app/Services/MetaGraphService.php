@@ -182,4 +182,60 @@ class MetaGraphService
             return null;
         }
     }
+
+    /**
+     * Publish a photo post to an Instagram Business account.
+     * Meta Graph API:
+     * 1. POST /{ig-user-id}/media (Create Media Container)
+     * 2. POST /{ig-user-id}/media_publish (Publish Container)
+     */
+    public function publishInstagramPhoto(string $igUserId, string $pageAccessToken, ?string $caption, ?string $imageUrl): ?array
+    {
+        try {
+            if (!$imageUrl) {
+                Log::warning("Instagram publish skipped: Instagram requires an image URL.");
+                return null;
+            }
+
+            // Step 1: Create Container
+            $containerUrl = $this->getUrl("/{$igUserId}/media");
+            $containerRes = Http::post($containerUrl, [
+                'image_url' => $imageUrl,
+                'caption' => $caption ?? '',
+                'access_token' => $pageAccessToken,
+            ]);
+
+            if (!$containerRes->successful()) {
+                Log::error("Meta Graph API Instagram create container error for {$igUserId}: " . $containerRes->body());
+                return null;
+            }
+
+            $containerData = $containerRes->json();
+            $containerId = $containerData['id'] ?? null;
+            if (!$containerId) {
+                return null;
+            }
+
+            // Step 2: Publish Container
+            $publishUrl = $this->getUrl("/{$igUserId}/media_publish");
+            $publishRes = Http::post($publishUrl, [
+                'creation_id' => $containerId,
+                'access_token' => $pageAccessToken,
+            ]);
+
+            if (!$publishRes->successful()) {
+                Log::error("Meta Graph API Instagram publish error for {$igUserId}: " . $publishRes->body());
+                return null;
+            }
+
+            $result = $publishRes->json();
+            Log::info("Successfully published post to Instagram Account {$igUserId}", $result);
+
+            return $result;
+
+        } catch (\Throwable $e) {
+            Log::error("Meta Graph API publishInstagramPhoto Exception: " . $e->getMessage());
+            return null;
+        }
+    }
 }

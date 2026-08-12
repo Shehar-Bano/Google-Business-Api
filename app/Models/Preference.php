@@ -30,6 +30,7 @@ class Preference extends Model
         'model_ethnicity',
         'audience',
         'cta',
+        'brand_color',
         'stop_creative_auto_approval',
     ];
 
