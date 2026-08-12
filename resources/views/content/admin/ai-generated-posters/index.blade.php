@@ -97,6 +97,7 @@
                             <th><a href="{{ $getSortUrl('business') }}" class="text-dark fw-bold">Business <i class="mdi {{ $getSortIcon('business') }} ml-1"></i></a></th>
                             <th><a href="{{ $getSortUrl('prompt') }}" class="text-dark fw-bold">Prompt <i class="mdi {{ $getSortIcon('prompt') }} ml-1"></i></a></th>
                             <th><a href="{{ $getSortUrl('status') }}" class="text-dark fw-bold">Status <i class="mdi {{ $getSortIcon('status') }} ml-1"></i></a></th>
+                            <th>Published Accounts</th>
                             <th><a href="{{ $getSortUrl('created_at') }}" class="text-dark fw-bold">Created Date <i class="mdi {{ $getSortIcon('created_at') }} ml-1"></i></a></th>
                             <th class="text-end">Actions</th>
                         </tr>
@@ -119,7 +120,7 @@
                                 <td>
                                     <div class="cell-primary fw-medium">{{ $item->business->name ?? ($item->user->club_name ?? '—') }}</div>
                                 </td>
-                                <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                <td style="max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                                     <span title="{{ $item->prompt }}">{{ $item->prompt }}</span>
                                 </td>
                                 <td>
@@ -134,6 +135,76 @@
                                         {{ $item->status }}
                                     </span>
                                 </td>
+                                <td>
+                                    @php
+                                        $pub = $item->latestSocialPublish;
+                                    @endphp
+                                    @if($pub)
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm {{ $pub->status === 'posted' ? 'btn-outline-success' : 'btn-outline-warning' }} dropdown-toggle py-1 px-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                <i class="mdi {{ $pub->status === 'posted' ? 'mdi-check-all' : 'mdi-alert-circle-outline' }} me-1"></i>
+                                                <span class="text-capitalize">{{ $pub->status }}</span>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end shadow-sm p-2" style="min-width: 250px;">
+                                                <li class="dropdown-header fw-bold text-uppercase pb-1">Social Accounts Status</li>
+                                                <li class="d-flex justify-content-between align-items-center py-1 px-2 border-bottom">
+                                                    <span><i class="mdi mdi-facebook text-primary me-1"></i> Facebook</span>
+                                                    @if($pub->facebook)
+                                                        <span class="badge bg-label-success">Posted</span>
+                                                    @else
+                                                        <span class="badge bg-label-danger">Failed</span>
+                                                    @endif
+                                                </li>
+                                                <li class="d-flex justify-content-between align-items-center py-1 px-2 border-bottom">
+                                                    <span><i class="mdi mdi-instagram text-danger me-1"></i> Instagram</span>
+                                                    @if($pub->instagram)
+                                                        <span class="badge bg-label-success">Posted</span>
+                                                    @else
+                                                        <span class="badge bg-label-danger">Failed</span>
+                                                    @endif
+                                                </li>
+                                                <li class="d-flex justify-content-between align-items-center py-1 px-2 border-bottom">
+                                                    <span><i class="mdi mdi-google text-info me-1"></i> Google</span>
+                                                    @if($pub->google)
+                                                        <span class="badge bg-label-success">Posted</span>
+                                                    @else
+                                                        <span class="badge bg-label-secondary">Off</span>
+                                                    @endif
+                                                </li>
+                                                @if($pub->failed_reason)
+                                                    <li class="pt-2 px-2 text-danger small">
+                                                        <strong>Failure Reason:</strong>
+                                                        <div class="mt-1" style="font-size: 11px; white-space: normal;">{{ $pub->failed_reason }}</div>
+                                                    </li>
+                                                @endif
+                                                @if($pub->published_at)
+                                                    <li class="pt-1 px-2 text-muted" style="font-size: 11px;">
+                                                        Published: {{ $pub->published_at->format('Y-m-d H:i') }}
+                                                    </li>
+                                                @endif
+                                            </ul>
+                                        </div>
+                                    @elseif($item->status === 'approved' && $item->published_at)
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-outline-success dropdown-toggle py-1 px-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                <i class="mdi mdi-check-all me-1"></i> Posted
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end shadow-sm p-2" style="min-width: 220px;">
+                                                <li class="dropdown-header fw-bold text-uppercase pb-1">Social Accounts Status</li>
+                                                <li class="d-flex justify-content-between align-items-center py-1 px-2 border-bottom">
+                                                    <span><i class="mdi mdi-facebook text-primary me-1"></i> Facebook</span>
+                                                    <span class="badge bg-label-success">Posted</span>
+                                                </li>
+                                                <li class="d-flex justify-content-between align-items-center py-1 px-2">
+                                                    <span><i class="mdi mdi-instagram text-danger me-1"></i> Instagram</span>
+                                                    <span class="badge bg-label-secondary">Pending Sync</span>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    @else
+                                        <span class="badge bg-label-secondary">Not Published</span>
+                                    @endif
+                                </td>
                                 <td class="cell-muted">{{ $item->created_at?->format('Y-m-d') }}</td>
                                 <td class="text-end">
                                     <div class="d-inline-flex align-items-center gap-1">
@@ -147,7 +218,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="text-center py-4 text-muted">No AI generated posters found.</td>
+                                <td colspan="9" class="text-center py-4 text-muted">No AI generated posters found.</td>
                             </tr>
                         @endforelse
                     </tbody>

@@ -95,16 +95,113 @@
                             <span class="text-muted small d-block">Approved By</span>
                             <strong class="cell-primary">{{ $aiGeneratedPoster->approver->name ?? 'Admin' }}</strong>
                         </div>
-                        <div class="py-2 mt-2">
+                        <div class="border-bottom py-2 mt-2">
                             <span class="text-muted small d-block">Approved At</span>
                             <strong class="cell-primary">{{ $aiGeneratedPoster->approved_at?->format('Y-m-d H:i') ?? '—' }}</strong>
                         </div>
                     @elseif($aiGeneratedPoster->status === 'rejected')
-                        <div class="py-2 mt-2">
+                        <div class="border-bottom py-2 mt-2">
                             <span class="text-muted small d-block text-danger">Rejection Reason</span>
                             <strong class="text-danger fw-semibold">{{ $aiGeneratedPoster->rejection_reason ?? 'No reason provided.' }}</strong>
                         </div>
                     @endif
+
+                    {{-- Social Accounts & Pages Publishing Status Section --}}
+                    @php
+                        $pub = $aiGeneratedPoster->latestSocialPublish;
+                        $userSocial = $aiGeneratedPoster->user;
+                        $connectedFbPage = $userSocial?->socialPages()->whereNotNull('connected_at')->first() ?? $userSocial?->socialPages()->first();
+                        $connectedIg = $userSocial?->instagramAccounts()->first();
+                    @endphp
+                    <div class="py-3 mt-3 p-3 rounded" style="background-color: #f8fafc; border: 1px solid #e2e8f0;">
+                        <h6 class="fw-bold mb-3 text-dark d-flex align-items-center justify-content-between">
+                            <span><i class="mdi mdi-share-variant me-1 text-primary"></i> Social Accounts & Pages Publishing Status</span>
+                            @if($pub)
+                                <span class="badge {{ $pub->status === 'posted' ? 'bg-label-success' : 'bg-label-warning' }} text-capitalize">
+                                    {{ $pub->status }}
+                                </span>
+                            @elseif($aiGeneratedPoster->status === 'approved')
+                                <span class="badge bg-label-success">Posted</span>
+                            @else
+                                <span class="badge bg-label-secondary">Pending User Schedule/Post</span>
+                            @endif
+                        </h6>
+
+                        {{-- Facebook Page Details --}}
+                        <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                            <div>
+                                <i class="mdi mdi-facebook text-primary me-1 fs-5"></i>
+                                <strong>Facebook Page:</strong>
+                                <span class="text-muted ms-1">{{ $connectedFbPage?->page_name ?? ($aiGeneratedPoster->business?->name ?? 'Not Linked') }}</span>
+                            </div>
+                            <div>
+                                @if($pub && $pub->facebook)
+                                    <span class="badge bg-label-success"><i class="mdi mdi-check-circle me-1"></i> Posted</span>
+                                @elseif($pub && !$pub->facebook)
+                                    <span class="badge bg-label-danger"><i class="mdi mdi-close-circle me-1"></i> Failed</span>
+                                @elseif($aiGeneratedPoster->status === 'approved')
+                                    <span class="badge bg-label-success"><i class="mdi mdi-check-circle me-1"></i> Posted</span>
+                                @else
+                                    <span class="badge bg-label-secondary">Pending</span>
+                                @endif
+                            </div>
+                        </div>
+
+                        {{-- Instagram Account Details --}}
+                        <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                            <div>
+                                <i class="mdi mdi-instagram text-danger me-1 fs-5"></i>
+                                <strong>Instagram Account:</strong>
+                                <span class="text-muted ms-1">{{ !empty($connectedIg?->username) ? '@' . $connectedIg->username : ($aiGeneratedPoster->business?->name ?? 'Not Linked') }}</span>
+                            </div>
+                            <div>
+                                @if($pub && $pub->instagram)
+                                    <span class="badge bg-label-success"><i class="mdi mdi-check-circle me-1"></i> Posted</span>
+                                @elseif($pub && !$pub->instagram)
+                                    <span class="badge bg-label-danger"><i class="mdi mdi-close-circle me-1"></i> Failed</span>
+                                @else
+                                    <span class="badge bg-label-secondary">Pending</span>
+                                @endif
+                            </div>
+                        </div>
+
+                        {{-- Google Business Profile Details --}}
+                        <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                            <div>
+                                <i class="mdi mdi-google text-info me-1 fs-5"></i>
+                                <strong>Google Business:</strong>
+                                <span class="text-muted ms-1">{{ $aiGeneratedPoster->business->name ?? 'Default Profile' }}</span>
+                            </div>
+                            <div>
+                                @if($pub && $pub->google)
+                                    <span class="badge bg-label-success"><i class="mdi mdi-check-circle me-1"></i> Posted</span>
+                                @else
+                                    <span class="badge bg-label-secondary">Off</span>
+                                @endif
+                            </div>
+                        </div>
+
+                        @if($pub && $pub->failed_reason)
+                            <div class="alert alert-danger py-2 px-3 mb-2 mt-3" style="font-size: 13px;">
+                                <strong><i class="mdi mdi-alert-circle me-1"></i> Publishing Failure Details:</strong>
+                                <div class="mt-1">{{ $pub->failed_reason }}</div>
+                            </div>
+                        @endif
+
+                        @if($pub && $pub->published_at)
+                            <div class="text-muted small mt-2">
+                                <i class="mdi mdi-clock-outline me-1"></i> Published At: <strong>{{ $pub->published_at->format('Y-m-d H:i:s') }}</strong>
+                            </div>
+                        @elseif($aiGeneratedPoster->published_at)
+                            <div class="text-muted small mt-2">
+                                <i class="mdi mdi-clock-outline me-1"></i> Published At: <strong>{{ $aiGeneratedPoster->published_at->format('Y-m-d H:i:s') }}</strong>
+                            </div>
+                        @elseif($aiGeneratedPoster->scheduled_at)
+                            <div class="text-info small mt-2">
+                                <i class="mdi mdi-calendar-clock me-1"></i> Scheduled For: <strong>{{ $aiGeneratedPoster->scheduled_at->format('Y-m-d H:i:s') }}</strong>
+                            </div>
+                        @endif
+                    </div>
 
 
                 </div>

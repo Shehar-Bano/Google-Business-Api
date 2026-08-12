@@ -171,6 +171,21 @@ class AiGeneratedPosterService
             $fbResult = $facebookService->publishPost($poster->user_id, $caption, $imagePath);
             $igResult = $instagramService->publishPost($poster->user_id, $caption, $imagePath);
 
+            $facebookPosted = ! empty($fbResult['id']);
+            $instagramPosted = ! empty($igResult['id']);
+            $googlePosted = false; // Google Business posts if enabled
+
+            $reasons = [];
+            if (! $facebookPosted) {
+                $reasons[] = 'Facebook: Not connected or publish failed';
+            }
+            if (! $instagramPosted) {
+                $reasons[] = 'Instagram: Not connected or publish failed';
+            }
+            $failedReason = empty($reasons) ? null : implode('; ', $reasons);
+
+            $status = ($facebookPosted || $instagramPosted || $googlePosted) ? 'posted' : 'failed';
+
             $postId = $fbResult['id'] ?? ($igResult['id'] ?? null);
 
             if ($postId) {
@@ -180,9 +195,29 @@ class AiGeneratedPosterService
                 ]);
             }
 
+            // Save or update PosterSocialPublish record
+            \App\Models\PosterSocialPublish::updateOrCreate(
+                [
+                    'ai_generated_post_id' => $poster->id,
+                ],
+                [
+                    'user_id' => $poster->user_id,
+                    'google' => $googlePosted,
+                    'facebook' => $facebookPosted,
+                    'instagram' => $instagramPosted,
+                    'status' => $status,
+                    'failed_reason' => ($status === 'posted' && ($facebookPosted && $instagramPosted)) ? null : $failedReason,
+                    'facebook_post_id' => $fbResult['id'] ?? null,
+                    'instagram_post_id' => $igResult['id'] ?? null,
+                    'google_post_id' => null,
+                    'published_at' => ($facebookPosted || $instagramPosted || $googlePosted) ? now() : null,
+                ]
+            );
+
             return [
                 'facebook' => $fbResult,
                 'instagram' => $igResult,
+                'status' => $status,
             ];
         } catch (\Throwable $e) {
             Log::error("Failed to auto-publish approved poster #{$poster->id} to social media: " . $e->getMessage());

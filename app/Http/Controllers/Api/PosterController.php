@@ -313,12 +313,17 @@ class PosterController extends Controller
     }
 
     /**
-     * Get user's AI generated posters.
+     * Get user's AI generated posters with social publishing status.
      * GET /api/v1/business/generated-posters
      */
     public function indexGenerated(Request $request): JsonResponse
     {
         $user = $request->user();
+        if (! $user && $request->bearerToken()) {
+            $hashed = hash('sha256', $request->bearerToken());
+            $user = \App\Models\User::where('api_access_token', $hashed)->first();
+        }
+
         if (! $user) {
             return response()->json([
                 'success' => false,
@@ -327,13 +332,49 @@ class PosterController extends Controller
         }
 
         $posters = \App\Models\AiGeneratedPoster::where('user_id', $user->id)
-            ->with(['poster'])
+            ->with(['poster', 'latestSocialPublish'])
             ->orderBy('id', 'desc')
             ->get();
 
         return response()->json([
             'success' => true,
             'data' => $posters,
+        ]);
+    }
+
+    /**
+     * Get social publishing logs for user's generated posters.
+     * GET /api/v1/business/poster-publish-logs
+     * GET /api/v1/business/posters/{posterId}/publish-logs
+     */
+    public function getPublishLogs(Request $request, ?int $posterId = null): JsonResponse
+    {
+        $user = $request->user();
+        if (! $user && $request->bearerToken()) {
+            $hashed = hash('sha256', $request->bearerToken());
+            $user = \App\Models\User::where('api_access_token', $hashed)->first();
+        }
+
+        if (! $user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized.',
+            ], 401);
+        }
+
+        $query = \App\Models\PosterSocialPublish::where('user_id', $user->id)
+            ->with(['aiGeneratedPoster:id,prompt,generated_title,generated_image,status,scheduled_at,published_at'])
+            ->orderBy('id', 'desc');
+
+        if ($posterId) {
+            $query->where('ai_generated_post_id', $posterId);
+        }
+
+        $logs = $query->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $logs,
         ]);
     }
 }

@@ -93,4 +93,20 @@ class AiGeneratedPoster extends Model
 
         return asset($value);
     }
+
+    /**
+     * Get social publish records for this generated poster.
+     */
+    public function socialPublishes()
+    {
+        return $this->hasMany(PosterSocialPublish::class, 'ai_generated_post_id');
+    }
+
+    /**
+     * Get the latest social publish log for this poster.
+     */
+    public function latestSocialPublish()
+    {
+        return $this->hasOne(PosterSocialPublish::class, 'ai_generated_post_id')->latestOfMany();
+    }
 }

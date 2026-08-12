@@ -40,7 +40,7 @@ class AiGeneratedPosterController extends Controller
      */
     public function show(AiGeneratedPoster $aiGeneratedPoster)
     {
-        $aiGeneratedPoster->load(['user', 'business', 'poster', 'approver']);
+        $aiGeneratedPoster->load(['user', 'business', 'poster', 'approver', 'latestSocialPublish']);
         return view('content.admin.ai-generated-posters.show', compact('aiGeneratedPoster'));
     }
 

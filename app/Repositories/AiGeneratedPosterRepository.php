@@ -22,7 +22,7 @@ class AiGeneratedPosterRepository
     {
         $query = AiGeneratedPoster::query()
             ->select('ai_generated_posters.*')
-            ->with(['user', 'business', 'poster']);
+            ->with(['user', 'business', 'poster', 'latestSocialPublish']);
 
         // Handle relation sorting
         if ($sort === 'user') {

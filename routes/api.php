@@ -133,6 +133,8 @@ Route::prefix('v1')->group(function () {
         Route::get('business/generated-posters/{id}', [App\Http\Controllers\Api\PosterController::class, 'generationStatus']);
         Route::post('business/generated-posters/{id}/approve', [App\Http\Controllers\Api\PosterController::class, 'approve']);
         Route::post('business/generated-posters/{id}/reject', [App\Http\Controllers\Api\PosterController::class, 'reject']);
+        Route::get('business/poster-publish-logs', [App\Http\Controllers\Api\PosterController::class, 'getPublishLogs']);
+        Route::get('business/posters/{posterId}/publish-logs', [App\Http\Controllers\Api\PosterController::class, 'getPublishLogs']);
         // WhatsApp Review Request Routes
         Route::post('whatsapp/review-request', [App\Http\Controllers\Api\ReviewRequestController::class, 'sendWhatsAppRequest']);
         Route::get('whatsapp/review-requests', [App\Http\Controllers\Api\ReviewRequestController::class, 'listRequests']);
