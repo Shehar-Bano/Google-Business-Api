@@ -175,6 +175,15 @@ class BusinessController extends Controller
             ], 404);
         }
 
+        if ($business->status === 'suspended') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Your business has been suspended. Please contact support.',
+                'error_code' => 'BUSINESS_SUSPENDED',
+                'status' => 'suspended',
+            ], 403);
+        }
+
         return response()->json([
             'success' => true,
             'data' => $business,
@@ -193,6 +202,15 @@ class BusinessController extends Controller
                 'success' => false,
                 'message' => 'Business not found.',
             ], 404);
+        }
+
+        if ($business->status === 'suspended') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Your business has been suspended. You cannot perform this action.',
+                'error_code' => 'BUSINESS_SUSPENDED',
+                'status' => 'suspended',
+            ], 403);
         }
 
         $validator = Validator::make($request->all(), [

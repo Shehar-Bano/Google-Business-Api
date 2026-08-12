@@ -25,6 +25,15 @@ class PreferenceController extends Controller
             ], 404);
         }
 
+        if ($business->status === 'suspended') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Your business has been suspended. Please contact support.',
+                'error_code' => 'BUSINESS_SUSPENDED',
+                'status' => 'suspended',
+            ], 403);
+        }
+
         $preferences = Preference::with(['business', 'images'])->where('business_id', $businessId)->first();
 
         if (! $preferences) {
@@ -53,6 +62,15 @@ class PreferenceController extends Controller
                 'success' => false,
                 'message' => 'Business not found.',
             ], 404);
+        }
+
+        if ($business->status === 'suspended') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Your business has been suspended. Please contact support.',
+                'error_code' => 'BUSINESS_SUSPENDED',
+                'status' => 'suspended',
+            ], 403);
         }
 
         $validator = Validator::make($request->all(), [

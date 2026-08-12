@@ -92,6 +92,23 @@ class OfferingController extends Controller
             ], 422);
         }
 
+        $business = \App\Models\Business::find($businessId);
+        if (! $business) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Business not found.',
+            ], 404);
+        }
+
+        if ($business->status === 'suspended') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Your business has been suspended. Please contact support.',
+                'error_code' => 'BUSINESS_SUSPENDED',
+                'status' => 'suspended',
+            ], 403);
+        }
+
         $offeringIds = $request->input('offering_ids', []);
         $customOfferings = $request->input('custom_offerings', []);
 
