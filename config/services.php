@@ -96,4 +96,9 @@ return [
         'app_hash' => env('TWILIO_APP_HASH'),
     ],
 
+    'dataforseo' => [
+        'login' => env('DATAFORSEO_LOGIN', 'bshehar2002@gmail.com'),
+        'password' => env('DATAFORSEO_PASSWORD', '933246dac8834240'),
+    ],
+
 ];

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\KeywordIdeasRequest;
+use App\Services\DataForSeoService;
 use App\Services\GoogleAdsService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
@@ -11,23 +12,19 @@ use Exception;
 
 class GoogleAdsController extends Controller
 {
-    /**
-     * @var GoogleAdsService
-     */
+    protected DataForSeoService $dataForSeoService;
     protected GoogleAdsService $googleAdsService;
 
-    /**
-     * GoogleAdsController constructor.
-     *
-     * @param GoogleAdsService $googleAdsService
-     */
-    public function __construct(GoogleAdsService $googleAdsService)
-    {
+    public function __construct(
+        DataForSeoService $dataForSeoService,
+        GoogleAdsService $googleAdsService
+    ) {
+        $this->dataForSeoService = $dataForSeoService;
         $this->googleAdsService = $googleAdsService;
     }
 
     /**
-     * Get keyword ideas based on location and seed keyword.
+     * Get keyword ideas based on location and seed keyword via DataForSEO Google Ads API.
      *
      * POST /api/google/keyword-ideas
      *
@@ -36,16 +33,38 @@ class GoogleAdsController extends Controller
      */
     public function getKeywordIdeas(KeywordIdeasRequest $request): JsonResponse
     {
-        $country = $request->input('country');
-        $city = $request->input('city');
+        $country = $request->input('country', 'United States');
+        $city = $request->input('city', '');
         $keyword = $request->input('keyword');
         $businessId = $request->input('business_id');
 
-        try {
-            $data = $this->googleAdsService->generateKeywordIdeas($country, $city, $keyword);
+        // Auto-resolve business_id from authenticated user if not provided in payload
+        if (! $businessId) {
+            $user = $request->user();
+            if (! $user && $request->bearerToken()) {
+                $hashed = hash('sha256', $request->bearerToken());
+                $user = \App\Models\User::where('api_access_token', $hashed)->first();
+            }
+            if ($user) {
+                $businessId = \App\Models\Business::where('user_id', $user->id)->value('id');
+            }
+        }
 
-            // Store in database if business_id is resolved or provided
-            if ($businessId) {
+        try {
+            // 1. Fetch via DataForSEO Service
+            $data = $this->dataForSeoService->generateKeywordIdeas($country, $city, $keyword);
+
+            // 2. Fallback to GoogleAdsService if DataForSEO returned empty
+            if (empty($data)) {
+                try {
+                    $data = $this->googleAdsService->generateKeywordIdeas($country, $city, $keyword);
+                } catch (\Throwable $e) {
+                    Log::warning("GoogleAdsService fallback failed: " . $e->getMessage());
+                }
+            }
+
+            // 3. Store in database if business_id is available
+            if ($businessId && ! empty($data)) {
                 \App\Models\BusinessKeywordIdea::where('business_id', $businessId)
                     ->where('search_query', $keyword)
                     ->delete();
@@ -55,10 +74,10 @@ class GoogleAdsController extends Controller
                         'business_id' => $businessId,
                         'search_query' => $keyword,
                         'keyword' => $item['keyword'] ?? '',
-                        'avg_monthly_searches' => $item['avg_monthly_searches'] ?? null,
-                        'competition' => $item['competition'] ?? null,
-                        'low_range_bid' => $item['low_range_bid'] ?? null,
-                        'high_range_bid' => $item['high_range_bid'] ?? null,
+                        'avg_monthly_searches' => $item['search_volume'] ?? $item['avg_monthly_searches'] ?? 0,
+                        'competition' => $item['competition'] ?? 'LOW',
+                        'low_range_bid' => $item['low_top_of_page_bid'] ?? $item['low_range_bid'] ?? null,
+                        'high_range_bid' => $item['high_top_of_page_bid'] ?? $item['high_range_bid'] ?? null,
                     ]);
                 }
             }
@@ -76,7 +95,7 @@ class GoogleAdsController extends Controller
             ], 200);
 
         } catch (Exception $e) {
-            Log::error("Google Ads API Exception encountered: " . $e->getMessage(), [
+            Log::error("Keyword Ideas API Exception: " . $e->getMessage(), [
                 'request' => $request->all(),
                 'trace' => $e->getTraceAsString()
             ]);
