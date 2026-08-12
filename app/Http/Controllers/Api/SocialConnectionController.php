@@ -300,7 +300,19 @@ class SocialConnectionController extends Controller
      */
     public function disconnectInstagram(Request $request): JsonResponse
     {
-        $userId = $request->user()->id;
+        $userId = $request->user()?->id;
+        if (! $userId && $request->bearerToken()) {
+            $hashed = hash('sha256', $request->bearerToken());
+            $userId = \App\Models\User::where('api_access_token', $hashed)->value('id');
+        }
+
+        if (! $userId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized.',
+            ], 401);
+        }
+
         $disconnected = $this->instagramService->disconnect($userId);
 
         if (! $disconnected) {

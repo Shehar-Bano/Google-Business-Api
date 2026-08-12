@@ -91,14 +91,17 @@ Route::prefix('v1')->group(function () {
         Route::post('social/facebook/connect-token', [App\Http\Controllers\Api\SocialConnectionController::class, 'facebookConnectToken']);
         Route::get('social/accounts', [App\Http\Controllers\Api\SocialConnectionController::class, 'status']);
         Route::delete('social/facebook/disconnect', [App\Http\Controllers\Api\SocialConnectionController::class, 'disconnectFacebook']);
+        Route::delete('v1/social/facebook/disconnect', [App\Http\Controllers\Api\SocialConnectionController::class, 'disconnectFacebook']);
 
         // Instagram Connection Routes
         Route::get('social/instagram/connect', [App\Http\Controllers\Api\SocialConnectionController::class, 'instagramConnect']);
-        Route::get('/social/instagram/connect', [App\Http\Controllers\Api\SocialConnectionController::class, 'instagramConnect']);
+        Route::get('v1/social/instagram/connect', [App\Http\Controllers\Api\SocialConnectionController::class, 'instagramConnect']);
         Route::post('social/instagram/connect-token', [App\Http\Controllers\Api\SocialConnectionController::class, 'instagramConnectToken']);
-        Route::post('/social/instagram/connect-token', [App\Http\Controllers\Api\SocialConnectionController::class, 'instagramConnectToken']);
+        Route::post('v1/social/instagram/connect-token', [App\Http\Controllers\Api\SocialConnectionController::class, 'instagramConnectToken']);
         Route::get('social/instagram/connected', [App\Http\Controllers\Api\SocialConnectionController::class, 'getConnectedInstagram']);
+        Route::get('v1/social/instagram/connected', [App\Http\Controllers\Api\SocialConnectionController::class, 'getConnectedInstagram']);
         Route::delete('social/instagram/disconnect', [App\Http\Controllers\Api\SocialConnectionController::class, 'disconnectInstagram']);
+        Route::delete('v1/social/instagram/disconnect', [App\Http\Controllers\Api\SocialConnectionController::class, 'disconnectInstagram']);
 
         // Facebook Page Connection Routes
         Route::get('social/facebook/pages', [App\Http\Controllers\Api\SocialConnectionController::class, 'listPages']);

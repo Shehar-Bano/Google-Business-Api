@@ -104,11 +104,14 @@ class SocialAccountRepository
     }
 
     /**
-     * Delete Instagram account connection.
+     * Delete Instagram account connection and social account record.
      */
     public function disconnectInstagram(int $userId): bool
     {
-        return InstagramAccount::where('user_id', $userId)->delete() > 0;
+        $igDeleted = InstagramAccount::where('user_id', $userId)->delete() > 0;
+        $socialDeleted = SocialAccount::where('user_id', $userId)->where('provider', 'instagram')->delete() > 0;
+
+        return $igDeleted || $socialDeleted;
     }
 
     /**
