@@ -543,6 +543,10 @@ class SocialConnectionController extends Controller
                     $accessToken = $longLivedRes->json('access_token');
                 }
 
+                if (str_starts_with($accessToken, 'IGAA')) {
+                    Log::warning("Connected with Instagram Basic Display token (starts with IGAA). Publishing will not be supported for this token.");
+                }
+
                 // Profile fetch
                 $profileRes = Http::get('https://graph.instagram.com/v20.0/me', [
                     'fields' => 'id,username,account_type,media_count,profile_picture_url',

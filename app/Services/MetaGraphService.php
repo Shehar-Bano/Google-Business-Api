@@ -197,8 +197,15 @@ class MetaGraphService
                 return null;
             }
 
+            // Auto-detect the correct API domain based on access token prefix
+            $domain = "https://graph.facebook.com";
+            if (str_starts_with($pageAccessToken, 'IGAA')) {
+                $domain = "https://graph.instagram.com";
+            }
+            $version = config('services.facebook.version', 'v20.0');
+
             // Step 1: Create Container
-            $containerUrl = $this->getUrl("/{$igUserId}/media");
+            $containerUrl = "{$domain}/{$version}/{$igUserId}/media";
             $containerRes = Http::post($containerUrl, [
                 'image_url' => $imageUrl,
                 'caption' => $caption ?? '',
@@ -206,7 +213,7 @@ class MetaGraphService
             ]);
 
             if (!$containerRes->successful()) {
-                Log::error("Meta Graph API Instagram create container error for {$igUserId}: " . $containerRes->body());
+                Log::error("Meta Graph API Instagram create container error for {$igUserId} on {$domain}: " . $containerRes->body());
                 return null;
             }
 
@@ -217,19 +224,19 @@ class MetaGraphService
             }
 
             // Step 2: Publish Container
-            $publishUrl = $this->getUrl("/{$igUserId}/media_publish");
+            $publishUrl = "{$domain}/{$version}/{$igUserId}/media_publish";
             $publishRes = Http::post($publishUrl, [
                 'creation_id' => $containerId,
                 'access_token' => $pageAccessToken,
             ]);
 
             if (!$publishRes->successful()) {
-                Log::error("Meta Graph API Instagram publish error for {$igUserId}: " . $publishRes->body());
+                Log::error("Meta Graph API Instagram publish error for {$igUserId} on {$domain}: " . $publishRes->body());
                 return null;
             }
 
             $result = $publishRes->json();
-            Log::info("Successfully published post to Instagram Account {$igUserId}", $result);
+            Log::info("Successfully published post to Instagram Account {$igUserId} on {$domain}", $result);
 
             return $result;
 
