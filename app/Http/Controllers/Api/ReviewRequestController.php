@@ -41,6 +41,18 @@ class ReviewRequestController extends Controller
 
         try {
             $authUser = $request->user();
+
+            $businessId = $request->input('business_id');
+            $business = \App\Models\Business::find($businessId);
+            if ($business && $business->status === 'suspended') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Your business has been suspended. Please contact support.',
+                    'error_code' => 'BUSINESS_SUSPENDED',
+                    'status' => 'suspended',
+                ], 403);
+            }
+
             $result = $this->reviewRequestService->sendRequests($request->validated(), $authUser);
 
             Log::info("ReviewRequest API Response sent successfully", [
@@ -102,6 +114,20 @@ class ReviewRequestController extends Controller
                     'success' => false,
                     'message' => 'Unauthorized.'
                 ], 401);
+            }
+
+            $businessId = $request->input('business_id');
+            $business = $businessId 
+                ? $authUser->businesses()->find($businessId) 
+                : $authUser->businesses()->first();
+
+            if ($business && $business->status === 'suspended') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Your business has been suspended. Please contact support.',
+                    'error_code' => 'BUSINESS_SUSPENDED',
+                    'status' => 'suspended',
+                ], 403);
             }
 
             // Get business IDs belonging to the authenticated user
@@ -186,6 +212,18 @@ class ReviewRequestController extends Controller
     {
         try {
             $authUser = $request->user();
+
+            $businessId = $request->input('business_id');
+            $business = \App\Models\Business::find($businessId);
+            if ($business && $business->status === 'suspended') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Your business has been suspended. Please contact support.',
+                    'error_code' => 'BUSINESS_SUSPENDED',
+                    'status' => 'suspended',
+                ], 403);
+            }
+
             $result = $this->reviewRequestService->sendFollowUpReminders($request->validated(), $authUser);
 
             $channel = $request->input('channel');

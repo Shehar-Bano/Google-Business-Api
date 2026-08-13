@@ -158,5 +158,4 @@ class SuspendedBusinessTest extends TestCase
                 'error_code' => 'BUSINESS_SUSPENDED',
                 'status' => 'suspended',
             ]);
-    }
 }
