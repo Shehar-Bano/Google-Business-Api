@@ -339,7 +339,41 @@ class PosterController extends Controller
         $posters = \App\Models\AiGeneratedPoster::where('user_id', $user->id)
             ->with(['poster', 'latestSocialPublish'])
             ->orderBy('id', 'desc')
-            ->get();
+            ->get()
+            ->map(function ($poster) {
+                return [
+                    'id' => $poster->id,
+                    'prompt' => $poster->prompt,
+                    'status' => $poster->status, // approved, rejected, pending, etc.
+                    'generation_status' => $poster->generation_status, // completed, failed, queued
+                    'title' => $poster->generated_title,
+                    'caption' => $poster->generated_caption,
+                    'image' => $poster->generated_image,
+                    'rejection_reason' => $poster->rejection_reason,
+                    
+                    // Scheduling & Publishing Timestamps
+                    'scheduled_at' => $poster->scheduled_at ? (\Carbon\Carbon::parse($poster->scheduled_at))->format('Y-m-d H:i:s') : null,
+                    'published_at' => $poster->published_at ? (\Carbon\Carbon::parse($poster->published_at))->format('Y-m-d H:i:s') : null,
+                    
+                    // Social Publishing Destinations & Details
+                    'is_published' => $poster->published_at !== null,
+                    'posted_destinations' => [
+                        'facebook' => $poster->latestSocialPublish ? (bool)$poster->latestSocialPublish->facebook : false,
+                        'instagram' => $poster->latestSocialPublish ? (bool)$poster->latestSocialPublish->instagram : false,
+                        'google' => $poster->latestSocialPublish ? (bool)$poster->latestSocialPublish->google : false,
+                    ],
+                    'publish_details' => $poster->latestSocialPublish ? [
+                        'status' => $poster->latestSocialPublish->status,
+                        'facebook_post_id' => $poster->latestSocialPublish->facebook_post_id,
+                        'instagram_post_id' => $poster->latestSocialPublish->instagram_post_id,
+                        'google_post_id' => $poster->latestSocialPublish->google_post_id,
+                        'failed_reason' => $poster->latestSocialPublish->failed_reason,
+                        'published_at' => $poster->latestSocialPublish->published_at ? (\Carbon\Carbon::parse($poster->latestSocialPublish->published_at))->format('Y-m-d H:i:s') : null,
+                    ] : null,
+                    
+                    'created_at' => $poster->created_at ? $poster->created_at->format('Y-m-d H:i:s') : null,
+                ];
+            });
 
         return response()->json([
             'success' => true,

@@ -113,14 +113,14 @@ class InstagramService
         }
 
         $accessToken = $page?->page_access_token;
-        $igBusinessId = $igAccount->instagram_business_id;
+        $igBusinessId = trim($igAccount->instagram_business_id);
 
         // If we have a connected Facebook Page, query Meta Graph API to resolve the official instagram_business_account ID
         if ($page && $page->page_access_token) {
             try {
                 $linkedIg = $this->metaGraphService->fetchLinkedInstagramAccount($page->page_id, $page->page_access_token);
                 if ($linkedIg && ! empty($linkedIg['instagram_business_id'])) {
-                    $igBusinessId = $linkedIg['instagram_business_id'];
+                    $igBusinessId = trim($linkedIg['instagram_business_id']);
                     $igAccount->update([
                         'instagram_business_id' => $igBusinessId,
                         'page_id' => $page->page_id,
@@ -140,6 +140,10 @@ class InstagramService
                     ->latest()
                     ->first();
             $accessToken = $socialAccount?->access_token;
+        }
+
+        if ($accessToken) {
+            $accessToken = trim($accessToken);
         }
 
         if (! $accessToken) {

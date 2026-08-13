@@ -394,7 +394,7 @@ class SocialConnectionController extends Controller
             'client_id' => $clientId,
             'redirect_uri' => $redirectUri,
             'response_type' => 'code',
-            'scope' => 'instagram_business_basic,instagram_business_manage_messages,instagram_business_manage_comments',
+            'scope' => 'instagram_business_basic,instagram_business_manage_messages,instagram_business_manage_comments,instagram_business_content_publish',
             'state' => $state,
         ]);
 
