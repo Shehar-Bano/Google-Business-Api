@@ -159,7 +159,7 @@ class AiGeneratedPosterService
     /**
      * Publish approved poster to connected social channels (Facebook Page and Instagram).
      */
-    public function publishToSocialMedia(AiGeneratedPoster $poster): ?array
+    public function publishToSocialMedia(AiGeneratedPoster $poster, ?array $platforms = null): ?array
     {
         try {
             $facebookService = app(\App\Services\FacebookService::class);
@@ -168,22 +168,41 @@ class AiGeneratedPosterService
             $caption = $poster->generated_caption ?: ($poster->generated_title ?: $poster->prompt);
             $imagePath = $poster->generated_image;
 
-            $fbResult = $facebookService->publishPost($poster->user_id, $caption, $imagePath);
-            $igResult = $instagramService->publishPost($poster->user_id, $caption, $imagePath);
+            // Auto-detect connected platforms if not specified
+            if (is_null($platforms)) {
+                $platforms = [];
+                $hasFb = \App\Models\SocialPage::where('user_id', $poster->user_id)->whereNotNull('connected_at')->exists();
+                $hasIg = \App\Models\InstagramAccount::where('user_id', $poster->user_id)->exists();
+                if ($hasFb) $platforms[] = 'facebook';
+                if ($hasIg) $platforms[] = 'instagram';
+            }
 
-            $facebookPosted = ! empty($fbResult['id']);
-            $instagramPosted = ! empty($igResult['id']);
-            $googlePosted = false; // Google Business posts if enabled
+            $fbResult = null;
+            $igResult = null;
+
+            $facebookPosted = false;
+            $instagramPosted = false;
+            $googlePosted = false;
 
             $reasons = [];
-            if (! $facebookPosted) {
-                $reasons[] = 'Facebook: Not connected or publish failed';
-            }
-            if (! $instagramPosted) {
-                $reasons[] = 'Instagram: Not connected or publish failed';
-            }
-            $failedReason = empty($reasons) ? null : implode('; ', $reasons);
 
+            if (in_array('facebook', $platforms)) {
+                $fbResult = $facebookService->publishPost($poster->user_id, $caption, $imagePath);
+                $facebookPosted = ! empty($fbResult['id']);
+                if (! $facebookPosted) {
+                    $reasons[] = 'Facebook: Publish failed';
+                }
+            }
+
+            if (in_array('instagram', $platforms)) {
+                $igResult = $instagramService->publishPost($poster->user_id, $caption, $imagePath);
+                $instagramPosted = ! empty($igResult['id']);
+                if (! $instagramPosted) {
+                    $reasons[] = 'Instagram: Publish failed';
+                }
+            }
+
+            $failedReason = empty($reasons) ? null : implode('; ', $reasons);
             $status = ($facebookPosted || $instagramPosted || $googlePosted) ? 'posted' : 'failed';
 
             $postId = $fbResult['id'] ?? ($igResult['id'] ?? null);
@@ -206,7 +225,7 @@ class AiGeneratedPosterService
                     'facebook' => $facebookPosted,
                     'instagram' => $instagramPosted,
                     'status' => $status,
-                    'failed_reason' => ($status === 'posted' && ($facebookPosted && $instagramPosted)) ? null : $failedReason,
+                    'failed_reason' => $failedReason,
                     'facebook_post_id' => $fbResult['id'] ?? null,
                     'instagram_post_id' => $igResult['id'] ?? null,
                     'google_post_id' => null,

@@ -102,7 +102,7 @@ class InstagramService
             return null;
         }
 
-        // 1. Get Facebook Page and token
+        // 1. Get Facebook Page and token if page is linked
         $page = null;
         if (! empty($igAccount->page_id) && ! str_starts_with($igAccount->page_id, 'instagram_')) {
             $page = $this->socialAccountRepo->findPageById($userId, $igAccount->page_id);
@@ -134,10 +134,11 @@ class InstagramService
         }
 
         if (! $accessToken) {
-            $socialAccount = \App\Models\SocialAccount::where('user_id', $userId)
-                ->whereIn('provider', ['facebook', 'instagram'])
-                ->latest()
-                ->first();
+            $socialAccount = \App\Models\SocialAccount::find($igAccount->social_account_id)
+                ?? \App\Models\SocialAccount::where('user_id', $userId)
+                    ->whereIn('provider', ['instagram', 'facebook'])
+                    ->latest()
+                    ->first();
             $accessToken = $socialAccount?->access_token;
         }
 

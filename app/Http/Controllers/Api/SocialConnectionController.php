@@ -632,6 +632,12 @@ class SocialConnectionController extends Controller
                 'fields' => 'id,username,account_type,media_count,profile_picture_url',
                 'access_token' => $token,
             ]);
+            if (! $profileRes->successful()) {
+                $profileRes = Http::get('https://graph.instagram.com/me', [
+                    'fields' => 'id,username,account_type,media_count',
+                    'access_token' => $token,
+                ]);
+            }
             $profile = $profileRes->successful() ? $profileRes->json() : [];
 
             $instagramUser = [

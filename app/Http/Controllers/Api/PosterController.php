@@ -185,6 +185,11 @@ class PosterController extends Controller
             } catch (\Throwable $e) {}
         }
 
+        $platforms = $request->input('platforms'); // optional array: ['facebook', 'instagram']
+        if ($platforms && !is_array($platforms)) {
+            $platforms = [$platforms];
+        }
+
         $isScheduled = $scheduledAt && $scheduledAt->isFuture();
 
         $generated->update([
@@ -195,8 +200,8 @@ class PosterController extends Controller
         ]);
 
         if ($isScheduled) {
-            // Queue Job dispatched with delay for scheduled time
-            \App\Jobs\PublishPosterToSocialMedia::dispatch($generated->id)->delay($scheduledAt);
+            // Queue Job dispatched with delay for scheduled time, carrying target platforms
+            \App\Jobs\PublishPosterToSocialMedia::dispatch($generated->id, $platforms)->delay($scheduledAt);
 
             return response()->json([
                 'success' => true,
@@ -211,7 +216,7 @@ class PosterController extends Controller
         $socialResult = null;
         try {
             $posterService = app(\App\Services\AiGeneratedPosterService::class);
-            $socialResult = $posterService->publishToSocialMedia($generated);
+            $socialResult = $posterService->publishToSocialMedia($generated, $platforms);
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::error("Social auto-publish failed on poster approve: " . $e->getMessage());
         }
