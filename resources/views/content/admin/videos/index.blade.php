@@ -12,29 +12,7 @@
         </div>
     </div>
 
-    <div class="videos-stats-grid mb-4">
-        <div class="videos-stat-card">
-            <div class="videos-stat-card__icon videos-stat-card__icon--primary"><i class="mdi mdi-video-outline"></i></div>
-            <div>
-                <div class="videos-stat-card__label">Total Videos</div>
-                <div class="videos-stat-card__value">{{ number_format($stats['total']) }}</div>
-            </div>
-        </div>
-        <div class="videos-stat-card">
-            <div class="videos-stat-card__icon videos-stat-card__icon--success"><i class="mdi mdi-check-circle-outline"></i></div>
-            <div>
-                <div class="videos-stat-card__label">Active</div>
-                <div class="videos-stat-card__value">{{ number_format($stats['active']) }}</div>
-            </div>
-        </div>
-        <div class="videos-stat-card">
-            <div class="videos-stat-card__icon videos-stat-card__icon--secondary"><i class="mdi mdi-pause-circle-outline"></i></div>
-            <div>
-                <div class="videos-stat-card__label">Inactive</div>
-                <div class="videos-stat-card__value">{{ number_format($stats['inactive']) }}</div>
-            </div>
-        </div>
-    </div>
+
 
     @if(session('success'))
         <div class="alert alert-success alert-dismissible" role="alert">
