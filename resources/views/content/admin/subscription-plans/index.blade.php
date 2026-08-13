@@ -122,12 +122,14 @@
                                     @endif
                                 </td>
                                 <td>
-                                    @if(is_array($plan->features) && count($plan->features) > 0)
-                                        <ul class="list-unstyled mb-0 text-start">
+                                    @if($plan->features && $plan->features->count() > 0)
+                                        <div class="d-flex flex-wrap gap-1" style="max-width: 280px;">
                                             @foreach($plan->features as $feature)
-                                                <li class="small text-secondary"><i class="mdi mdi-check-circle-outline text-success me-1"></i>{{ $feature }}</li>
+                                                <span class="badge bg-label-primary font-monospace py-1" style="font-size: 11px;">
+                                                    <i class="mdi mdi-check me-1 text-success"></i>{{ $feature->name }}
+                                                </span>
                                             @endforeach
-                                        </ul>
+                                        </div>
                                     @else
                                         <span class="text-muted small">No features added.</span>
                                     @endif

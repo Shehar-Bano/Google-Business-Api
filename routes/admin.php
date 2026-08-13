@@ -47,7 +47,8 @@ Route::middleware(['auth', 'verified', 'role:super_admin|admin'])
         // Audit Logs Route
         Route::get('audit-logs', [App\Http\Controllers\Admin\AuditLogController::class, 'index'])->name('audit-logs.index');
 
-        // Subscriptions Management
+        // Plan Features & Subscriptions Management
+        Route::resource('plan-features', App\Http\Controllers\Admin\PlanFeatureController::class);
         Route::resource('subscription-plans', App\Http\Controllers\Admin\SubscriptionPlanController::class);
 
         // User Management

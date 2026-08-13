@@ -77,6 +77,13 @@
             </a>
         </li> --}}
 
+        <li class="menu-item {{ request()->routeIs('admin.plan-features.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.plan-features.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons mdi mdi-format-list-checks"></i>
+                <div>Plan Features</div>
+            </a>
+        </li>
+
         <li class="menu-item {{ request()->routeIs('admin.subscription-plans.*') ? 'active' : '' }}">
             <a href="{{ route('admin.subscription-plans.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons mdi mdi-credit-card-outline"></i>

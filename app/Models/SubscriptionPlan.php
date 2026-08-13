@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class SubscriptionPlan extends Model
 {
@@ -15,14 +16,21 @@ class SubscriptionPlan extends Model
         'title',
         'status',
         'is_popular',
-        'features',
         'price',
         'billing_period',
     ];
 
     protected $casts = [
-        'features' => 'array',
         'price' => 'decimal:2',
         'is_popular' => 'boolean',
     ];
+
+    /**
+     * Get the plan features linked to this subscription plan.
+     */
+    public function features(): BelongsToMany
+    {
+        return $this->belongsToMany(PlanFeature::class, 'subscription_plan_features', 'subscription_plan_id', 'feature_id')
+            ->withTimestamps();
+    }
 }

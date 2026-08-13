@@ -18,7 +18,13 @@ class SubscriptionPlanController extends Controller
     public function index(): JsonResponse
     {
         try {
-            $plans = SubscriptionPlan::where('status', 'active')->orderBy('price', 'asc')->get();
+            $plans = SubscriptionPlan::where('status', 'active')
+                ->with(['features' => function ($q) {
+                    $q->where('plan_features.status', 'active')
+                      ->select('plan_features.id', 'plan_features.name', 'plan_features.slug', 'plan_features.description');
+                }])
+                ->orderBy('price', 'asc')
+                ->get();
 
             return response()->json([
                 'success' => true,

@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\ConnectFacebookPageRequest;
+use App\Http\Resources\Api\V1\InstagramAccountResource;
+use App\Http\Resources\Api\V1\SocialPageResource;
 use App\Services\FacebookService;
 use App\Services\InstagramService;
-use App\Http\Requests\Api\ConnectFacebookPageRequest;
-use App\Http\Resources\Api\V1\SocialPageResource;
-use App\Http\Resources\Api\V1\InstagramAccountResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
@@ -268,7 +268,7 @@ class SocialConnectionController extends Controller
         return response()->json([
             'google' => $user->socialAccounts()->where('provider', 'google')->exists(),
             'facebook' => $user->socialAccounts()->where('provider', 'facebook')->exists(),
-            'instagram' => $user->instagramAccounts()->exists(),
+            'instagram' => $user->socialAccounts()->where('provider', 'instagram')->exists(),
         ]);
     }
 
@@ -523,7 +523,7 @@ class SocialConnectionController extends Controller
                 ]);
             }
 
-            Log::info("Instagram Token Exchange Final Response: ", [
+            Log::info('Instagram Token Exchange Final Response: ', [
                 'status' => $tokenRes->status(),
                 'body' => $tokenRes->body(),
             ]);
@@ -704,7 +704,7 @@ class SocialConnectionController extends Controller
 
         $page = $this->facebookService->connectPage($userId, $pageId);
 
-        if (!$page) {
+        if (! $page) {
             return response()->json([
                 'success' => false,
                 'message' => 'The selected Facebook Page was not found under your connected account.',
@@ -742,7 +742,7 @@ class SocialConnectionController extends Controller
         $userId = $request->user()->id;
         $disconnected = $this->facebookService->disconnectPage($userId);
 
-        if (!$disconnected) {
+        if (! $disconnected) {
             return response()->json([
                 'success' => false,
                 'message' => 'No Facebook Page is currently connected.',

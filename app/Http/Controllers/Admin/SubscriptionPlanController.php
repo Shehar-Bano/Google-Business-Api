@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\PlanFeature;
 use App\Models\SubscriptionPlan;
+use App\Models\AdminAuditLog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -30,6 +32,7 @@ class SubscriptionPlanController extends Controller
             ? $request->string('direction', 'desc')->toString() : 'desc';
 
         $plans = SubscriptionPlan::query()
+            ->with(['features'])
             ->when($search !== '', function ($query) use ($search) {
                 $query->where('title', 'like', "%{$search}%");
             })
@@ -48,7 +51,8 @@ class SubscriptionPlanController extends Controller
      */
     public function create(): View
     {
-        return view('content.admin.subscription-plans.create');
+        $features = PlanFeature::where('status', 'active')->orderBy('name')->get();
+        return view('content.admin.subscription-plans.create', compact('features'));
     }
 
     /**
@@ -60,27 +64,25 @@ class SubscriptionPlanController extends Controller
             'title' => 'required|string|max:255',
             'status' => 'required|in:active,inactive',
             'is_popular' => 'nullable|boolean',
-            'features' => 'nullable|string',
+            'feature_ids' => 'nullable|array',
+            'feature_ids.*' => 'exists:plan_features,id',
             'price' => 'required|numeric|min:0',
             'billing_period' => 'required|string|max:100',
         ]);
-
-        // Convert new lines to clean array
-        $featuresArray = [];
-        if ($request->filled('features')) {
-            $featuresArray = array_filter(array_map('trim', explode("\n", str_replace("\r", "", $request->input('features')))));
-        }
 
         $plan = SubscriptionPlan::create([
             'title' => $request->input('title'),
             'status' => $request->input('status'),
             'is_popular' => $request->boolean('is_popular'),
-            'features' => array_values($featuresArray),
             'price' => $request->input('price'),
             'billing_period' => $request->input('billing_period'),
         ]);
 
-        \App\Models\AdminAuditLog::log(
+        if ($request->has('feature_ids')) {
+            $plan->features()->sync($request->input('feature_ids', []));
+        }
+
+        AdminAuditLog::log(
             'subscription_plan_create',
             'SubscriptionPlan',
             (string) $plan->id,
@@ -97,11 +99,10 @@ class SubscriptionPlanController extends Controller
      */
     public function edit(SubscriptionPlan $subscriptionPlan): View
     {
-        $featuresString = is_array($subscriptionPlan->features) 
-            ? implode("\n", $subscriptionPlan->features) 
-            : '';
+        $features = PlanFeature::where('status', 'active')->orderBy('name')->get();
+        $selectedFeatureIds = $subscriptionPlan->features()->pluck('plan_features.id')->toArray();
 
-        return view('content.admin.subscription-plans.edit', compact('subscriptionPlan', 'featuresString'));
+        return view('content.admin.subscription-plans.edit', compact('subscriptionPlan', 'features', 'selectedFeatureIds'));
     }
 
     /**
@@ -113,27 +114,23 @@ class SubscriptionPlanController extends Controller
             'title' => 'required|string|max:255',
             'status' => 'required|in:active,inactive',
             'is_popular' => 'nullable|boolean',
-            'features' => 'nullable|string',
+            'feature_ids' => 'nullable|array',
+            'feature_ids.*' => 'exists:plan_features,id',
             'price' => 'required|numeric|min:0',
             'billing_period' => 'required|string|max:100',
         ]);
-
-        // Convert new lines to clean array
-        $featuresArray = [];
-        if ($request->filled('features')) {
-            $featuresArray = array_filter(array_map('trim', explode("\n", str_replace("\r", "", $request->input('features')))));
-        }
 
         $subscriptionPlan->update([
             'title' => $request->input('title'),
             'status' => $request->input('status'),
             'is_popular' => $request->boolean('is_popular'),
-            'features' => array_values($featuresArray),
             'price' => $request->input('price'),
             'billing_period' => $request->input('billing_period'),
         ]);
 
-        \App\Models\AdminAuditLog::log(
+        $subscriptionPlan->features()->sync($request->input('feature_ids', []));
+
+        AdminAuditLog::log(
             'subscription_plan_update',
             'SubscriptionPlan',
             (string) $subscriptionPlan->id,
@@ -152,9 +149,11 @@ class SubscriptionPlanController extends Controller
     {
         $planTitle = $subscriptionPlan->title;
         $planId = $subscriptionPlan->id;
+
+        $subscriptionPlan->features()->detach();
         $subscriptionPlan->delete();
 
-        \App\Models\AdminAuditLog::log(
+        AdminAuditLog::log(
             'subscription_plan_delete',
             'SubscriptionPlan',
             (string) $planId,
