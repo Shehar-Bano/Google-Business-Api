@@ -13,24 +13,7 @@
         </div>
 
         {{-- Stats Grid --}}
-        <div class="um-stats-grid mb-4">
-            <a href="{{ route('admin.user-management.index') }}" class="um-stat-card text-decoration-none text-reset">
-                <div class="um-stat-card__icon um-stat-card__icon--primary"><i class="mdi mdi-account-multiple"></i></div>
-                <div>
-                    <div class="um-stat-card__label">Total Users</div>
-                    <div class="um-stat-card__value">{{ number_format($stats['total']) }}</div>
-                </div>
-            </a>
-            <a href="{{ route('admin.user-management.index', ['status' => 'suspended']) }}" class="um-stat-card text-decoration-none text-reset">
-                <div class="um-stat-card__icon" style="background: #1e293b; color: #f1f5f9;">
-                    <i class="mdi mdi-account-lock-outline"></i>
-                </div>
-                <div>
-                    <div class="um-stat-card__label">Suspended Users</div>
-                    <div class="um-stat-card__value">{{ number_format($stats['suspended'] ?? 0) }}</div>
-                </div>
-            </a>
-        </div>
+       
 
     <div class="card mt-4">
         <div class="card-header d-flex justify-content-between align-items-center">

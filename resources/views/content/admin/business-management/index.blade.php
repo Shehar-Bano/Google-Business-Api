@@ -13,25 +13,7 @@
             </div>
         </div>
 
-        {{-- Stats Grid --}}
-        <div class="um-stats-grid mb-4">
-            <a href="{{ route('admin.business-management.index') }}" class="um-stat-card text-decoration-none text-reset">
-                <div class="um-stat-card__icon um-stat-card__icon--primary"><i class="mdi mdi-briefcase"></i></div>
-                <div>
-                    <div class="um-stat-card__label">Total Businesses</div>
-                    <div class="um-stat-card__value">{{ number_format($stats['total']) }}</div>
-                </div>
-            </a>
-            <a href="{{ route('admin.business-management.index', ['status' => 'suspended']) }}" class="um-stat-card text-decoration-none text-reset">
-                <div class="um-stat-card__icon" style="background: #1e293b; color: #f1f5f9;">
-                    <i class="mdi mdi-lock-outline"></i>
-                </div>
-                <div>
-                    <div class="um-stat-card__label">Suspended Businesses</div>
-                    <div class="um-stat-card__value">{{ number_format($stats['suspended'] ?? 0) }}</div>
-                </div>
-            </a>
-        </div>
+       
 
         <div class="card mt-4">
             <div class="card-header d-flex justify-content-between align-items-center">

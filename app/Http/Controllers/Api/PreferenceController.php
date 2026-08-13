@@ -183,6 +183,15 @@ class PreferenceController extends Controller
             ], 404);
         }
 
+        if ($business->status === 'suspended') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Your business has been suspended. Please contact support.',
+                'error_code' => 'BUSINESS_SUSPENDED',
+                'status' => 'suspended',
+            ], 403);
+        }
+
         if ($business->preferences) {
             $business->preferences->delete();
         }

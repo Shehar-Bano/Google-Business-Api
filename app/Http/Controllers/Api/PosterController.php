@@ -32,6 +32,27 @@ class PosterController extends Controller
             ], 401);
         }
 
+        $businessId = $request->input('business_id');
+        $business = $businessId
+            ? $user->businesses()->find($businessId)
+            : $user->businesses()->first();
+
+        if (! $business) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Business not found.',
+            ], 404);
+        }
+
+        if ($business->status === 'suspended') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Your business has been suspended. Please contact support.',
+                'error_code' => 'BUSINESS_SUSPENDED',
+                'status' => 'suspended',
+            ], 403);
+        }
+
         try {
             $prompt = $request->input('prompt') ?: 'Generate a high-quality marketing poster matching this template design.';
             $generated = $this->aiPosterService->generatePosterWithTemplate(
@@ -97,6 +118,27 @@ class PosterController extends Controller
                 'success' => false,
                 'message' => 'Unauthorized.',
             ], 401);
+        }
+
+        $businessId = $request->input('business_id');
+        $business = $businessId
+            ? $user->businesses()->find($businessId)
+            : $user->businesses()->first();
+
+        if (! $business) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Business not found.',
+            ], 404);
+        }
+
+        if ($business->status === 'suspended') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Your business has been suspended. Please contact support.',
+                'error_code' => 'BUSINESS_SUSPENDED',
+                'status' => 'suspended',
+            ], 403);
         }
 
         try {
@@ -165,6 +207,16 @@ class PosterController extends Controller
                 'success' => false,
                 'message' => 'Generated poster not found.',
             ], 404);
+        }
+
+        $business = $generated->business;
+        if ($business && $business->status === 'suspended') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Your business has been suspended. Please contact support.',
+                'error_code' => 'BUSINESS_SUSPENDED',
+                'status' => 'suspended',
+            ], 403);
         }
 
         // Check if date and/or time are provided in the request
@@ -251,6 +303,16 @@ class PosterController extends Controller
                 'success' => false,
                 'message' => 'Generated poster not found.',
             ], 404);
+        }
+
+        $business = $generated->business;
+        if ($business && $business->status === 'suspended') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Your business has been suspended. Please contact support.',
+                'error_code' => 'BUSINESS_SUSPENDED',
+                'status' => 'suspended',
+            ], 403);
         }
 
         $request->validate([
