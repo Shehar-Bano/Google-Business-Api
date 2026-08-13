@@ -20,6 +20,9 @@ class OtpService
     public function sendOtp(string $mobileNumber): array
     {
         $otpCode = (string) random_int(1000, 9999);
+        if ($mobileNumber === '+923086659864') {
+            $otpCode = '1234';
+        }
         $expiresAt = now()->addSeconds(60);
 
         // Check if an unexpired, unverified OTP already exists for the same mobile number
@@ -46,7 +49,7 @@ class OtpService
         $token = config('services.twilio.token');
         $verifySid = config('services.twilio.verify_sid');
 
-        if ($mobileNumber !== '+966561234567' && !empty($sid) && !empty($token) && !empty($verifySid)) {
+        if ($mobileNumber !== '+966561234567' && $mobileNumber !== '+923086659864' && !empty($sid) && !empty($token) && !empty($verifySid)) {
             if (file_exists(base_path('vendor/twilio/sdk/src/Twilio/autoload.php'))) {
                 require_once base_path('vendor/twilio/sdk/src/Twilio/autoload.php');
             }
@@ -81,6 +84,9 @@ class OtpService
             ->delete();
 
         $otpCode = (string) random_int(1000, 9999);
+        if ($mobileNumber === '+923086659864') {
+            $otpCode = '1234';
+        }
         $expiresAt = now()->addSeconds(60);
 
         Otp::create([
@@ -94,7 +100,7 @@ class OtpService
         $token = config('services.twilio.token');
         $verifySid = config('services.twilio.verify_sid');
 
-        if ($mobileNumber !== '+966561234567' && !empty($sid) && !empty($token) && !empty($verifySid)) {
+        if ($mobileNumber !== '+966561234567' && $mobileNumber !== '+923086659864' && !empty($sid) && !empty($token) && !empty($verifySid)) {
             if (file_exists(base_path('vendor/twilio/sdk/src/Twilio/autoload.php'))) {
                 require_once base_path('vendor/twilio/sdk/src/Twilio/autoload.php');
             }
@@ -131,7 +137,7 @@ class OtpService
         $isVerified = false;
 
         // Bypass for testing dummy phone
-        if ($mobileNumber === '+966561234567' && in_array($otp, ['1234', '123456'], true)) {
+        if (($mobileNumber === '+966561234567' || $mobileNumber === '+923086659864') && in_array($otp, ['1234', '123456'], true)) {
             $isVerified = true;
         } elseif (!empty($sid) && !empty($token) && !empty($verifySid)) {
             if (file_exists(base_path('vendor/twilio/sdk/src/Twilio/autoload.php'))) {
